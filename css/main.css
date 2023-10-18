@@ -1,0 +1,256 @@
+/*
+//	This file is originaly part of the Planet Rescue Project
+//	It was first made in 2010 by Sylvain Lano ( https://sylvainlano.github.io/ )
+//	This project page is : https://github.com/SylvainLano/PlanetRescue
+//  The old project page was : https://sourceforge.net/projects/planetrescue/
+//
+//	This program is distributed in the hope that it will be fun and useful,
+//	but WITHOUT ANY WARRANTY. If it doesn't work well, contact us
+//	or improve the code and share it alike !
+*/
+
+
+/* RESETS */
+html, body, div, span, applet, object, iframe, h1, h2, h3, h4, h5, h6, p, blockquote, pre, a, abbr, acronym, address, big, cite, code, del, dfn, em, font, img, ins, kbd, q, s, samp, small, strike, sub, sup, tt, var, b, u, i, center, dl, dt, dd, ol, ul, li, fieldset, form, label, legend, table, caption, tbody, tfoot, thead, tr, th, td {
+	margin: 0;
+	padding: 0;
+	font-size: 100%;
+	vertical-align: baseline;
+	border: 0;
+	outline: 0;
+	background: transparent;
+}
+
+ol, ul {
+	list-style: none;
+}
+
+blockquote, q {
+	quotes: none;
+}
+
+:focus {
+	outline: 0;
+}
+
+table {
+	border-collapse: collapse;
+	border-spacing: 0;
+}
+
+dfn {
+	display: none;
+}
+
+img, img a {
+	max-width: 100%;
+}
+
+ 
+/* PAGE ELEMENTS */
+body {
+	background-image: url("../img/spaceBackground1.png");
+    background-size: cover;
+    background-position: center;
+    background-attachment: fixed;
+	overflow: hidden;
+}
+
+#gameArea {
+	position : relative;
+	width: 600px;
+	height: 600px;
+	margin: 75px auto;
+	border: 5px solid #000;
+}
+
+ 
+/* GAME ELEMENTS */
+
+@font-face {
+	font-family: 'MirageRegular';
+	src: url('../fonts/magenta_bbt-webfont.eot');
+	src: local('?'), url('../fonts/magenta_bbt-webfont.woff') format('woff'), url('../fonts/magenta_bbt-webfont.ttf') format('truetype'), url('../fonts/magenta_bbt-webfont.svg#webfont2GeNYhd2') format('svg');
+	font-weight: normal;
+	font-style: normal;
+}
+
+#mainArea{
+	background-image: url("../img/background1.png");
+    background-size: cover;
+    background-position: center;
+    background-attachment: fixed;
+	position : absolute;
+	margin: auto;
+}
+
+.ui {
+	width: 584px;
+	margin: auto;
+	font-family: Arial, Helvetica, sans-serif;
+	font-size: 10px;
+	color: #DDD;
+	text-align: left;
+	background-color: rgba(0,0,0,0.5);
+	padding: 8px;
+	position: absolute;
+}
+
+#countdown {
+	text-align: center;
+	z-index: 11;
+	vertical-align: bottom;
+	font-family: 'MirageRegular';
+	font-size: 85px;
+	color : rgb(255, 71, 71);
+	display: none;
+	height: 100px;
+}
+
+#loader {
+	text-align: center;
+	background-color: rgba(60,60,60,1);
+	z-index: 10;
+	height: 584px;
+}
+
+#loadingDisplay {
+	margin-top: 280px;
+}
+
+#status {
+	height: 15px;
+	z-index: 2;
+}
+
+#instructions {
+	height: 15px;
+	z-index: 6;
+	text-align : center;
+	text-decoration : blink;
+}
+
+#startMenu {
+	height: 584px;
+	vertical-align: center;
+	z-index: 3;
+}
+
+#infoText {
+	z-index: 7;
+}
+
+#pause {
+	height: 584px;
+	z-index: 4;
+}
+
+#gameOver {
+	height: 584px;
+	z-index: 5;
+}
+
+#resetHS {
+	position : absolute;
+	bottom : 5px;
+	right : 5px;
+}
+
+#mainMenu {
+	margin-top: 50px;
+}
+
+.title {
+	text-align: center;
+	color: #fff;
+	font-family: 'MirageRegular';
+	font-size: 75px;
+	margin: 20px;
+}
+
+.statUpper {
+	font-weight: bold;
+	color: #5df45d;
+}
+
+.statLower {
+	font-weight: bold;
+	color: rgb(255, 71, 71);
+}
+
+.statScore {
+	font-weight: bold;
+	color: #5454e3;
+}
+
+.green {
+	color : #5df45d;
+}
+
+.red {
+	color : rgb(255, 71, 71);
+}
+
+.upgreen {
+	color : #3b9c3b;
+	cursor: pointer;
+}
+
+.upred {
+	color : rgb(158, 45, 45);
+	cursor: pointer;
+}
+
+.blue {
+	color : #5454e3;
+}
+
+.mat {
+	font-size : 50px;
+}
+
+.matDisplay {
+	position : absolute;
+	background : white;
+	border : solid 1px black;
+	color: #3b9c3b;
+	z-index : 20;
+	text-align : center;
+	right : 20px;
+	padding : 5px;
+}
+
+ a:link, a:visited {
+	color: rgb(255, 71, 71);
+	text-decoration: none;
+}
+
+ a:hover {
+	color: #fff;
+}
+
+.version {
+	color: #fff;
+	font-family: 'Arial';
+	font-size: 15px;
+	font-style: italic;
+}
+
+.text {
+	font-size: 14px;
+	width: 500px;
+	margin: auto;
+	margin-bottom : 50px;
+}
+
+.paused {
+	margin: auto;
+	width: 500px;
+	height: 400px;
+	border-bottom: 1px solid white;
+}
+
+.center {
+	margin: auto;
+	text-align: center;
+}

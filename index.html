@@ -1,0 +1,200 @@
+<!DOCTYPE html>
+<!--
+//	This file is originaly part of the Planet Rescue Project
+//	It was first made in 2010 by Sylvain Lano ( https://sylvainlano.github.io/ )
+//	This project page is : https://github.com/SylvainLano/PlanetRescue
+//  The old project page was : https://sourceforge.net/projects/planetrescue/
+//
+//	This program is distributed in the hope that it will be fun and useful,
+//	but WITHOUT ANY WARRANTY. If it doesn't work well, contact us
+//	or improve the code and share it alike !
+-->
+<html>
+<head>
+	<title>Planet Rescue v0.4</title>
+
+	<link rel="stylesheet" type="text/css" href="css/coda-slider-2.0.css">
+	<link rel="stylesheet" type="text/css" href="css/main.css">
+	<link rel="stylesheet" type="text/css" href="css/jquery-ui.css"/>
+	<link rel="stylesheet" type="text/css" href="css/jquery.tooltip.css" />
+
+	<script type="text/javascript" src="src/jquery.min.js"></script>
+	<script type="text/javascript" src="src/jquery-ui.min.js"></script>
+	<script type="text/javascript" src="src/jquery.easing.1.3.js"></script>
+	<script type="text/javascript" src="src/jquery.coda-slider-2.0.js"></script>
+	<script type="text/javascript" src="src/jquery.tooltip.min.js"></script>
+	<script type="text/javascript" src="src/jquery_functions.js"></script>
+	<script type="text/javascript" src="src/objects.js"></script>
+	<script type="text/javascript" src="src/functions.js"></script>
+	<script type="text/javascript" src="src/prototypes.js"></script>
+	<script type="text/javascript" src="src/parameters.js"></script>
+	<script type="text/javascript" src="src/engine.js"></script>
+	<script type="text/javascript" src="src/main.js"></script>
+</head>
+<body>
+<div id="gameArea">
+	<div id="status" class="ui" onClick="displayStatus();"></div>
+	<div id="instructions" class="ui"></div>
+	<div id="gameOver" class="ui"></div>
+	<div id="countdown" class="ui"></div>
+	<div id="loader" class="ui">
+		<div id="loadingDisplay">
+			Loading game, please wait<br />
+			<img src="img/ajax-loader.gif" />
+		</div>
+	</div>
+	<div id="pause" class="ui">
+		<div class='title'>
+			PAUSE
+		</div>
+		<div class="paused">
+			<div class="matDisplay">You have<br /><span id="matNbr" class="mat"></span><br />mat</div>
+			<div class="center">&lt; press space to resume &gt;</div>
+			<br />
+			<div id='accordion'>
+				<h3 class="head"><a href='#'>Upgrade Your Gravitron</a></h3>
+				<div>
+					<p><span class="pretty" title="Sorting the asteroids - This means your Gravitron will attract asteroids less and debris more.">Sorting : <a id="gravSort" onClick="upgrade('gravSort');"></a></span></p>
+					<p><span class="pretty" title="Gravity Generator - This represent the suction power of the opened part of the Gravitron.">Gravity Generator : <a id="gravPower" onClick="upgrade('gravPower');"></a></span></p>
+					<p><span class="pretty" title="Repulsion - This represent the repulsion power of the closed part of the Gravitron. It uses the Gravity Generator power and the Gravitron's sorting effect to perform.">Repulsion : <a id="repulsion" onClick="upgrade('repulsion');"></a></span></p> 
+					<p><span class="pretty" title="Gravitron Shield - With a shielding effect, your Gravitron will protect your planet (a few). It loads over time and then unloads on asteroids, thus damaging them.">Gravitron Shield : <a id="gravShield" onClick="upgrade('gravShield');"></a></span></p> 
+					<p><span class="pretty" title="Gravitron Pulse - When the shield is hit by an asteroid, it will emit a pulse that causes damages to the nearby asteroids. At level 2 it will also pulse when shield is fully loaded.">Gravitron Pulse : <a id="gravPulse" onClick="upgrade('gravPulse');"></a></span></p> 
+				</div>
+				<h3 class="head"><a href='#'>Build or upgrade your Weapons</a></h3>
+					<div class="coda-slider-wrapper">
+						<div id="coda-nav-1" class="coda-nav">
+							<ul>
+								<li class="tab1"><a href="#1">Structure</a></li>
+								<li class="tab2"><a href="#2">Basic</a></li>
+								<li class="tab3"><a href="#3">Spiral</a></li>
+								<li class="tab4"><a href="#4">Magnet</a></li>
+								<li class="tab4"><a href="#5">Hammer</a></li>
+							</ul>
+						</div>
+						<div class="coda-slider preload" id="coda-slider-1">
+							<div class="panel">
+								<div class="panel-wrapper">
+									<h2 class="panel-title">Main Structure</h2>
+									<p><span class="pretty" title="Main Structure Move Speed - Making the Main Structure to move faster.">Main Structure Move Speed : <a id="mCMSpeed" onClick="upgrade('mCMSpeed');"></a></span></p>
+									<p><span class="pretty" id="SMARTspan" title="Main Structure SMART AI - Next level of SMART AI will grant you anticipation, to make basic weapon more effective.">Main Structure SMART AI : <a id="SMART" onClick="upgrade('SMART');"></a></span></p>
+									<p><span class="pretty" title="Multiple weapon structure - Each level gives you one more weapon to activate at the same time.">Multiple weapon : <a id="MaxWAtATime" onClick="upgrade('MaxWAtATime');"></a></span></p>
+								</div>
+							</div>
+							<div class="panel">
+								<div class="panel-wrapper">
+									<h2 class="panel-title">Basic Weapon</h2>
+									<p><span class="pretty" title="By making this weapon active, you could disactivate the current one.">Status : <a id="basicW" onClick="activate('basicW');"></a></span></p>
+									<div id="dispoW1">
+										<p><span class="pretty" title="Basic Cannons Number - Increased fire spread, and so fire rate as well.">Cannons : <a id="mCNumber" onClick="upgrade('mCNumber');"></a></span></p>
+										<p><span class="pretty" title="Basic Weapon Fire Rate - Making the weapon to fire faster. Expressed in Shots Per Second.">Fire Rate : <a id="mCFireRate" onClick="upgrade('mCFireRate');"></a></span></p>
+										<p><span class="pretty" title="Basic Shots Power - To cause more damages.">Fire Power : <a id="mainPow" onClick="upgrade('mainPow');"></a></span></p>
+										<p><span class="pretty" title="Basic Shots Speed - To reach targets faster.">Fire Speed : <a id="mainSpeed" onClick="upgrade('mainSpeed');"></a></span></p>
+									</div>
+								</div>
+							</div>
+							<div class="panel">
+								<div class="panel-wrapper">
+									<h2 class="panel-title">Spiral and Orbital Weapon</h2>
+									<p><span class="pretty" title="By making this weapon active, you could disactivate one of the current one.">Status : <a id="SaOW" onClick="activate('SaOW');"></a></span></p>
+									<div id="dispoW2">
+										<p><span class="pretty" title="Change the mode to trigger alternative fire.">Mode : <a id="SaOWMode" onClick="modeChange('SaOW');"></a></span></p>
+										<p><span class="pretty" title="Spiral Cannons Number - Increased fire spread and unlock new modes.">Cannons : <a id="SaOCNumber" onClick="upgrade('SaOCNumber');"></a></span></p>
+										<p><span class="pretty" title="Spiral Weapon Fire Rate - Making the weapon to fire faster. Expressed in Shots Per Second.">Fire Rate : <a id="SaOCFireRate" onClick="upgrade('SaOCFireRate');"></a></span></p>
+										<p><span class="pretty" title="Spiral Shots Power - To cause more damages.">Fire Power : <a id="SaOPow" onClick="upgrade('SaOPow');"></a></span></p>
+										<p><span class="pretty" title="Spiral Shots Speed - To slow down shoots, thus making more of them staying in game.">Fire Speed : <a id="SaOSpeed" onClick="upgrade('SaOSpeed');"></a></span></p>
+									</div>
+								</div>
+							</div>
+							<div class="panel">
+								<div class="panel-wrapper">
+									<h2 class="panel-title">Magnetic Weapon</h2>
+									<p><span class="pretty" title="By making this weapon active, you could disactivate one of the current one.">Status : <a id="magneticW" onClick="activate('magneticW');"></a></span></p>
+									<div id="dispoW3">
+										<p><span class="pretty" title="Change the mode to trigger alternative fire.">Mode : <a id="magneticWMode" onClick="modeChange('magneticW');"></a></span></p>
+										<p><span class="pretty" title="Magnetic Cannons Number - Increased fire spread.">Cannons : <a id="magneticCNumber" onClick="upgrade('magneticCNumber');"></a></span></p>
+										<p><span class="pretty" title="Magnetic Weapon Fire Rate - Making the weapon to fire faster. Expressed in Shots Per Second.">Fire Rate : <a id="magneticCFireRate" onClick="upgrade('magneticCFireRate');"></a></span></p>
+										<p><span class="pretty" title="Magnetic Shots Power - To cause more damages.">Fire Power : <a id="magneticPow" onClick="upgrade('magneticPow');"></a></span></p>
+										<p><span class="pretty" title="Magnetic Shots Friction - To slow down shoots, thus making more of them staying in game.">Fire Friction : <a id="magneticSpeed" onClick="upgrade('magneticSpeed');"></a></span></p>
+									</div>
+								</div>
+							</div>
+							<div class="panel">
+								<div class="panel-wrapper">
+									<h2 class="panel-title">Hammer and Broom Weapon</h2>
+									<p><span class="pretty" title="By making this weapon active, you could disactivate one of the current one.">Status : <a id="HaBW" onClick="activate('HaBW');"></a></span></p>
+									<div id="dispoW4">
+										<p><span class="pretty" title="Change the mode to trigger alternative fire.">Mode : <a id="HaBWMode" onClick="modeChange('HaBW');"></a></span></p>
+										<p><span class="pretty" title="Hammer Cannons Number - Increased fire spread.">Cannons : <a id="HaBCNumber" onClick="upgrade('HaBCNumber');"></a></span></p>
+										<p><span class="pretty" title="Hammer Weapon Fire Rate - Making the weapon to fire faster. Expressed in Shots Per Second.">Fire Rate : <a id="HaBCFireRate" onClick="upgrade('HaBCFireRate');"></a></span></p>
+										<p><span class="pretty" title="Hammer Shots Power - To cause more damages.">Fire Power : <a id="HaBPow" onClick="upgrade('HaBPow');"></a></span></p>
+										<p><span class="pretty" title="Hammer Shots Spread - To slow down shoots, thus making more of them staying in game.">Fire Spread : <a id="HaBSpeed" onClick="upgrade('HaBSpeed');"></a></span></p>
+									</div>
+								</div>
+							</div>
+						</div><!-- .coda-slider -->
+					</div><!-- .coda-slider-wrapper -->
+				<h3 class="head"><a href='#'>Heal or upgrade your Planet</a></h3>
+				<div>
+					<p><span class="pretty" title="Healing - Here you can spend your Mat to help the reconstruction of your planet.">Healing : <a id="healing" onClick="upgrade('healing');"></a></span></p>
+					<p><span class="pretty" title="Healing Factor - This will make your healing more effective, thus costing less Mat and healing faster.">Healing Factor : <a id="healFact" onClick="upgrade('healFact');"></a></span></p>
+					<p><span class="pretty" title="Maximum Health - It's the maximum amount of inhabitants your planet can have on.">Maximum Health : <a id="maxHealth" onClick="upgrade('maxHealth');"></a></span></p>
+					<p><span class="pretty" title="Maximum Mat - It's the maximum amount of material your planet can store.">Maximum Mat : <a id="maxMat" onClick="upgrade('maxMat');"></a></span></p>
+					<p><span class="pretty" title="Auto-Healing - If you buy this upgrade, your planet will heal slowly as long as there is Mat to use and houses to build.">Auto-Healing : <a id="autoHeal" onClick="upgrade('autoHeal');"></a></span></p>
+					<p><span class="pretty" title="Recovery - With this upgrade, your citizens will be able to get mat from the asteroids crashing on their planet.">Recovery : <a id="recovery" onClick="upgrade('recovery');"></a></span></p>
+				</div>
+				<h3 class="head"><a href='#'>Researches</a></h3>
+				<div>
+					Sed non urna. Donec et ante. Phasellus eu ligula. Vestibulum sit amet purus. Vivamus hendrerit, dolor at aliquet laoreet, mauris turpis porttitor velit, faucibus interdum tellus libero ac justo. Vivamus non quam. In suscipit faucibus urna.
+				</div>
+			</div>
+		</div>
+	</div>
+	<div id="startMenu" class="ui">
+		<div class="title">
+			Planet Rescue <span class="version">v0.4</span>
+		</div>
+		<div id="mainMenu" class="title">
+			<br /><a href="#" onClick='state="init";'>Start</a><br />			
+			<br /><a href="#" onClick='state="tutorial";'>Tutorial</a>
+			-
+			<a href="#" onClick='state="infos";'>Infos</a>
+		</div>		
+		<div id="infoText">
+			<div class="text">
+				<strong>What to do?</strong><br />
+				Collect the debris with the open space from your Gravitron.<br />
+				Avoid the destruction of your planet by upgrading its weapons.<br /><br />
+				Your planet start with an upgradable main cannon and a basic Gravitron.<br />
+				To pause game and get to the upgrade menu, press space.<br />
+				All weapons shoot automatically, you just control the Gravitron.<br /><br />
+				Control the Gravitron with the arrow key :
+				<ul>
+					<li><strong>UP :</strong> shorten the aperture
+					<li><strong>DOWN :</strong> widen the aperture
+					<li><strong>LEFT & RIGHT :</strong> rotate the Gravitron
+					<li><strong>DELETE :</strong> change target
+					<li><strong>END :</strong> erase target selection
+				</ul>
+				<br />
+				<strong>Where to find?</strong><br />
+				You can find the whole project on <a href="https://github.com/SylvainLano/PlanetRescue">GitHub</a>.<br />
+			</div>
+			<div class="title">
+				<a href="#" onClick='state="menu";'>Back to Menu</a>
+			</div>
+		</div>
+		<div id="resetHS">
+			<a href="#" onClick='state="hiscores";'>see hi-scores</a> - <a href="#" onClick="resetHS()">reset hi-scores</a>
+		</div>
+	</div>
+	<canvas id="mainArea" width="600" height="600">
+		Sorry, you're browser is not able to display HTML5 elements and Canvas.<br /><br />
+		Please try to get back there after downloading another one, like :<br />
+		- Google Chrome : <a href="http://www.google.com/chrome">Get Chrome instantly!</a><br />
+		- Opera : <a href="http://www.opera.com/">Get Opera in a minute!</a><br />
+		- Mozilla Firefox : <a href="http://www.mozilla.com/firefox/">Get Firefox now!</a><br /><br />
+		Thank you for your support!
+	</canvas>
+</div>
+</body>
+</html>
