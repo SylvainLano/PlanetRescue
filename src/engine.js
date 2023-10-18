@@ -543,7 +543,7 @@ function engine() {
 					var hiScore = localStorage['score'];
 					if( hiScore === undefined || hiScore === null ||  hiScore < score ){
 						localStorage['score'] = score;
-						gameOverInnerHTML += "<span class=green>High Score :";
+						gameOverInnerHTML += "<span class=green>High Score : ";
 					} else {
 						gameOverInnerHTML += "<span class=red>Score : ";
 					}
