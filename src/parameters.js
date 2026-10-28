@@ -41,7 +41,8 @@
 		gravSort		: 1,
 		gravShield		: 0,
 		gravPulse		: 0,
-		gravRepulsion	: 0
+		gravRepulsion	: 0,
+		gravScanner		: 0
 	};
 
 	// difficulty levels : what each one changes from the values above, which are the normal ones
@@ -201,6 +202,7 @@ function initDefault(context,level) {
 	MyGravitron.power		= gameValues.gravPower;
 	MyGravitron.sort		= gameValues.gravSort;
 	MyGravitron.pulse		= gameValues.gravPulse;
+	MyGravitron.scanner		= gameValues.gravScanner;
 	pulseList				= [];
 	gravColor				= '#666666';
 	gravRadius				= planetRadius * 1.1;

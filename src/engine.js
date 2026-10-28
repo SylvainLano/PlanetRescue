@@ -442,8 +442,12 @@ function engine() {
 		pause=0; pauseStep=0;
 		pauseScreen.style.display = "none";
 	}
-	
-	
+
+	// Showing the limits of the GRAVITRON's field, with the Field Scanner
+	if ( MyGravitron.scanner > 0 && pause == 0 ) {
+		drawFieldLimits(ctx);
+	}
+
 	// Resolving the debris
 	debrisList = resolveDebris(debrisList,ctx,MyPlanet,pause,gravSuction,MyGravitron.power,MyGravitron.sort,debrisColor);
 
@@ -757,8 +761,11 @@ function engine() {
 			}
 			// Keeping the asteroid
 			tempList.push(asteroidList[i]);
-			// Displaying asteroid
+			// Displaying asteroid, tinted with the GRAVITRON's effect at Field Scanner level 2
 			asteroidList[i].Draw();
+			if ( MyGravitron.scanner > 1 && pause == 0 ) {
+				drawFieldTint(ctx,asteroidList[i]);
+			}
 			if(showDetails == true) {
 				asteroidList[i].ShowLife();
 			}

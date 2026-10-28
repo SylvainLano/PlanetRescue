@@ -46,6 +46,7 @@ function Gravitron(context,suction,angle,wideness,shield,power,sort,repulsion,pu
 	this.vg = 0;		// growth velocity
 	this.charge = 0;	// shield charge
 	this.counter = 0;	// count before charging
+	this.scanner = 0;	// Field Scanner level, to see the field and its effect
 
 // object definition
 	this.type="Gravitron";

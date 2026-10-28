@@ -248,6 +248,34 @@ function gravitronAcceleration(angle,mass) {
 	return 0;
 }
 
+// Function to show the limits of the GRAVITRON's field (Field Scanner level 1) : the field has no end, so they go to the edge of the game area
+function drawFieldLimits(ctx) {
+	var limits = [MyGravitron.angle, MyGravitron.angle + MyGravitron.wideness];
+	ctx.strokeStyle = 'rgba(255,255,255,0.3)';
+	ctx.lineWidth = 1;
+	ctx.setLineDash([4,6]);
+	ctx.beginPath();
+	for ( var l in limits ) {
+		ctx.moveTo(MyPlanet.x + (MyGravitron.radius + 6) * Math.cos(limits[l]), MyPlanet.y + (MyGravitron.radius + 6) * Math.sin(limits[l]));
+		ctx.lineTo(MyPlanet.x + gameSize * Math.cos(limits[l]), MyPlanet.y + gameSize * Math.sin(limits[l]));
+	}
+	ctx.stroke();
+	ctx.setLineDash([]);
+}
+
+// Function to tint an asteroid with the GRAVITRON's effect on it (Field Scanner level 2) : red when pulled in, green when pushed away
+function drawFieldTint(ctx,asteroid) {
+	var pull = gravitronAcceleration(angleAroundPlanet(asteroid.x,asteroid.y), asteroid.mass);
+	if ( pull == 0 ) {
+		return;
+	}
+	ctx.fillStyle = ( pull < 0 ) ? 'rgba(255,40,40,0.3)' : 'rgba(60,255,60,0.3)';
+	ctx.beginPath();
+	ctx.arc(asteroid.x,asteroid.y,asteroid.radius,0,2*Math.PI,true);
+	ctx.closePath();
+	ctx.fill();
+}
+
 // Function to get the number of turns to wait before the next asteroid : the interval shrinks as time passes
 function spawnInterval() {
 	var seconds = gameTime / framesPerSecond;
@@ -614,7 +642,7 @@ function modeUpdate ( weapon ) {
 function refresh() {
 	var item = document.getElementById("matNbr");
 	item.innerHTML = MyPlanet.mat;
-	var refreshList = new Array("gravSort","gravPower","gravShield","repulsion","gravPulse",	// GRAVITRON
+	var refreshList = new Array("gravSort","gravPower","gravShield","repulsion","gravPulse","gravScanner",	// GRAVITRON
 	"MaxWAtATime","mCMSpeed",																	// MAIN STRUCTURE
 	"mainPow","mainSpeed","mCFireRate","SMART","mCNumber",										// BASIC CANNON
 	"SaOCNumber","SaOCFireRate","SaOPow","SaOSpeed",											// SPIRAL AND ORBITAL CANNON
@@ -695,6 +723,7 @@ function maxUpgrade(thing) {
 		case "mCFireRate" : max = 5; break;
 		case "MaxWAtATime" :
 		case "gravPulse" :
+		case "gravScanner" :
 		case "SMART" : max = 2; break;
 		case "maxHealth" : max = 50; break;
 		case "maxMat" : max = 1000; break;
@@ -742,6 +771,8 @@ function upgrade(thing) {
 				MyGravitron.repulsion++; break;
 			case "gravPulse" :
 				MyGravitron.pulse++; break;
+			case "gravScanner" :
+				MyGravitron.scanner++; break;
 			case "mainPow" :
 				mainCannon.power++; break;
 			case "mainSpeed" :
@@ -857,6 +888,7 @@ function priceToPay(what) {
 		case "autoHeal" :
 		case "recovery" :
 		case "SaOPow" :
+		case "gravScanner" :
 			type = "plus1times50"; break;
 		case "maxMat" :
 			type = "times0.75"; break;
@@ -924,6 +956,8 @@ function translate(that) {
 			itis = MyGravitron.repulsion; break;
 		case "gravPulse" :
 			itis = MyGravitron.pulse; break;
+		case "gravScanner" :
+			itis = MyGravitron.scanner; break;
 		case "mCNumber" :
 			itis = mainCannon.cannonNbr; break;
 		case "SaOCNumber" :
