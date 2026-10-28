@@ -115,7 +115,7 @@ function resolveDebris (debrisList,ctx,MyPlanet,pause,main,gravSuction,gravPower
 						
 					} else if ( MyGravitron.repulsion > 0 ) {
 							debrisList[i].vx += gravSuction / Math.pow(gravSort, gravPower) * Math.cos(angle);
-							debrisList[i].vx += gravSuction / Math.pow(gravSort, gravPower) * Math.sin(angle);
+							debrisList[i].vy += gravSuction / Math.pow(gravSort, gravPower) * Math.sin(angle);
 					}
 				}
 			
@@ -253,6 +253,8 @@ function distanceToPlanet(x,y) {
 
 // function to create shoots depending on the weapon type and number of cannons
 function shoot(ctx,weapon){
+	// counting the shots really fired, for the accuracy statistic
+	var shotsBefore = shotList.length;
 	switch ( weapon.type ) {
 		case "basicW" :
 			if ( weapon.cannonNbr % 2 == 1 ) {
@@ -367,6 +369,7 @@ function shoot(ctx,weapon){
 			}
 			break;
 	}
+	nbrShots += shotList.length - shotsBefore;
 }
 
 // function to display the current weapon
@@ -966,8 +969,12 @@ function calculate(type,ref) {
 
 // function to reset Hi-Scores
 function resetHS() {
-	localStorage.clear();
-	resetHS.style.display = "none";
+	// erasing only the scores : localStorage is shared with every page of the same site
+	var scoreKeys = ["totalMat","accuracy","nbrCrashes","nbrDamage","nbrUpgrades","nbrCost","score","playedGames"];
+	for ( var k in scoreKeys ) {
+		localStorage.removeItem(scoreKeys[k]);
+	}
+	document.getElementById("resetHS").style.display = "none";
 }
 
 // function to make the reset Hi-Scores button appear or not (if there is no data to erase)

@@ -488,7 +488,10 @@ function engine() {
 				status.style.display = "none";
 				gameOver.style.display = "block";
 				var gameOverInnerHTML = "<div class=title>Game Over</div><div class=text>Your planet has been destroyed !<br /><br />You gathered a total of ";
-				var accuracy = Math.floor((1-(nbrLostShots/nbrShots))*100);
+				var accuracy = 0;
+				if ( nbrShots > 0 ) {
+					accuracy = Math.floor((1-(nbrLostShots/nbrShots))*100);
+				}
 					// Saving the hi-scores
 					var hiTotalMat = localStorage['totalMat'];
 					if( hiTotalMat === null || hiTotalMat === undefined || hiTotalMat < MyPlanet.totalMat ){
@@ -704,7 +707,7 @@ function engine() {
 						   var vy_cm = (asteroidList[i].mass*asteroidList[i].vy+asteroidList[j].mass*asteroidList[j].vy)/(asteroidList[i].mass+asteroidList[j].mass) ;
 							
 						//     If not close enough, stop the process
-						   if ( (vx2minus1*x2minus1 + vy2minus1*y2minus1) >= 0) break;
+						   if ( (vx2minus1*x2minus1 + vy2minus1*y2minus1) >= 0) continue;
 						// will they bounce or do they completely crash
 						   var CollisionSpeed = Math.abs(vx2minus1)+Math.abs(vy2minus1);
 						   
@@ -794,6 +797,7 @@ function engine() {
 		}
 	
 		// Resolving the weapons, and making them shoot
+		var moveSpeed = mainCanMovSpeed * Math.PI / 256;
 		for(i in weaponList){
 			if ( closestA != false && weaponList[i].type == "basicW" ) {
 				if ( closestA == targetedA ) {
@@ -806,8 +810,7 @@ function engine() {
 				ctx.arc(closestA.x,closestA.y,(closestA.radius + 2),0,2*Math.PI,true);
 				ctx.closePath();
 				ctx.stroke();
-				
-				var moveSpeed = mainCanMovSpeed * Math.PI / 256;
+
 				if( weaponList[i].smart == 1 ){
 					var angle = angleAroundPlanet(closestA.x,closestA.y);
 				} else {
@@ -874,7 +877,6 @@ function engine() {
 						case "magneticW":
 						case "HaBW":
 						case "basicW":
-							nbrShots+=weaponList[i].cannonNbr;
 							if(closestA == false) {
 								break;
 							}
@@ -883,9 +885,6 @@ function engine() {
 								break;
 							}
 							weaponList[i].currentDelay = 0;
-							if ( weaponList[i].angle == 0 ) {
-								nbrShots+=weaponList[i].cannonNbr;
-							}
 							shoot(ctx,weaponList[i]);
 							break;
 					}
