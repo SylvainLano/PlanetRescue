@@ -119,7 +119,7 @@ function engine() {
 			ctx.fill();
 		}
 		if ( countdownValue > 214 ) {
-			debrisList = resolveDebris(debrisList,ctx,MyPlanet,pause,gravSuction,gravPower,gravSort,debrisColor);
+			debrisList = resolveDebris(debrisList,ctx,MyPlanet,pause,gravSuction,MyGravitron.power,MyGravitron.sort,debrisColor);
 		}
 		if ( countdownValue > 234 ) {
 		var keys = [0,0,0,0,0,0];
@@ -449,12 +449,12 @@ function engine() {
 
 	
 	if ( pause == 0 ) {
-		// Creating an asteroid or not
-		potential+=difficulty;
-		if(potential>(asteroidList.length*20000)) {
-			// Decreasing potential of asteroids' creation
-			potential-=(asteroidList.length*1000);
-			
+		// Creating an asteroid when the timer runs out, the timer getting shorter as time passes
+		gameTime++;
+		spawnTimer--;
+		if ( spawnTimer <= 0 ) {
+			spawnTimer = spawnInterval();
+
 			// Creation of an asteroid
 				var radius = gameSize / 2;
 				
@@ -469,15 +469,12 @@ function engine() {
 				if ( asteroidList.length > 2 ) {
 					angle = angle - Math.PI / 4 + Math.random() * Math.PI / 2;
 				}
-				var velocity = (Math.random() * 2 + 1) * difficulty / 200 * asteroidBS;
+				var velocity = (Math.random() * 2 + 1) * asteroidSpeedFactor() * asteroidBS;
 				var vx = - velocity * Math.cos(angle);
 				var vy = - velocity * Math.sin(angle);
 			
-			item = new Asteroid(ctx,10,asteroid1Skin,asteroidBR,asteroidBM,AsterX,AsterY,vx,vy);
+			item = new Asteroid(ctx,startValues.asteroidLife,asteroid1Skin,asteroidBR,asteroidBM,AsterX,AsterY,vx,vy);
 			asteroidList.push(item);
-			
-			// Increasing the difficulty
-			difficulty += 1;
 		}
 	}	// this is the pause bracket
 
@@ -659,7 +656,7 @@ function engine() {
 			// angle has already been calculated before
 			
 			// lauching asteroid right through
- 			var velocity = (Math.random() * 4 + 1) * difficulty / 200 * asteroidBS;
+ 			var velocity = (Math.random() * 4 + 1) * asteroidSpeedFactor() * asteroidBS;
 			asteroidList[i].vx = - velocity * Math.cos(angle);
 			asteroidList[i].vy = - velocity * Math.sin(angle);
 			

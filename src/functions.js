@@ -248,6 +248,18 @@ function gravitronAcceleration(angle,mass) {
 	return 0;
 }
 
+// Function to get the number of turns to wait before the next asteroid : the interval shrinks as time passes
+function spawnInterval() {
+	var seconds = gameTime / framesPerSecond;
+	var interval = startValues.spawnMin + ( startValues.spawnStart - startValues.spawnMin ) * Math.exp( - seconds / startValues.spawnSlowness );
+	return Math.round( interval * framesPerSecond );
+}
+
+// Function to get the asteroids' speed factor, which grows as time passes
+function asteroidSpeedFactor() {
+	return 1 + gameTime / framesPerSecond / startValues.speedGrowth;
+}
+
 // Calculating angle around the player's planet
 function angleAroundPlanet(x,y) {
 	if ( MyPlanet.y != y || x > MyPlanet.x) {

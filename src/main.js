@@ -31,14 +31,12 @@ window.addEventListener('load', function () {
 	window.addEventListener('resize', fitGameArea, false);
 
 	// Creation of the Planet
-	MyPlanet = new Planet(context,planetLife,planetMat,planetSkin,planetRadius,planetMass,planetX,planetY);
-	MyGravitron = new Gravitron(context,gravSuction,0,gravMinSize,gravShield,gravPower,gravSort,gravRepulsion,gravPulse,gravRadius);
-	mainCannon	= new Weapon(context,"basicW","#FFFFFF",0,25,3,1,0,1);
-	weaponList.push(mainCannon);
-	activate("basicW");
-	
+	// (its weapons are created with each new game, by initDefault)
+	MyPlanet = new Planet(context,startValues.planetLife,startValues.planetMat,planetSkin,planetRadius,planetMass,planetX,planetY);
+	MyGravitron = new Gravitron(context,gravSuction,0,gravMinSize,startValues.gravShield,startValues.gravPower,startValues.gravSort,startValues.gravRepulsion,startValues.gravPulse,gravRadius);
+
 	// Setting the call to engine()  so it rolls the dices 25 times a second (25 fps)
-	var interval = setInterval("engine();",40);
+	var interval = setInterval(engine, 1000 / framesPerSecond);
 	
 	// Setting the call to the changeKey function which will take care of the keyboards events
 	document.onkeydown=function(e){changeKey((e||window.event).keyCode, 1);}

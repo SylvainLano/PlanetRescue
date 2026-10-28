@@ -10,6 +10,40 @@
 */
 
 // Parameters setup (default values);
+	// starting values of a game, gathered here to tune the difficulty
+	var startValues = {
+		// asteroids : one comes at each interval, and the interval shrinks over time down to a minimum
+		spawnStart		: 7,		// seconds between two asteroids at the beginning
+		spawnMin		: 1.5,		// seconds between two asteroids in the long run
+		spawnSlowness	: 180,		// seconds for the interval to go about two thirds of the way down
+		speedGrowth		: 400,		// seconds for the asteroids' speed to grow by its starting value
+		asteroidLife	: 10,
+		asteroidSpeed	: 0.25,		// base speed for the asteroids, each one being 1 to 3 times faster
+
+		// player's planet
+		planetLife		: 20,
+		planetMat		: 20,
+		planetMaxMat	: 100,
+		planetAutoHeal	: 0,
+		planetHealFact	: 1,
+		planetRecovery	: 5,
+
+		// player's weapons
+		maxWAtATime		: 1,		// maximum amount of active weapons
+		mainCanMovSpeed	: 2,
+		basicW			: { delay : 25, power : 2, speed : 1, smart : 1, cannons : 1 },
+		SaOW			: { delay : 25, power : 1, speed : 5, smart : 0, cannons : 0 },
+		magneticW		: { delay : 25, power : 3, speed : 1, smart : 0, cannons : 0 },
+		HaBW			: { delay : 50, power : 1, speed : 1, smart : 0, cannons : 0 },
+
+		// player's GRAVITRON
+		gravPower		: 1,
+		gravSort		: 1,
+		gravShield		: 0,
+		gravPulse		: 0,
+		gravRepulsion	: 0
+	};
+
 	// game parameters
 	if( localStorage["displayS"] === null || localStorage["displayS"] === undefined ){
 		localStorage["displayS"] = "bars";
@@ -20,8 +54,9 @@
 	var gameSize		= 600;		// size of the game area in game units, the canvas is zoomed to fit the screen
 	var screenFill		= 0.80;		// part of the window's smallest side filled by the game area
 	var state 			= "menu";
-	var potential		= 200;
-	var difficulty		= 100;
+	var framesPerSecond	= 25;		// the engine runs this many times a second
+	var gameTime		= 0;		// turns played in the current game, pauses excluded
+	var spawnTimer		= 0;		// turns left before the next asteroid
 	var showDetails		= false;	// Set this one to true to see some helpful vars on screen
 	var redEffect		= 0;		// to make the screen become red
 	var pause			= 0;
@@ -43,16 +78,11 @@
 	
 	// player's planet parameters
 	var planetSkin		= 'img/planet.png';
-	var planetLife		= 20;
-	var planetMaxLife	= planetLife;
-	var planetAutoHeal	= 0;
-	var planetHealFact	= 1;
+	var planetAutoHeal	= startValues.planetAutoHeal;
+	var planetHealFact	= startValues.planetHealFact;
 	var planetHealTimer	= 0;
 	var planetHealPend	= 0;
-	var planetMat		= 20;
-	var planetMaxMat	= 100;
-	var planetTotalMat	= 0;
-	var planetRecovery	= 0;
+	var planetRecovery	= startValues.planetRecovery;
 	var planetRadius	= 50;
 	var planetMass		= 150;
 	var planetX			= 300;
@@ -66,29 +96,24 @@
 	weaponCost["SaOW"]	= 150;
 	weaponCost["magneticW"]	= 300;
 	weaponCost["HaBW"]	= 450;
-	var mainCanMovSpeed	= 2;
-	var maxWAtATime		= 1;
+	var mainCanMovSpeed	= startValues.mainCanMovSpeed;
+	var maxWAtATime		= startValues.maxWAtATime;
 	var orbitalNbr		= 0;
 	
 	// player's GRAVITRON parameters
 	var key				= [0,0,0,0,0,0,0];		// counterclockwise, clockwise, close, open, pause, change target, erase target choice
 	var gravSuction		= 0.05;
-	var gravRepulsion	= 0;
 	var gravColor		= '#666666';
 	var gravRadius		= planetRadius * 1.1;
 	var gravFriction	= 30;					// expressed in percents
 	var gravMinSize		= Math.PI / 64;
 	var gravMaxSize		= 2 * Math.PI - gravMinSize;
-	var gravSort		= 1;
-	var gravPower		= 1;
-	var gravShield		= 0;
-	var gravPulse		= 0;
 	var pulseList		= new Array();
 	
 	// asteroids parameters
 	var asteroidList	= new Array();
 	var asteroid1Skin	= 'img/asteroid1.png';
-	var asteroidBS		= 0.20;		// Base speed for the asteroids
+	var asteroidBS		= startValues.asteroidSpeed;	// Base speed for the asteroids
 	var asteroidBR		= 8;		// Base radius for the asteroids
 	var asteroidBM		= 8;		// Base mass for the asteroids
 	var MaxCollSpd		= 10;		// Max Collision Speed for the asteroid to bounce without being destroyed
@@ -102,8 +127,8 @@
 	
 function initDefault(context) {
 	// game parameters
-	potential		= 200;
-	difficulty		= 100;
+	gameTime		= 0;
+	spawnTimer		= 0;
 	redEffect		= 0;		// to make the screen become red
 	pause			= 0;
 	pauseStep		= 0;
@@ -121,47 +146,47 @@ function initDefault(context) {
 	
 	// player's planet parameters
 	MyPlanet.skin		= planetSkin;
-	MyPlanet.life		= planetLife;
-	MyPlanet.maxLife	= planetLife;
-	MyPlanet.mat		= planetMat;
-	MyPlanet.maxMat		= planetMaxMat;
-	MyPlanet.totalMat	= planetTotalMat;
+	MyPlanet.life		= startValues.planetLife;
+	MyPlanet.maxLife	= startValues.planetLife;
+	MyPlanet.mat		= startValues.planetMat;
+	MyPlanet.maxMat		= startValues.planetMaxMat;
+	MyPlanet.totalMat	= 0;
 	MyPlanet.radius		= planetRadius;
 	MyPlanet.mass		= planetMass;
 	MyPlanet.x			= planetX;
 	MyPlanet.y			= planetY;
-	planetAutoHeal		= 0;
-	planetHealFact		= 1;
+	planetAutoHeal		= startValues.planetAutoHeal;
+	planetHealFact		= startValues.planetHealFact;
 	planetHealTimer		= 0;
 	planetHealPend		= 0;
-	planetRecovery		= 5;
+	planetRecovery		= startValues.planetRecovery;
 	
 	// player's weapons parameters
 	// Weapon ( context, type, color, angle, delay, power, speed, smart, cNbr )
 	shotList		= [];
 	weaponList		= [];
-	maxWAtATime		= 1;							// Maximum amount of active weapons
-	mainCannon		= new Weapon(context,"basicW","#FFFFFF",0,25,2,1,1,1);
-	spiralCannon	= new Weapon(context,"SaOW","#00FFFF",0,25,1,5,0,0);
-	magneticCannon	= new Weapon(context,"magneticW","#964514",0,25,3,1,0,0);
-	hammerCannon	= new Weapon(context,"HaBW","#0099CC",0,50,1,1,0,0);
+	maxWAtATime		= startValues.maxWAtATime;
+	mainCannon		= newWeapon(context,"basicW","#FFFFFF");
+	spiralCannon	= newWeapon(context,"SaOW","#00FFFF");
+	magneticCannon	= newWeapon(context,"magneticW","#964514");
+	hammerCannon	= newWeapon(context,"HaBW","#0099CC");
 	weaponList.push(mainCannon);
 	weaponList.push(spiralCannon);
 	weaponList.push(magneticCannon);
 	weaponList.push(hammerCannon);
 	activate("basicW");
-	mainCanMovSpeed	= 2;
+	mainCanMovSpeed	= startValues.mainCanMovSpeed;
 	orbitalNbr		= 0;
 	
 	// player's GRAVITRON parameters
 	MyGravitron.suction		= gravSuction;
-	MyGravitron.repulsion	= gravRepulsion;
-	MyGravitron.shield		= gravShield;
+	MyGravitron.repulsion	= startValues.gravRepulsion;
+	MyGravitron.shield		= startValues.gravShield;
 	MyGravitron.charge		= 0;
 	MyGravitron.counter		= 0;
-	MyGravitron.power		= gravPower;
-	MyGravitron.sort		= gravSort;
-	MyGravitron.pulse		= gravPulse;
+	MyGravitron.power		= startValues.gravPower;
+	MyGravitron.sort		= startValues.gravSort;
+	MyGravitron.pulse		= startValues.gravPulse;
 	pulseList				= [];
 	gravColor				= '#666666';
 	gravRadius				= planetRadius * 1.1;
@@ -173,7 +198,7 @@ function initDefault(context) {
 	// asteroids parameters
 	asteroidList	= [];
 	asteroid1Skin	= 'img/asteroid1.png';
-	asteroidBS		= 0.5;		// Base speed for the asteroids
+	asteroidBS		= startValues.asteroidSpeed;	// Base speed for the asteroids
 	asteroidBR		= 8;		// Base radius for the asteroids
 	asteroidBM		= 8;		// Base mass for the asteroids
 	MaxCollSpd		= 10;		// Max Collision Speed for the asteroid to bounce without being destroyed
@@ -182,6 +207,13 @@ function initDefault(context) {
 	// debris parameters
 	debrisList		= [];
 	debrisColor		= '#734A12';
+}
+
+// function to create a weapon from its starting values
+function newWeapon(context,type,color) {
+	// Weapon ( context, type, color, angle, delay, power, speed, smart, cNbr )
+	var start = startValues[type];
+	return new Weapon(context,type,color,0,start.delay,start.power,start.speed,start.smart,start.cannons);
 }
 
 function initTutorial(context) {
