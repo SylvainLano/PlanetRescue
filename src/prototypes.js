@@ -10,19 +10,11 @@
 */
 
 
-Planet.prototype.GetDetail=GetDetail;
 Planet.prototype.Draw=Draw;
 Planet.prototype.ShowLife=ShowLife;
 
-Asteroid.prototype.GetDetail=GetDetail;
 Asteroid.prototype.Draw=Draw;
 Asteroid.prototype.ShowLife=ShowLife;
-
-Weapon.prototype.GetDetail=GetDetail;
-
-function GetDetail() {
-	with (this) document.write('This '+type+' has '+life+' HP and worth '+mat+' material. </br>');
-}
 
 function Draw() {
 	img=new Image();

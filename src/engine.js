@@ -24,7 +24,6 @@ function engine() {
 	var pauseScreen = document.getElementById("pause");
 	var countdown = document.getElementById("countdown");
 	var resetHS = document.getElementById("resetHS");
-	var testText = "";
 	
 	if(state == "menu") {
 		
@@ -555,7 +554,7 @@ function engine() {
 			if ( pauseStep > 6 ) {
 			
 				for(i=0;i<asteroidList[0].life;i++){
-					deBrisList = addDebris(ctx,1,asteroidList[0].x,asteroidList[0].y,Math.random(),Math.random(),debrisList);
+					addDebris(ctx,1,asteroidList[0].x,asteroidList[0].y,Math.random(),Math.random(),debrisList);
 				}
 				asteroidList.shift();
 				pauseStep = 0;
@@ -607,11 +606,11 @@ function engine() {
 					if ( Math.abs ( distance - pulseList[p].radius ) < ( asteroidList[i].radius / 2 ) && intoArcField(angle,pulseList[p]) == false ) {
 						if ( pulseList[p].charge < asteroidList[i].life ) {
 							asteroidList[i].life -= pulseList[p].charge;
-							deBrisList = addDebris(ctx,pulseList[p].charge,asteroidList[i].x,asteroidList[i].y,asteroidList[i].vx,asteroidList[i].vy,debrisList);
+							addDebris(ctx,pulseList[p].charge,asteroidList[i].x,asteroidList[i].y,asteroidList[i].vx,asteroidList[i].vy,debrisList);
 							pulseList[p].charge = 0;
 						} else {
 							pulseList[p].charge -= asteroidList[i].life;
-							deBrisList = addDebris(ctx,asteroidList[i].life,asteroidList[i].x,asteroidList[i].y,asteroidList[i].vx,asteroidList[i].vy,debrisList);
+							addDebris(ctx,asteroidList[i].life,asteroidList[i].x,asteroidList[i].y,asteroidList[i].vx,asteroidList[i].vy,debrisList);
 							asteroidList[i].life = 0;
 						}
 					}
@@ -693,33 +692,6 @@ function engine() {
 					if ( tempD < collision ) {
 						// There's a collision between two asteroids
 						
-						/*
-							
-							This below is an old routine only working
-							for perfectly elastic collisions with equal masses
-							do not uncomment until you comment the new routine
-							
-							// Calculating the base
-							var nx = (asteroidList[j].x - asteroidList[i].x)/collision;
-							var ny = (asteroidList[j].y - asteroidList[i].y)/collision;
-							var gx = -ny;
-							var gy = nx;
-
-							// Calculating speeds inside the base
-							var v1n = nx*asteroidList[i].vx + ny*asteroidList[i].vy;
-							var v1g = gx*asteroidList[i].vx + gy*asteroidList[i].vy;
-							var v2n = nx*asteroidList[j].vx + ny*asteroidList[j].vy;
-							var v2g = gx*asteroidList[j].vx + gy*asteroidList[j].vy;
-
-							// Resolving new speeds
-							asteroidList[i].vx = nx*v2n +  gx*v1g;
-							asteroidList[i].vy = ny*v2n +  gy*v1g;
-							asteroidList[j].vx = nx*v1n +  gx*v2g;
-							asteroidList[j].vy = ny*v1n +  gy*v2g;
-							
-						*/
-						
-							// This routine works really better
 							// START OF NEW ROUTINE //
 						   
 						   var mass2on1=asteroidList[j].mass/asteroidList[i].mass;
@@ -738,11 +710,11 @@ function engine() {
 						   
 						// debris creation from asteroids' life
 							var iColl = Math.floor(asteroidList[j].life * CollisionSpeed / MaxCollSpd );
-							deBrisList = addDebris(ctx,iColl,asteroidList[i].x,asteroidList[i].y,asteroidList[j].vx,asteroidList[j].vy,debrisList);
+							addDebris(ctx,iColl,asteroidList[i].x,asteroidList[i].y,asteroidList[j].vx,asteroidList[j].vy,debrisList);
 							asteroidList[i].life -= iColl;
 							
 							var jColl = Math.floor(asteroidList[i].life * CollisionSpeed / MaxCollSpd );
-							deBrisList = addDebris(ctx,jColl,asteroidList[j].x,asteroidList[j].y,asteroidList[i].vx,asteroidList[i].vy,debrisList);
+							addDebris(ctx,jColl,asteroidList[j].x,asteroidList[j].y,asteroidList[i].vx,asteroidList[i].vy,debrisList);
 							asteroidList[j].life -= jColl;
 							
 						// calculating the restitution coefficient
@@ -1001,7 +973,7 @@ function engine() {
 							asteroidList[j].vy += tempVY * shotList[i].power / 15;
 						} else {
 							// debris creation from asteroids' life
-							deBrisList = addDebris(ctx,shotList[i].power,asteroidList[j].x,asteroidList[j].y,asteroidList[j].vx,asteroidList[j].vy,debrisList);
+							addDebris(ctx,shotList[i].power,asteroidList[j].x,asteroidList[j].y,asteroidList[j].vx,asteroidList[j].vy,debrisList);
 							asteroidList[j].life -= shotList[i].power;
 							if ( asteroidList[j].life <= 0 ) {
 								allPassed = 1;
@@ -1163,7 +1135,7 @@ function engine() {
 			statusText += " - Shield : <div style='display:inline-block;width:" + ( MyGravitron.shield * 10 ) + "px; padding:1px; border:1px solid #999999; background-color:black; height:5px;'><div style='float:left;width:" + MyGravitron.charge + "px; background-color:" + gravColor + ";height:5px;'></div></div>";
 		}
 	}
-	status.innerHTML = statusText + " <br /> " + testText;
+	status.innerHTML = statusText;
 	
 	
 	}	// Bracket for the state == "playing"
