@@ -596,17 +596,14 @@ function engine() {
 			// Calculating angle around the planet to the asteroid
 			var angle = angleAroundPlanet(asteroidList[i].x,asteroidList[i].y);		
 			
-			// Testing if asteroid is into the gravitron's field
-			if (intoArcField(angle,MyGravitron) == true) {
-				// Yes it is !
-				asteroidList[i].vx -= gravSuction * MyGravitron.power / Math.pow(MyGravitron.sort, MyGravitron.power) * Math.cos(angle) / asteroidList[i].mass;
-				asteroidList[i].vy -= gravSuction * MyGravitron.power / Math.pow(MyGravitron.sort, MyGravitron.power) * Math.sin(angle) / asteroidList[i].mass;
-			} else {
-				if ( MyGravitron.repulsion > 0 ) {
-					asteroidList[i].vx += gravSuction * Math.pow(MyGravitron.sort, MyGravitron.power) * Math.cos(angle) / asteroidList[i].mass;
-					asteroidList[i].vy += gravSuction * Math.pow(MyGravitron.sort, MyGravitron.power) * Math.sin(angle) / asteroidList[i].mass;
-				}
-				
+			// Pulling the asteroid if it is into the gravitron's field, or pushing it away with the repulsion
+			var pull = gravitronAcceleration(angle, asteroidList[i].mass);
+			asteroidList[i].vx += pull * Math.cos(angle);
+			asteroidList[i].vy += pull * Math.sin(angle);
+
+			// Testing if asteroid is out of the gravitron's field
+			if (intoArcField(angle,MyGravitron) == false) {
+
 				// Checking if there's a pulse hitting the asteroid
 				for (p in pulseList) {
 					if ( Math.abs ( distance - pulseList[p].radius ) < ( asteroidList[i].radius / 2 ) && intoArcField(angle,pulseList[p]) == false ) {

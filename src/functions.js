@@ -237,6 +237,17 @@ function intoArcField(angle,arc) {
 	}
 }
 
+// Function to get the GRAVITRON's acceleration on an asteroid, along the line from the planet's center to the asteroid
+// (negative when the asteroid is pulled toward the planet, positive when the repulsion pushes it away)
+function gravitronAcceleration(angle,mass) {
+	if (intoArcField(angle,MyGravitron) == true) {
+		return - gravSuction * MyGravitron.power / Math.pow(MyGravitron.sort, MyGravitron.power) / mass;
+	} else if ( MyGravitron.repulsion > 0 ) {
+		return gravSuction * Math.pow(MyGravitron.sort, MyGravitron.power) / mass;
+	}
+	return 0;
+}
+
 // Calculating angle around the player's planet
 function angleAroundPlanet(x,y) {
 	if ( MyPlanet.y != y || x > MyPlanet.x) {
@@ -1012,38 +1023,35 @@ function displayStatus() {
 // function to anticipate asteroid's movement and intercept it ; returns an angle to shoot toward
 // The first version (2010) was made with the help of Marc35 from the forum at ilephysique.net
 // A shot leaves the planet radially : it is at the distance r0 from the planet's center after its
-// first move, then goes Vp further at each turn. It meets the asteroid when both are at the same
-// distance from the planet's center : |A + V*t| = r0 + Vp*t, a second degree equation in t
+// first move, then goes Vp further at each turn. The asteroid is followed turn by turn, moved
+// like the engine does with the GRAVITRON's pull, until the shot's distance catches up with its own.
 function interception ( asteroid, Vp, r0 ) {
-	// asteroid's position relative to the planet
-	var Ax = asteroid.x - MyPlanet.x;
-	var Ay = asteroid.y - MyPlanet.y;
+	// asteroid's position relative to the planet, and speed
+	var x = asteroid.x - MyPlanet.x;
+	var y = asteroid.y - MyPlanet.y;
+	var vx = asteroid.vx;
+	var vy = asteroid.vy;
 
-	// coefficients of a*t^2 + b*t + c = 0
-	var a = asteroid.vx*asteroid.vx + asteroid.vy*asteroid.vy - Vp*Vp;
-	var b = 2 * ( Ax*asteroid.vx + Ay*asteroid.vy - r0*Vp );
-	var c = Ax*Ax + Ay*Ay - r0*r0;
+	// how far the asteroid is beyond the shot
+	var gap = Math.sqrt(x*x + y*y) - r0;
 
-	// looking for the first meeting still to come
-	var t = 0;
-	if ( Math.abs(a) < 0.000001 ) {
-		// same speed for the asteroid and the shot : it's only a first degree equation
-		if ( b < 0 ) {
-			t = -c / b;
+	for ( var n = 1; gap > 0 && ( r0 + n*Vp ) <= gameSize; n++ ) {
+		// moving the asteroid one turn ahead, as if the GRAVITRON stays where it is
+		var angle = Math.atan2(y, x);
+		var pull = gravitronAcceleration(angle, asteroid.mass);
+		vx += pull * Math.cos(angle);
+		vy += pull * Math.sin(angle);
+		var nextGap = Math.sqrt((x+vx)*(x+vx) + (y+vy)*(y+vy)) - ( r0 + n*Vp );
+		if ( nextGap <= 0 ) {
+			// the shot catches up during this turn : aiming at the matching point of the asteroid's move
+			var share = gap / ( gap - nextGap );
+			return Math.atan2( y + share*vy, x + share*vx );
 		}
-	} else {
-		var delta = b*b - 4*a*c;
-		if ( delta >= 0 ) {
-			var t1 = ( -b - Math.sqrt(delta) ) / ( 2*a );
-			var t2 = ( -b + Math.sqrt(delta) ) / ( 2*a );
-			if ( t1 > 0 && ( t2 <= 0 || t1 < t2 ) ) {
-				t = t1;
-			} else if ( t2 > 0 ) {
-				t = t2;
-			}
-		}
+		x += vx;
+		y += vy;
+		gap = nextGap;
 	}
 
-	// aiming where the asteroid will be, or where it is if it can't be caught
-	return Math.atan2( Ay + asteroid.vy*t, Ax + asteroid.vx*t );
+	// no way to catch it : shooting at its current position
+	return Math.atan2( asteroid.y - MyPlanet.y, asteroid.x - MyPlanet.x );
 }
