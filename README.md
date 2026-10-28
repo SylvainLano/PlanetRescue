@@ -11,7 +11,8 @@ Your planet sits in the middle of the screen and asteroids come from every direc
 - **The Gravitron** is an arc around your planet. Its open part pulls debris in, which turns them into **mat** (material), but it also pulls asteroids toward you. Its closed part can push them away once you buy the Repulsion upgrade. It can also become a shield and send out damaging pulses.
 - **The weapons fire automatically.** You start with a basic cannon guided by its SMART AI, and you can buy the Spiral & Orbital, Magnetic, and Hammer & Broom weapons, each with its own firing modes.
 - **The upgrade menu** opens with the pause. There you spend your mat on the Gravitron, the weapons and the planet: healing, maximum health, storage, auto-healing, and recovery of mat from crashed asteroids.
-- At the end of a game you get your statistics (mat gathered, accuracy, crashes, inhabitants lost, upgrades) and the hi-scores, which are saved in your browser.
+- **Three difficulty levels** can be chosen in the start menu. Easy gives your planet more life and mat, sends the asteroids more slowly and lets your cannon anticipate from the start. Hard sends them faster and faster, sooner.
+- At the end of a game you get your statistics (mat gathered, accuracy, crashes, inhabitants lost, upgrades) and the hi-scores of your difficulty level, which are saved in your browser.
 
 ### Controls
 
@@ -48,12 +49,13 @@ In **2026** the game came back to life. The goals are to keep its spirit, make i
 | 0.5.1 | Interception rewritten as an exact equation, and the basic cannon waits to be aligned before firing. |
 | 0.5.2 | The cannon now predicts the asteroid's path turn by turn, including the Gravitron's pull: 99.8 % of reachable asteroids are hit in our tests. |
 | 0.6.0 | Asteroids now arrive on a timer that speeds up as time passes, so destroying them finally buys you some breathing room. All the starting values are gathered in one place (`startValues`). |
+| 0.7.0 | Three difficulty levels (Easy, Normal, Hard) in the start menu, each with its own hi-scores. Normal is the 0.6.0 game, and its hi-scores are kept. |
 
 ## Roadmap (2026)
 
 The order may change as we go.
 
-1. **Fairer difficulty:** difficulty levels, an impact warning, and SMART AI levels 3 to 5 as designed in 2010.
+1. **Fairer difficulty:** difficulty levels (done in 0.7.0), an impact warning, and SMART AI levels 3 to 5 as designed in 2010.
 2. **Modernization:** weapons and upgrades described as data, a pause menu without jQuery (ready for the research tree), lighter assets.
 3. **Graphics:** the Earth as your planet, real rock textures for the asteroids, high-resolution images, a hand-made animated background.
 4. **Touch screens.**
@@ -114,7 +116,7 @@ No build step and no dependencies to install: open `index.html` in a browser and
 | `src/engine.js` | the game loop and its states (menu, tutorial, countdown, playing, hi-scores) |
 | `src/functions.js` | debris, pulses, Gravitron, weapons, shop, interception |
 | `src/objects.js`, `src/prototypes.js` | game objects and their drawing |
-| `src/parameters.js` | settings, and the starting values that tune the difficulty (`startValues`) |
+| `src/parameters.js` | settings, the starting values that tune the difficulty (`startValues`), and what each difficulty level changes (`difficultyLevels`) |
 
 The pause menu still uses the libraries of the time: jQuery 1.4.3, jQuery UI 1.8.5, jQuery Easing, Coda Slider and jQuery Tooltip.
 

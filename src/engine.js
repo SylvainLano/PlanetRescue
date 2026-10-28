@@ -69,7 +69,7 @@ function engine() {
 		instructions.style.background = 'rgba(60,60,60,0)';
 		countdown.style.top = '35px';
 		instructions.style.top = '155px';
-		initDefault(ctx);
+		initDefault(ctx,"normal");
 		initTutorial(ctx);
 		state = "tutorialSteps";
 		
@@ -325,7 +325,7 @@ function engine() {
 		startMenu.style.display = "none";
 		gameOver.style.display = "none";
 		pauseScreen.style.display = "none";
-		initDefault(ctx);
+		initDefault(ctx,difficulty);
 		if ( countdownValue > 0 ) {
 			countdown.style.display = "block";
 			state = "countdown";
@@ -334,11 +334,11 @@ function engine() {
 			state = "playing";
 		}
 
-		var playedGames = localStorage['playedGames'];
+		var playedGames = localStorage[scoreKey('playedGames')];
 		if( playedGames === null || playedGames === undefined ){
-			localStorage['playedGames'] = 1;
+			localStorage[scoreKey('playedGames')] = 1;
 		} else {
-			localStorage['playedGames']++;
+			localStorage[scoreKey('playedGames')]++;
 		}
 		
 	} else if (state == "countdown"){
@@ -368,23 +368,23 @@ function engine() {
 		pauseScreen.style.display = "none";
 		status.style.display = "none";
 		gameOver.style.display = "block";
-		var gameOverInnerHTML = "<div class=title>Hi-Scores</div><div class=text>Maximum amount of mat gathered : ";
+		var gameOverInnerHTML = "<div class=title>Hi-Scores</div><div class=text>Difficulty level : <strong>" + levelName() + "</strong><br /><br />Maximum amount of mat gathered : ";
 			gameOverInnerHTML += "<span class=statUpper>";
-			gameOverInnerHTML += localStorage['totalMat'] + "</span><br />Maximum accuracy reached : ";
+			gameOverInnerHTML += localStorage[scoreKey('totalMat')] + "</span><br />Maximum accuracy reached : ";
 			gameOverInnerHTML += "<span class=statUpper>";
-			gameOverInnerHTML += localStorage['accuracy'] + "%</span><br />Maximum crashed asteroids : ";
+			gameOverInnerHTML += localStorage[scoreKey('accuracy')] + "%</span><br />Maximum crashed asteroids : ";
 			gameOverInnerHTML += "<span class=statUpper>";
-			gameOverInnerHTML += localStorage['nbrCrashes'] + "</span><br />Maximum inhabitants lost : ";
+			gameOverInnerHTML += localStorage[scoreKey('nbrCrashes')] + "</span><br />Maximum inhabitants lost : ";
 			gameOverInnerHTML += "<span class=statUpper>";
-			gameOverInnerHTML += localStorage['nbrDamage'] + "</span><br />Maximum upgrade purchased : ";
+			gameOverInnerHTML += localStorage[scoreKey('nbrDamage')] + "</span><br />Maximum upgrade purchased : ";
 			gameOverInnerHTML += "<span class=statUpper>";
-			gameOverInnerHTML += localStorage['nbrUpgrades'] + "</span><br />Maximum mat spent : ";
+			gameOverInnerHTML += localStorage[scoreKey('nbrUpgrades')] + "</span><br />Maximum mat spent : ";
 			gameOverInnerHTML += "<span class=statUpper>";
-			gameOverInnerHTML += localStorage['nbrCost'] + "</span><br /><br />Number of games played : ";
+			gameOverInnerHTML += localStorage[scoreKey('nbrCost')] + "</span><br /><br />Number of games played : ";
 			gameOverInnerHTML += "<span class=statUpper>";
-			gameOverInnerHTML += localStorage['playedGames'] + "</span><br /><br />Hi-Score : ";
+			gameOverInnerHTML += localStorage[scoreKey('playedGames')] + "</span><br /><br />Hi-Score : ";
 			gameOverInnerHTML += "<span class=statUpper>";
-			gameOverInnerHTML += localStorage['score'] + "</span></div><div class=title><br /><a href=# onClick='state=&quot;menu&quot;;'>Back to Main Menu</a></div>";
+			gameOverInnerHTML += localStorage[scoreKey('score')] + "</span></div><div class=title><br /><a href=# onClick='state=&quot;menu&quot;;'>Back to Main Menu</a></div>";
 			gameOver.innerHTML = gameOverInnerHTML;	
 		state = "stand";
 		
@@ -473,7 +473,7 @@ function engine() {
 				var vx = - velocity * Math.cos(angle);
 				var vy = - velocity * Math.sin(angle);
 			
-			item = new Asteroid(ctx,startValues.asteroidLife,asteroid1Skin,asteroidBR,asteroidBM,AsterX,AsterY,vx,vy);
+			item = new Asteroid(ctx,gameValues.asteroidLife,asteroid1Skin,asteroidBR,asteroidBM,AsterX,AsterY,vx,vy);
 			asteroidList.push(item);
 		}
 	}	// this is the pause bracket
@@ -487,64 +487,64 @@ function engine() {
 			if( pauseStep != 0){
 				status.style.display = "none";
 				gameOver.style.display = "block";
-				var gameOverInnerHTML = "<div class=title>Game Over</div><div class=text>Your planet has been destroyed !<br /><br />You gathered a total of ";
+				var gameOverInnerHTML = "<div class=title>Game Over</div><div class=text>Your planet has been destroyed !<br />Difficulty level : <strong>" + levelName() + "</strong><br /><br />You gathered a total of ";
 				var accuracy = 0;
 				if ( nbrShots > 0 ) {
 					accuracy = Math.floor((1-(nbrLostShots/nbrShots))*100);
 				}
 					// Saving the hi-scores
-					var hiTotalMat = localStorage['totalMat'];
+					var hiTotalMat = localStorage[scoreKey('totalMat')];
 					if( hiTotalMat === null || hiTotalMat === undefined || hiTotalMat < MyPlanet.totalMat ){
-						localStorage['totalMat'] = MyPlanet.totalMat;
+						localStorage[scoreKey('totalMat')] = MyPlanet.totalMat;
 						gameOverInnerHTML += "<span class=statUpper>";
 					} else {
 						gameOverInnerHTML += "<span class=statLower>";
 					}
 					gameOverInnerHTML += MyPlanet.totalMat + " mat</span>.<br />You shot a total of " + nbrShots + " shots but " + nbrLostShots + " of them were lost in space.<br />You therefor reached an accuracy of ";
-					var hiAccuracy = localStorage['accuracy'];
+					var hiAccuracy = localStorage[scoreKey('accuracy')];
 					if( hiAccuracy === undefined || hiAccuracy === null ||  hiAccuracy < accuracy ){
-						localStorage['accuracy'] = accuracy;
+						localStorage[scoreKey('accuracy')] = accuracy;
 						gameOverInnerHTML += "<span class=statUpper>";
 					} else {
 						gameOverInnerHTML += "<span class=statLower>";
 					}
 					gameOverInnerHTML += accuracy + "%</span>.<br />";
-					var hiNbrCrashes = localStorage['nbrCrashes'];
+					var hiNbrCrashes = localStorage[scoreKey('nbrCrashes')];
 					if( hiNbrCrashes === undefined || hiNbrCrashes === null ||  hiNbrCrashes < nbrCrashes ){
-						localStorage['nbrCrashes'] = nbrCrashes;
+						localStorage[scoreKey('nbrCrashes')] = nbrCrashes;
 						gameOverInnerHTML += "<span class=statUpper>";
 					} else {
 						gameOverInnerHTML += "<span class=statLower>";
 					}
 					gameOverInnerHTML += nbrCrashes + " asteroids</span> hit your planet, causing a loss of ";
-					var hiNbrDamage = localStorage['nbrDamage']
+					var hiNbrDamage = localStorage[scoreKey('nbrDamage')]
 					if( hiNbrDamage === undefined || hiNbrDamage === null ||  hiNbrDamage < nbrDamage ){
-						localStorage['nbrDamage'] = nbrDamage;
+						localStorage[scoreKey('nbrDamage')] = nbrDamage;
 						gameOverInnerHTML += "<span class=statUpper>";
 					} else {
 						gameOverInnerHTML += "<span class=statLower>";
 					}
 					gameOverInnerHTML += nbrDamage + "M inhabitants</span> before you lose.<br />You purchased ";
-					var hiNbrUpgrades = localStorage['nbrUpgrades'];
+					var hiNbrUpgrades = localStorage[scoreKey('nbrUpgrades')];
 					if( hiNbrUpgrades === undefined || hiNbrUpgrades === null ||  hiNbrUpgrades < nbrUpgrades ){
-						localStorage['nbrUpgrades'] = nbrUpgrades;
+						localStorage[scoreKey('nbrUpgrades')] = nbrUpgrades;
 						gameOverInnerHTML += "<span class=statUpper>";
 					} else {
 						gameOverInnerHTML += "<span class=statLower>";
 					}
 					gameOverInnerHTML += nbrUpgrades + " upgrades</span> and spent ";
-					var hiNbrCost = localStorage['nbrCost'];
+					var hiNbrCost = localStorage[scoreKey('nbrCost')];
 					if( hiNbrCost === undefined || hiNbrCost === null ||  hiNbrCost < nbrCost ){
-						localStorage['nbrCost'] = nbrCost;
+						localStorage[scoreKey('nbrCost')] = nbrCost;
 						gameOverInnerHTML += "<span class=statUpper>";
 					} else {
 						gameOverInnerHTML += "<span class=statLower>";
 					}
 					gameOverInnerHTML += nbrCost + " mat</span> for them.</div><div class=title>";
 					var score = Math.floor ( accuracy / 100 * ( ( nbrUpgrades * nbrCost ) + ( nbrCrashes * nbrDamage ) - MyPlanet.totalMat ) );
-					var hiScore = localStorage['score'];
+					var hiScore = localStorage[scoreKey('score')];
 					if( hiScore === undefined || hiScore === null ||  hiScore < score ){
-						localStorage['score'] = score;
+						localStorage[scoreKey('score')] = score;
 						gameOverInnerHTML += "<span class=green>High Score : ";
 					} else {
 						gameOverInnerHTML += "<span class=red>Score : ";

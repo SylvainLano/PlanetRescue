@@ -251,13 +251,13 @@ function gravitronAcceleration(angle,mass) {
 // Function to get the number of turns to wait before the next asteroid : the interval shrinks as time passes
 function spawnInterval() {
 	var seconds = gameTime / framesPerSecond;
-	var interval = startValues.spawnMin + ( startValues.spawnStart - startValues.spawnMin ) * Math.exp( - seconds / startValues.spawnSlowness );
+	var interval = gameValues.spawnMin + ( gameValues.spawnStart - gameValues.spawnMin ) * Math.exp( - seconds / gameValues.spawnSlowness );
 	return Math.round( interval * framesPerSecond );
 }
 
 // Function to get the asteroids' speed factor, which grows as time passes
 function asteroidSpeedFactor() {
-	return 1 + gameTime / framesPerSecond / startValues.speedGrowth;
+	return 1 + gameTime / framesPerSecond / gameValues.speedGrowth;
 }
 
 // Calculating angle around the player's planet
@@ -990,23 +990,50 @@ function calculate(type,ref) {
 	return ref;
 }
 
-// function to reset Hi-Scores
+// function to reset Hi-Scores of the chosen difficulty level
 function resetHS() {
 	// erasing only the scores : localStorage is shared with every page of the same site
 	var scoreKeys = ["totalMat","accuracy","nbrCrashes","nbrDamage","nbrUpgrades","nbrCost","score","playedGames"];
 	for ( var k in scoreKeys ) {
-		localStorage.removeItem(scoreKeys[k]);
+		localStorage.removeItem(scoreKey(scoreKeys[k]));
 	}
 	document.getElementById("resetHS").style.display = "none";
 }
 
 // function to make the reset Hi-Scores button appear or not (if there is no data to erase)
 function enableResetHS(resetHS) {
-	if( localStorage["totalMat"] === undefined ){
+	if( localStorage[scoreKey("totalMat")] === undefined ){
 		resetHS.style.display = "none";
 	}else{
 		resetHS.style.display = "block";
 	}
+}
+
+// function to choose the difficulty level, remembered by the browser
+function chooseLevel(level) {
+	difficulty = level;
+	localStorage["difficulty"] = level;
+	showLevel();
+}
+
+// function to highlight the chosen difficulty level in the start menu
+function showLevel() {
+	for ( var level in difficultyLevels ) {
+		document.getElementById("level_" + level).className = ( level == difficulty ) ? "chosen" : "";
+	}
+}
+
+// function to get the name of the chosen difficulty level, as shown to the player
+function levelName() {
+	return difficulty.charAt(0).toUpperCase() + difficulty.slice(1);
+}
+
+// function to get where a hi-score is saved : each difficulty level has its own, the normal one keeping the original names
+function scoreKey(name) {
+	if ( difficulty == "normal" ) {
+		return name;
+	}
+	return name + "_" + difficulty;
 }
 
 // function to zoom the game area so that it fits the window, with a sharp canvas

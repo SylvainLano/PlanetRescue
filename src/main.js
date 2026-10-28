@@ -30,6 +30,9 @@ window.addEventListener('load', function () {
 	fitGameArea();
 	window.addEventListener('resize', fitGameArea, false);
 
+	// Highlighting the difficulty level chosen last time
+	showLevel();
+
 	// Creation of the Planet
 	// (its weapons are created with each new game, by initDefault)
 	MyPlanet = new Planet(context,startValues.planetLife,startValues.planetMat,planetSkin,planetRadius,planetMass,planetX,planetY);

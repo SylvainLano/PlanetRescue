@@ -164,6 +164,15 @@ body {
 	margin-top: 50px;
 }
 
+#levels {
+	font-size: 35px;
+	margin: 10px 0px 40px 0px;
+}
+
+#levels a.chosen {
+	color: #fff;
+}
+
 .title {
 	text-align: center;
 	color: #fff;

@@ -44,6 +44,19 @@
 		gravRepulsion	: 0
 	};
 
+	// difficulty levels : what each one changes from the values above, which are the normal ones
+	var difficultyLevels = {
+		easy	: { planetLife : 30, planetMat : 50, spawnStart : 9, spawnMin : 2.5, spawnSlowness : 240, speedGrowth : 600, basicW : { smart : 2 } },
+		normal	: {},
+		hard	: { spawnStart : 5, spawnMin : 1, spawnSlowness : 150, speedGrowth : 300 }
+	};
+	// difficulty level chosen by the player, remembered by the browser
+	var difficulty = localStorage["difficulty"];
+	if ( !difficultyLevels.hasOwnProperty(difficulty) ) {
+		difficulty = "normal";
+	}
+	var gameValues = startValues;	// starting values of the current game, at its difficulty level
+
 	// game parameters
 	if( localStorage["displayS"] === null || localStorage["displayS"] === undefined ){
 		localStorage["displayS"] = "bars";
@@ -125,8 +138,9 @@
 
 	
 	
-function initDefault(context) {
+function initDefault(context,level) {
 	// game parameters
+	gameValues		= levelValues(level);
 	gameTime		= 0;
 	spawnTimer		= 0;
 	redEffect		= 0;		// to make the screen become red
@@ -146,26 +160,26 @@ function initDefault(context) {
 	
 	// player's planet parameters
 	MyPlanet.skin		= planetSkin;
-	MyPlanet.life		= startValues.planetLife;
-	MyPlanet.maxLife	= startValues.planetLife;
-	MyPlanet.mat		= startValues.planetMat;
-	MyPlanet.maxMat		= startValues.planetMaxMat;
+	MyPlanet.life		= gameValues.planetLife;
+	MyPlanet.maxLife	= gameValues.planetLife;
+	MyPlanet.mat		= gameValues.planetMat;
+	MyPlanet.maxMat		= gameValues.planetMaxMat;
 	MyPlanet.totalMat	= 0;
 	MyPlanet.radius		= planetRadius;
 	MyPlanet.mass		= planetMass;
 	MyPlanet.x			= planetX;
 	MyPlanet.y			= planetY;
-	planetAutoHeal		= startValues.planetAutoHeal;
-	planetHealFact		= startValues.planetHealFact;
+	planetAutoHeal		= gameValues.planetAutoHeal;
+	planetHealFact		= gameValues.planetHealFact;
 	planetHealTimer		= 0;
 	planetHealPend		= 0;
-	planetRecovery		= startValues.planetRecovery;
+	planetRecovery		= gameValues.planetRecovery;
 	
 	// player's weapons parameters
 	// Weapon ( context, type, color, angle, delay, power, speed, smart, cNbr )
 	shotList		= [];
 	weaponList		= [];
-	maxWAtATime		= startValues.maxWAtATime;
+	maxWAtATime		= gameValues.maxWAtATime;
 	mainCannon		= newWeapon(context,"basicW","#FFFFFF");
 	spiralCannon	= newWeapon(context,"SaOW","#00FFFF");
 	magneticCannon	= newWeapon(context,"magneticW","#964514");
@@ -175,18 +189,18 @@ function initDefault(context) {
 	weaponList.push(magneticCannon);
 	weaponList.push(hammerCannon);
 	activate("basicW");
-	mainCanMovSpeed	= startValues.mainCanMovSpeed;
+	mainCanMovSpeed	= gameValues.mainCanMovSpeed;
 	orbitalNbr		= 0;
 	
 	// player's GRAVITRON parameters
 	MyGravitron.suction		= gravSuction;
-	MyGravitron.repulsion	= startValues.gravRepulsion;
-	MyGravitron.shield		= startValues.gravShield;
+	MyGravitron.repulsion	= gameValues.gravRepulsion;
+	MyGravitron.shield		= gameValues.gravShield;
 	MyGravitron.charge		= 0;
 	MyGravitron.counter		= 0;
-	MyGravitron.power		= startValues.gravPower;
-	MyGravitron.sort		= startValues.gravSort;
-	MyGravitron.pulse		= startValues.gravPulse;
+	MyGravitron.power		= gameValues.gravPower;
+	MyGravitron.sort		= gameValues.gravSort;
+	MyGravitron.pulse		= gameValues.gravPulse;
 	pulseList				= [];
 	gravColor				= '#666666';
 	gravRadius				= planetRadius * 1.1;
@@ -198,7 +212,7 @@ function initDefault(context) {
 	// asteroids parameters
 	asteroidList	= [];
 	asteroid1Skin	= 'img/asteroid1.png';
-	asteroidBS		= startValues.asteroidSpeed;	// Base speed for the asteroids
+	asteroidBS		= gameValues.asteroidSpeed;	// Base speed for the asteroids
 	asteroidBR		= 8;		// Base radius for the asteroids
 	asteroidBM		= 8;		// Base mass for the asteroids
 	MaxCollSpd		= 10;		// Max Collision Speed for the asteroid to bounce without being destroyed
@@ -212,8 +226,28 @@ function initDefault(context) {
 // function to create a weapon from its starting values
 function newWeapon(context,type,color) {
 	// Weapon ( context, type, color, angle, delay, power, speed, smart, cNbr )
-	var start = startValues[type];
+	var start = gameValues[type];
 	return new Weapon(context,type,color,0,start.delay,start.power,start.speed,start.smart,start.cannons);
+}
+
+// function to get the starting values of a difficulty level : the normal ones, changed by the level's own
+function levelValues(level) {
+	var changes = difficultyLevels[level] || {};
+	var values = {};
+	for ( var name in startValues ) {
+		var start = startValues[name];
+		var change = changes[name];
+		if ( typeof start == "object" ) {
+			// a weapon : each of its values can be changed on its own
+			values[name] = {};
+			for ( var detail in start ) {
+				values[name][detail] = ( change !== undefined && change[detail] !== undefined ) ? change[detail] : start[detail];
+			}
+		} else {
+			values[name] = ( change !== undefined ) ? change : start;
+		}
+	}
+	return values;
 }
 
 function initTutorial(context) {
