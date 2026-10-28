@@ -25,7 +25,11 @@ window.addEventListener('load', function () {
 	}
 
 	// Now browser should work with HTML 5 and Canvas
-	
+
+	// Zooming the game area to fit the window, now and each time it is resized
+	fitGameArea();
+	window.addEventListener('resize', fitGameArea, false);
+
 	// Creation of the Planet
 	MyPlanet = new Planet(context,planetLife,planetMat,planetSkin,planetRadius,planetMass,planetX,planetY);
 	MyGravitron = new Gravitron(context,gravSuction,0,gravMinSize,gravShield,gravPower,gravSort,gravRepulsion,gravPulse,gravRadius);

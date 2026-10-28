@@ -17,6 +17,8 @@
 	}else{
 		var displayS = localStorage["displayS"];
 	}
+	var gameSize		= 600;		// size of the game area in game units, the canvas is zoomed to fit the screen
+	var screenFill		= 0.80;		// part of the window's smallest side filled by the game area
 	var state 			= "menu";
 	var potential		= 200;
 	var difficulty		= 100;

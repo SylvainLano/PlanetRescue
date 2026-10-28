@@ -92,7 +92,7 @@ function resolvePulses (pulseList,ctx) {
 }
 
 // Function to resolve the debris
-function resolveDebris (debrisList,ctx,MyPlanet,pause,main,gravSuction,gravPower,gravSort,debrisColor) {
+function resolveDebris (debrisList,ctx,MyPlanet,pause,gravSuction,gravPower,gravSort,debrisColor) {
 	var tempList = new Array();
 	for (i in debrisList) {
 		// a var to know if we're gonna keep this debris into the array
@@ -125,7 +125,7 @@ function resolveDebris (debrisList,ctx,MyPlanet,pause,main,gravSuction,gravPower
 			debrisList[i].y += debrisList[i].vy;
 			
 			// Testing if debris still in game 
-			if ( distance > main.width ){
+			if ( distance > gameSize ){
 				
 				// Debris outta game, destroying it
 				keepit = 0;
@@ -984,6 +984,19 @@ function enableResetHS(resetHS) {
 	}else{
 		resetHS.style.display = "block";
 	}
+}
+
+// function to zoom the game area so that it fits the window, with a sharp canvas
+function fitGameArea() {
+	var gameArea = document.getElementById("gameArea");
+	var main = document.getElementById("mainArea");
+	// 610 is the game area with its borders
+	var zoom = Math.min(window.innerWidth, window.innerHeight) * screenFill / 610;
+	gameArea.style.transform = "translate(-50%, -50%) scale(" + zoom + ")";
+	// giving the canvas as many pixels as the screen shows, to avoid any blur
+	var pixels = Math.round(gameSize * zoom * (window.devicePixelRatio || 1));
+	main.width = pixels;
+	main.height = pixels;
 }
 
 // function to display status as bars or digits

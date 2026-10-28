@@ -14,7 +14,10 @@ function engine() {
 	// Clearing the context
 	var main = document.getElementById('mainArea');
 	var ctx = main.getContext('2d');
-	ctx.clearRect(0,0,main.width,main.height);
+	// drawing in game units, whatever the real size of the canvas
+	var scale = main.width / gameSize;
+	ctx.setTransform(scale,0,0,scale,0,0);
+	ctx.clearRect(0,0,gameSize,gameSize);
 	var status = document.getElementById("status");
 	var startMenu = document.getElementById("startMenu");
 	var mainMenu = document.getElementById("mainMenu");
@@ -116,7 +119,7 @@ function engine() {
 			ctx.fill();
 		}
 		if ( countdownValue > 214 ) {
-			debrisList = resolveDebris(debrisList,ctx,MyPlanet,pause,main,gravSuction,gravPower,gravSort,debrisColor);
+			debrisList = resolveDebris(debrisList,ctx,MyPlanet,pause,gravSuction,gravPower,gravSort,debrisColor);
 		}
 		if ( countdownValue > 234 ) {
 		var keys = [0,0,0,0,0,0];
@@ -167,7 +170,7 @@ function engine() {
 			instructions.innerHTML = '';
 		} else if ( countdownValue == 57 ) {
 			instructions.innerHTML = '"Space", "Space", "SPACE"';
-			var radius = main.width / 2;
+			var radius = gameSize / 2;
 			var angle = Math.PI / 4;
 			var AsterX = MyPlanet.x + (radius * Math.cos(angle));
 			var AsterY = MyPlanet.y + (radius * Math.sin(angle));
@@ -390,7 +393,7 @@ function engine() {
 	// Making the Red Effect when planet is hit!
 	if ( redEffect != 0 ) {
 		ctx.fillStyle = "rgba(" + redEffect + ", 0, 0, 1)";
-		ctx.fillRect(0,0,main.width,main.height);
+		ctx.fillRect(0,0,gameSize,gameSize);
 		redEffect -= 64;
 		if( redEffect < 0 ) { redEffect = 0; }
 	}
@@ -442,7 +445,7 @@ function engine() {
 	
 	
 	// Resolving the debris
-	debrisList = resolveDebris(debrisList,ctx,MyPlanet,pause,main,gravSuction,MyGravitron.power,MyGravitron.sort,debrisColor);
+	debrisList = resolveDebris(debrisList,ctx,MyPlanet,pause,gravSuction,MyGravitron.power,MyGravitron.sort,debrisColor);
 
 	
 	if ( pause == 0 ) {
@@ -453,7 +456,7 @@ function engine() {
 			potential-=(asteroidList.length*1000);
 			
 			// Creation of an asteroid
-				var radius = main.width / 2;
+				var radius = gameSize / 2;
 				
 				// Determination of an angle
 				var angle = Math.random() * Math.PI * 2 ;
@@ -569,7 +572,7 @@ function engine() {
 	
 	var tempList = new Array();
 	var closestA = false;
-	var closestD = main.width;
+	var closestD = gameSize;
 	var tempList = new Array();
 	var passedNbr = 0;
 	for (i in asteroidList) {
@@ -652,7 +655,7 @@ function engine() {
 		}
 		
 		// Testing if asteroid still in game
-		if ( distance > main.width ){
+		if ( distance > gameSize ){
 		
 		// Asteroid outta game, relaunching it toward player's planet
 			
@@ -948,7 +951,7 @@ function engine() {
 
 			// Testing if shot still in game
 			var distance = distanceToPlanet(shotList[i].x,shotList[i].y);
-			if ( distance > main.width ){
+			if ( distance > gameSize ){
 			
 			// Shot outta game, destroying it
 				keepit = 0;
