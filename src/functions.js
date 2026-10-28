@@ -492,38 +492,49 @@ function displayWeapon(ctx,weapon) {
 
 // function to activate a weapon
 function activate ( weapon ) {
+	// buying the weapon first if needed, so that a lack of mat leaves the active weapons untouched
+	var purchased = false;
+	for ( i in weaponList ) {
+		if ( weaponList[i].type == weapon && weaponList[i].cannonNbr == 0 ) {
+			var price = weaponCost[weapon];
+			if ( MyPlanet.mat < price ) {
+				document.getElementById(weapon).innerHTML = "<span class='red'>not enough mat, please activate another weapon</span>";
+				return;
+			}
+			MyPlanet.mat -= price;
+			nbrUpgrades++;
+			nbrCost += price;
+			weaponList[i].cannonNbr++;
+			purchased = true;
+		}
+	}
 	for ( i in weaponList ) {
 		var item = document.getElementById(weaponList[i].type);
 		if ( weaponList[i].type == weapon ) {
-			if ( weaponList[i].cannonNbr == 0 ) {
-				var price = weaponCost[weaponList[i].type];
-				if ( MyPlanet.mat >= price ) {
-					weaponList[i].cannonNbr++;
-					weaponList[i].active = 1;
-					item.innerHTML = "<span class='green'>active</span>";
-					modeUpdate ( weaponList[i] );
-				} else {
-					item.innerHTML = "<span class='red'>not enough mat, please activate another weapon</span>";
-					break;
-				}
-			} else {
-				weaponList[i].active = 1;
-				item.innerHTML = "<span class='green'>active</span>";
-			}
+			weaponList[i].active = 1;
+			item.innerHTML = "<span class='green'>active</span>";
 		} else if ( weaponList[i].cannonNbr == 0 ) {
 			weaponList[i].active = 0;
-			var price = weaponCost[weaponList[i].type];
-			if ( MyPlanet.mat >= price ) {
-				item.innerHTML = "<span class='blue'>purchase for " + price + " mat</span>";
-			} else {
-				item.innerHTML = "<span class='blue'>" + price + " mat needed to purchase</span>";
-			}
+			item.innerHTML = purchaseStatus ( weaponList[i] );
 		} else if ( weaponList[i].active >= maxWAtATime || weaponList[i].active == 0 ) {
 			weaponList[i].active = 0;
 			item.innerHTML = "<span class='red'>inactive</span>";
 		} else {
 			weaponList[i].active++;
 		}
+	}
+	if ( purchased ) {
+		refresh();
+	}
+}
+
+// function to display the purchase status of a weapon not bought yet
+function purchaseStatus ( weapon ) {
+	var price = weaponCost[weapon.type];
+	if ( MyPlanet.mat >= price ) {
+		return "<span class='blue'>purchase for " + price + " mat</span>";
+	} else {
+		return "<span class='blue'>" + price + " mat needed to purchase</span>";
 	}
 }
 
@@ -587,8 +598,7 @@ function refresh() {
 	for(i in refreshList){
 		var item = document.getElementById(refreshList[i]);
 		item.innerHTML = "<b>" + translate(refreshList[i]) + "</b>";
-		var max = maxUpgrade( refreshList[i] );
-		if ( item.innerHTML != max ) {
+		if ( !maxReached( refreshList[i] ) ) {
 			var price=priceToPay(refreshList[i]);
 			if ( refreshList[i] == "healing" ) {
 				var healFact = (maxUpgrade("healFact") - planetHealFact + 1 );
@@ -625,8 +635,9 @@ function refresh() {
 		item = document.getElementById("dispoW"+iw);
 		if ( weaponList[iw-1].cannonNbr < 1 ) {
 			item.style.display = "none";
+			document.getElementById(weaponList[iw-1].type).innerHTML = purchaseStatus ( weaponList[iw-1] );
 		} else {
-			item.style.display = "display";
+			item.style.display = "block";
 		}
 		modeUpdate ( weaponList[iw-1] );
 	}
@@ -670,8 +681,20 @@ function maxUpgrade(thing) {
 	return max;
 }
 
+// function to know if an upgrade has reached its maximum
+function maxReached(thing) {
+	if ( thing == "SaOSpeed" ) {
+		// this one goes down : slower spiral shots stay longer in game
+		return translate(thing) <= maxUpgrade(thing);
+	}
+	return translate(thing) >= maxUpgrade(thing);
+}
+
 // function to upgrade things...
 function upgrade(thing) {
+	if ( maxReached(thing) ) {
+		return;
+	}
 	var price=enoughFor(thing);
 	if ( thing == "healing") {
 		var healFact = (maxUpgrade("healFact") - planetHealFact + 1 );
