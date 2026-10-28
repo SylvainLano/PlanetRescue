@@ -9,7 +9,7 @@ Defend your planet against a never-ending rain of asteroids: your weapons fire o
 Your planet sits in the middle of the screen and asteroids come from every direction. When one crashes on the planet, you lose as many million inhabitants as it had life left. If your population reaches zero, the game is over.
 
 - **The Gravitron** is an arc around your planet. Its open part pulls debris in, which turns them into **mat** (material), but it also pulls asteroids toward you. Its closed part can push them away once you buy the Repulsion upgrade. It can also become a shield and send out damaging pulses. The whole art is to gather debris without drawing the asteroids in: the Field Scanner upgrade shows the limits of the field, then which asteroids are pulled (red) or pushed (green).
-- **The weapons fire automatically.** You start with a basic cannon guided by its SMART AI, and you can buy the Spiral & Orbital, Magnetic, and Hammer & Broom weapons, each with its own firing modes.
+- **The weapons fire automatically.** You start with a basic cannon guided by its SMART AI, which goes up to level 5: it learns to aim ahead of its targets, then to choose them wisely. You can also buy the Spiral & Orbital, Magnetic, and Hammer & Broom weapons, each with its own firing modes.
 - **The upgrade menu** opens with the pause. There you spend your mat on the Gravitron, the weapons and the planet: healing, maximum health, storage, auto-healing, and recovery of mat from crashed asteroids.
 - **Three difficulty levels** can be chosen in the start menu. Easy gives your planet more life and mat, sends the asteroids more slowly and lets your cannon anticipate from the start. Hard sends them faster and faster, sooner.
 - At the end of a game you get your statistics (mat gathered, accuracy, crashes, inhabitants lost, upgrades) and the hi-scores of your difficulty level, which are saved in your browser.
@@ -51,12 +51,13 @@ In **2026** the game came back to life. The goals are to keep its spirit, make i
 | 0.6.0 | Asteroids now arrive on a timer that speeds up as time passes, so destroying them finally buys you some breathing room. All the starting values are gathered in one place (`startValues`). |
 | 0.7.0 | Three difficulty levels (Easy, Normal, Hard) in the start menu, each with its own hi-scores. Normal is the 0.6.0 game, and its hi-scores are kept. |
 | 0.8.0 | New Gravitron upgrade, the Field Scanner: level 1 shows the limits of the Gravitron's field, level 2 tints the asteroids it pulls in (red) or pushes away (green). |
+| 0.9.0 | SMART AI levels 3 to 5, as designed in 2010: no wasted shots, then the target the cannon can hit the soonest, then the asteroids about to crash on the planet first. The End key now releases the target at once. |
 
 ## Roadmap (2026)
 
 The order may change as we go.
 
-1. **Fairer difficulty:** difficulty levels (done in 0.7.0), the Field Scanner (done in 0.8.0), and SMART AI levels 3 to 5 as designed in 2010.
+1. **Fairer difficulty:** difficulty levels (done in 0.7.0), the Field Scanner (done in 0.8.0), and SMART AI levels 3 to 5 as designed in 2010 (done in 0.9.0).
 2. **Modernization:** weapons and upgrades described as data, a pause menu without jQuery (ready for the research tree), lighter assets.
 3. **Graphics:** the Earth as your planet, real rock textures for the asteroids, high-resolution images, a hand-made animated background.
 4. **Touch screens.**

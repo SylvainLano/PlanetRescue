@@ -335,6 +335,10 @@ function shoot(ctx,weapon){
 				item = new Shot1(ctx,weapon.power,weapon.color,x,y,vx,vy);
 				shotList.push(item);
 			}
+			// the shots fired right toward the target are the ones the SMART AI counts on to destroy it
+			for ( var s = shotsBefore; s < shotList.length; s++ ) {
+				shotList[s].target = weapon.target;
+			}
 			if ( weapon.cannonNbr >= 3 ) {
 				var x = MyPlanet.x + (MyPlanet.radius+5) * Math.cos(weapon.angle - 0.08);
 				var y = MyPlanet.y + (MyPlanet.radius+5) * Math.sin(weapon.angle - 0.08);
@@ -638,6 +642,16 @@ function modeUpdate ( weapon ) {
 	}
 }
 
+// what the next level of SMART AI brings, for the upgrade menu
+var smartNextLevel = [
+	"",
+	"Next level of SMART AI will grant you anticipation, to make the basic weapon more effective.",
+	"Next level of SMART AI will stop wasting shots : only the shots needed to destroy a target, and none at the asteroids out of reach.",
+	"Next level of SMART AI will choose the target it can hit the soonest, turning and shooting.",
+	"Next level of SMART AI will shoot first at the asteroids going to crash on your planet.",
+	"Your SMART AI is at its best : no more level available."
+];
+
 // function to refresh the upgrade menu
 function refresh() {
 	var item = document.getElementById("matNbr");
@@ -673,16 +687,12 @@ function refresh() {
 					item.innerHTML += " <span class='upred'>COST "+price+" MAT</span>";
 				}
 			}
-			if(refreshList[i] == "SMART"){
-				item = document.getElementById("SMARTspan");
-				if( translate(refreshList[i]) == 1) {
-					item.title = "Main Cannon SMART AI - Next level of SMART AI will grant you anticipation, to make the cannon more effective.";
-				} else {
-					item.title = "Main Cannon SMART AI - There is no more level of SMART AI available.";
-				}
-			}
 		} else {
 			item.innerHTML = " MAX";
+		}
+		if ( refreshList[i] == "SMART" ) {
+			// the tooltip plugin keeps the text it found when the page loaded, so it is changed there
+			document.getElementById("SMARTspan").tooltipText = "Main Structure SMART AI - " + smartNextLevel[translate(refreshList[i])];
 		}
 	}
 	for ( iw=1; iw<=weaponList.length; iw++ ){
@@ -720,11 +730,11 @@ function maxUpgrade(thing) {
 		case "HaBCFireRate" :
 		case "HaBPow" :
 		case "HaBSpeed" :
+		case "SMART" :
 		case "mCFireRate" : max = 5; break;
 		case "MaxWAtATime" :
 		case "gravPulse" :
-		case "gravScanner" :
-		case "SMART" : max = 2; break;
+		case "gravScanner" : max = 2; break;
 		case "maxHealth" : max = 50; break;
 		case "maxMat" : max = 1000; break;
 		case "healing" : max = MyPlanet.maxLife; break;
@@ -1095,10 +1105,22 @@ function displayStatus() {
 
 // function to anticipate asteroid's movement and intercept it ; returns an angle to shoot toward
 // The first version (2010) was made with the help of Marc35 from the forum at ilephysique.net
+function interception ( asteroid, Vp, r0 ) {
+	var meeting = meetingPoint ( asteroid, Vp, r0 );
+	if ( meeting != false ) {
+		return meeting.angle;
+	}
+
+	// no way to catch it : shooting at its current position
+	return Math.atan2( asteroid.y - MyPlanet.y, asteroid.x - MyPlanet.x );
+}
+
+// function to find where a shot can meet an asteroid ; returns the angle to shoot toward and the turns
+// before they meet, or false if no shot can catch it
 // A shot leaves the planet radially : it is at the distance r0 from the planet's center after its
 // first move, then goes Vp further at each turn. The asteroid is followed turn by turn, moved
 // like the engine does with the GRAVITRON's pull, until the shot's distance catches up with its own.
-function interception ( asteroid, Vp, r0 ) {
+function meetingPoint ( asteroid, Vp, r0 ) {
 	// asteroid's position relative to the planet, and speed
 	var x = asteroid.x - MyPlanet.x;
 	var y = asteroid.y - MyPlanet.y;
@@ -1118,13 +1140,96 @@ function interception ( asteroid, Vp, r0 ) {
 		if ( nextGap <= 0 ) {
 			// the shot catches up during this turn : aiming at the matching point of the asteroid's move
 			var share = gap / ( gap - nextGap );
-			return Math.atan2( y + share*vy, x + share*vx );
+			return { angle : Math.atan2( y + share*vy, x + share*vx ), turns : n - 1 + share };
 		}
 		x += vx;
 		y += vy;
 		gap = nextGap;
 	}
 
-	// no way to catch it : shooting at its current position
-	return Math.atan2( asteroid.y - MyPlanet.y, asteroid.x - MyPlanet.x );
+	// the shot gets out of the game first
+	return false;
+}
+
+// function to know if an asteroid is going to crash on the planet ; returns the turns before the crash, or false
+// The asteroid is followed turn by turn like in meetingPoint, as if the GRAVITRON stays where it is.
+function crashTime ( asteroid ) {
+	var x = asteroid.x - MyPlanet.x;
+	var y = asteroid.y - MyPlanet.y;
+	var vx = asteroid.vx;
+	var vy = asteroid.vy;
+	var crash = MyPlanet.radius + asteroid.radius;
+
+	// looking 40 seconds ahead at most
+	for ( var n = 0; n < 1000; n++ ) {
+		var distance = Math.sqrt(x*x + y*y);
+		if ( distance < crash ) {
+			return n;
+		}
+		if ( distance > gameSize ) {
+			return false;
+		}
+		var angle = Math.atan2(y, x);
+		var pull = gravitronAcceleration(angle, asteroid.mass);
+		vx += pull * Math.cos(angle);
+		vy += pull * Math.sin(angle);
+		x += vx;
+		y += vy;
+	}
+	return false;
+}
+
+// function to choose the main cannon's target with its SMART AI, from level 3 ; returns false when no asteroid is worth a shot
+//	- SMART 3 skips the asteroids that the shots on their way will destroy, and the ones no shot can catch, then takes the closest
+//	- SMART 4 takes the asteroid it can hit the soonest, counting the time to turn toward it and the time for the shot to fly
+//	- SMART 5 takes first the asteroids going to crash on the planet, the soonest crash first
+function smartTarget ( cannon ) {
+	// damages already on their way to each asteroid
+	for ( var a in asteroidList ) {
+		asteroidList[a].incoming = 0;
+	}
+	for ( var s in shotList ) {
+		if ( shotList[s].target ) {
+			shotList[s].target.incoming += shotList[s].power;
+		}
+	}
+
+	var r0 = MyPlanet.radius + 5 + cannon.speed;
+	var turnSpeed = mainCanMovSpeed * Math.PI / 256;
+	var best = false;
+	var bestScore = 0;
+	var bestThreat = false;
+	for ( var a in asteroidList ) {
+		var asteroid = asteroidList[a];
+		if ( asteroid.pass == 1 || asteroid.incoming >= asteroid.life ) {
+			continue;
+		}
+		var meeting = meetingPoint ( asteroid, cannon.speed, r0 );
+		if ( meeting == false ) {
+			continue;
+		}
+		var threat = false;
+		var score = distanceToPlanet ( asteroid.x, asteroid.y );
+		if ( cannon.smart >= 4 ) {
+			var turn = Math.abs ( meeting.angle - cannon.angle );
+			if ( turn > Math.PI ) {
+				turn = 2 * Math.PI - turn;
+			}
+			score = turn / turnSpeed + meeting.turns;
+		}
+		if ( cannon.smart >= 5 ) {
+			var crash = crashTime ( asteroid );
+			if ( crash !== false ) {
+				threat = true;
+				score = crash;
+			}
+		}
+		// a threat always comes before the others, then the lowest score wins
+		if ( best === false || ( threat && !bestThreat ) || ( threat == bestThreat && score < bestScore ) ) {
+			best = asteroid;
+			bestScore = score;
+			bestThreat = threat;
+		}
+	}
+	return best;
 }

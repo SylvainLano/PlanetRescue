@@ -778,9 +778,17 @@ function engine() {
 	if ( passedNbr == asteroidList.length ) {
 		allPassed = 1;
 	}
+	// From SMART 3, the main cannon's AI chooses its target instead of taking the closest asteroid
+	// (the other weapons only need an asteroid in game to shoot)
+	var anyTarget = closestA;
+	if ( mainCannon.smart >= 3 && pause == 0 ) {
+		closestA = smartTarget(mainCannon);
+	}
 	if ( targetedA.life <= 0 || key[6] == 1 ) {
+		// releasing the target : the passed asteroids are forgotten too, so that no new target gets locked at once
 		targetedA = false;
 		allPassed = 1;
+		passedNbr = 0;
 	}
 	if ( targetedA != false ) {
 		closestA = targetedA;
@@ -804,6 +812,7 @@ function engine() {
 		var moveSpeed = mainCanMovSpeed * Math.PI / 256;
 		for(i in weaponList){
 			if ( closestA != false && weaponList[i].type == "basicW" ) {
+				weaponList[i].target = closestA;
 				if ( closestA == targetedA ) {
 					ctx.strokeStyle = "rgba(255, 0, 0, 1)";
 				} else {
@@ -871,7 +880,7 @@ function engine() {
 						case "HaBW":
 						case "basicW":
 							// the basic weapon waits to be turned toward its target before shooting
-							if(closestA == false || ( weaponList[i].type == "basicW" && weaponList[i].aligned == false )) {
+							if(anyTarget == false || ( weaponList[i].type == "basicW" && ( closestA == false || weaponList[i].aligned == false ) )) {
 								break;
 							}
 						case "SaOW":

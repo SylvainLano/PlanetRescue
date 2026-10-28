@@ -127,6 +127,7 @@ function Weapon(context,type,color,angle,delay,power,speed,smart,cNbr) {
 		*/
 	this.active = 0;
 	this.aligned = false;	// for the basic weapon : turned toward its target
+	this.target = false;	// for the basic weapon : the asteroid it aims at
 	this.cannonNbr = cNbr;
 
 // object definition
@@ -144,6 +145,7 @@ function Shot1(context,power,color,x,y,vx,vy) {
 	this.vx=vx;
 	this.vy=vy;
 	this.weapon=1;
+	this.target=false;	// asteroid it was fired at, for the SMART AI to count the damages on their way
 
 // object definition
 	this.type="Straight Shot";
