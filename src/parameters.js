@@ -26,7 +26,7 @@
 		planetMaxMat	: 100,
 		planetAutoHeal	: 0,
 		planetHealFact	: 1,
-		planetRecovery	: 5,
+		planetRecovery	: 0,		// mat recovered from the asteroids crashing on the planet, an upgrade to buy
 
 		// player's weapons
 		maxWAtATime		: 1,		// maximum amount of active weapons
@@ -86,6 +86,7 @@
 	var nbrShots		= 0;
 	var nbrLostShots	= 0;
 	var nbrCrashes		= 0;
+	var nbrDestroyed	= 0;
 	var nbrDamage		= 0;
 	var nbrUpgrades		= 0;
 	var nbrCost			= 0;
@@ -155,6 +156,7 @@ function initDefault(context,level) {
 	nbrShots		= 0;
 	nbrLostShots	= 0;
 	nbrCrashes		= 0;
+	nbrDestroyed	= 0;
 	nbrDamage		= 0;
 	nbrUpgrades		= 0;
 	nbrCost			= 0;

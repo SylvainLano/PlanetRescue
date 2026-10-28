@@ -368,23 +368,25 @@ function engine() {
 		pauseScreen.style.display = "none";
 		status.style.display = "none";
 		gameOver.style.display = "block";
-		var gameOverInnerHTML = "<div class=title>Hi-Scores</div><div class=text>Difficulty level : <strong>" + levelName() + "</strong><br /><br />Maximum amount of mat gathered : ";
+		var gameOverInnerHTML = "<div class=title>Hi-Scores</div><div class=text>Difficulty level : <strong>" + levelName() + "</strong><br /><br />Longest survival (seconds) : ";
 			gameOverInnerHTML += "<span class=statUpper>";
-			gameOverInnerHTML += localStorage[scoreKey('totalMat')] + "</span><br />Maximum accuracy reached : ";
+			gameOverInnerHTML += savedRecord('survival') + "</span><br />Maximum amount of mat gathered : ";
 			gameOverInnerHTML += "<span class=statUpper>";
-			gameOverInnerHTML += localStorage[scoreKey('accuracy')] + "%</span><br />Maximum crashed asteroids : ";
+			gameOverInnerHTML += savedRecord('totalMat') + "</span><br />Maximum accuracy reached : ";
 			gameOverInnerHTML += "<span class=statUpper>";
-			gameOverInnerHTML += localStorage[scoreKey('nbrCrashes')] + "</span><br />Maximum inhabitants lost : ";
+			gameOverInnerHTML += savedRecord('accuracy') + "%</span><br />Maximum crashed asteroids : ";
 			gameOverInnerHTML += "<span class=statUpper>";
-			gameOverInnerHTML += localStorage[scoreKey('nbrDamage')] + "</span><br />Maximum upgrade purchased : ";
+			gameOverInnerHTML += savedRecord('nbrCrashes') + "</span><br />Maximum inhabitants lost : ";
 			gameOverInnerHTML += "<span class=statUpper>";
-			gameOverInnerHTML += localStorage[scoreKey('nbrUpgrades')] + "</span><br />Maximum mat spent : ";
+			gameOverInnerHTML += savedRecord('nbrDamage') + "</span><br />Maximum upgrade purchased : ";
 			gameOverInnerHTML += "<span class=statUpper>";
-			gameOverInnerHTML += localStorage[scoreKey('nbrCost')] + "</span><br /><br />Number of games played : ";
+			gameOverInnerHTML += savedRecord('nbrUpgrades') + "</span><br />Maximum mat spent : ";
 			gameOverInnerHTML += "<span class=statUpper>";
-			gameOverInnerHTML += localStorage[scoreKey('playedGames')] + "</span><br /><br />Hi-Score : ";
+			gameOverInnerHTML += savedRecord('nbrCost') + "</span><br /><br />Number of games played : ";
 			gameOverInnerHTML += "<span class=statUpper>";
-			gameOverInnerHTML += localStorage[scoreKey('score')] + "</span></div><div class=title><br /><a href=# onClick='state=&quot;menu&quot;;'>Back to Main Menu</a></div>";
+			gameOverInnerHTML += savedRecord('playedGames') + "</span><br /><br />Hi-Score : ";
+			gameOverInnerHTML += "<span class=statUpper>";
+			gameOverInnerHTML += savedRecord('bestScore') + "</span></div><div class=title><br /><a href=# onClick='state=&quot;menu&quot;;'>Back to Main Menu</a></div>";
 			gameOver.innerHTML = gameOverInnerHTML;	
 		state = "stand";
 		
@@ -491,12 +493,21 @@ function engine() {
 			if( pauseStep != 0){
 				status.style.display = "none";
 				gameOver.style.display = "block";
-				var gameOverInnerHTML = "<div class=title>Game Over</div><div class=text>Your planet has been destroyed !<br />Difficulty level : <strong>" + levelName() + "</strong><br /><br />You gathered a total of ";
+				var gameOverInnerHTML = "<div class=title>Game Over</div><div class=text>Your planet has been destroyed !<br />Difficulty level : <strong>" + levelName() + "</strong><br /><br />You survived ";
 				var accuracy = 0;
 				if ( nbrShots > 0 ) {
 					accuracy = Math.floor((1-(nbrLostShots/nbrShots))*100);
 				}
+				var seconds = Math.floor ( gameTime / framesPerSecond );
 					// Saving the hi-scores
+					var hiSurvival = localStorage[scoreKey('survival')];
+					if( hiSurvival === undefined || hiSurvival === null || hiSurvival < seconds ){
+						localStorage[scoreKey('survival')] = seconds;
+						gameOverInnerHTML += "<span class=statUpper>";
+					} else {
+						gameOverInnerHTML += "<span class=statLower>";
+					}
+					gameOverInnerHTML += seconds + " seconds</span> and destroyed " + nbrDestroyed + " asteroids.<br />You gathered a total of ";
 					var hiTotalMat = localStorage[scoreKey('totalMat')];
 					if( hiTotalMat === null || hiTotalMat === undefined || hiTotalMat < MyPlanet.totalMat ){
 						localStorage[scoreKey('totalMat')] = MyPlanet.totalMat;
@@ -544,11 +555,13 @@ function engine() {
 					} else {
 						gameOverInnerHTML += "<span class=statLower>";
 					}
-					gameOverInnerHTML += nbrCost + " mat</span> for them.</div><div class=title>";
-					var score = Math.floor ( accuracy / 100 * ( ( nbrUpgrades * nbrCost ) + ( nbrCrashes * nbrDamage ) - MyPlanet.totalMat ) );
-					var hiScore = localStorage[scoreKey('score')];
+					// the score rewards what the player does : destroying asteroids, gathering mat, and surviving
+					// (the 2010 score was saved as 'score', this one has its own record)
+					var score = nbrDestroyed * 10 + MyPlanet.totalMat + seconds;
+					gameOverInnerHTML += nbrCost + " mat</span> for them.<br /><br />Score : " + nbrDestroyed + " asteroids &times; 10 + " + MyPlanet.totalMat + " mat + " + seconds + " seconds.</div><div class=title>";
+					var hiScore = localStorage[scoreKey('bestScore')];
 					if( hiScore === undefined || hiScore === null ||  hiScore < score ){
-						localStorage[scoreKey('score')] = score;
+						localStorage[scoreKey('bestScore')] = score;
 						gameOverInnerHTML += "<span class=green>High Score : ";
 					} else {
 						gameOverInnerHTML += "<span class=red>Score : ";
@@ -587,8 +600,9 @@ function engine() {
 		}
 			
 		if ( asteroidList[i].life <= 0 ) {
-			// This one is done
+			// This one is done (the ones crashing on the planet are removed right away, they don't come here)
 			keepit = 0;
+			nbrDestroyed++;
 		} else if (pause == 0) {
 		
 		// Calculating distance to the player's planet
@@ -673,7 +687,7 @@ function engine() {
 			if( MyPlanet.life < 0 ){
 				nbrDamage += MyPlanet.life;
 			}
-			if ( planetRecovery > 0 && MyPlanet.mat < MyPlanet.totalMat ) {
+			if ( planetRecovery > 0 && MyPlanet.mat < MyPlanet.maxMat ) {
 				var temp = Math.floor ( asteroidList[i].life / 5 * planetRecovery );
 				if ( ( MyPlanet.mat + temp ) > MyPlanet.maxMat ) {
 					temp = MyPlanet.maxMat - MyPlanet.mat;

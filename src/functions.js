@@ -1037,7 +1037,8 @@ function calculate(type,ref) {
 // function to reset Hi-Scores of the chosen difficulty level
 function resetHS() {
 	// erasing only the scores : localStorage is shared with every page of the same site
-	var scoreKeys = ["totalMat","accuracy","nbrCrashes","nbrDamage","nbrUpgrades","nbrCost","score","playedGames"];
+	// ('score' is the record of the 2010 score, still erased with the others)
+	var scoreKeys = ["survival","totalMat","accuracy","nbrCrashes","nbrDamage","nbrUpgrades","nbrCost","bestScore","score","playedGames"];
 	for ( var k in scoreKeys ) {
 		localStorage.removeItem(scoreKey(scoreKeys[k]));
 	}
@@ -1078,6 +1079,15 @@ function scoreKey(name) {
 		return name;
 	}
 	return name + "_" + difficulty;
+}
+
+// function to read a hi-score of the chosen difficulty level, with a dash when there is none yet
+function savedRecord(name) {
+	var value = localStorage[scoreKey(name)];
+	if ( value === undefined || value === null ) {
+		return "-";
+	}
+	return value;
 }
 
 // function to zoom the game area so that it fits the window, with a sharp canvas

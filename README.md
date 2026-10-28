@@ -12,7 +12,7 @@ Your planet sits in the middle of the screen and asteroids come from every direc
 - **The weapons fire automatically.** You start with a basic cannon guided by its SMART AI, which goes up to level 5: it learns to aim ahead of its targets, then to choose them wisely. You can also buy the Spiral & Orbital, Magnetic, and Hammer & Broom weapons, each with its own firing modes.
 - **The upgrade menu** opens with the pause. There you spend your mat on the Gravitron, the weapons and the planet: healing, maximum health, storage, auto-healing, and recovery of mat from crashed asteroids.
 - **Three difficulty levels** can be chosen in the start menu. Easy gives your planet more life and mat, sends the asteroids more slowly and lets your cannon anticipate from the start. Hard sends them faster and faster, sooner.
-- At the end of a game you get your statistics (mat gathered, accuracy, crashes, inhabitants lost, upgrades) and the hi-scores of your difficulty level, which are saved in your browser.
+- At the end of a game you get your statistics (survival time, mat gathered, accuracy, crashes, inhabitants lost, upgrades) and the hi-scores of your difficulty level, which are saved in your browser. The score is 10 points per asteroid destroyed, plus the mat gathered, plus the seconds survived.
 
 ### Controls
 
@@ -52,6 +52,7 @@ In **2026** the game came back to life. The goals are to keep its spirit, make i
 | 0.7.0 | Three difficulty levels (Easy, Normal, Hard) in the start menu, each with its own hi-scores. Normal is the 0.6.0 game, and its hi-scores are kept. |
 | 0.8.0 | New Gravitron upgrade, the Field Scanner: level 1 shows the limits of the Gravitron's field, level 2 tints the asteroids it pulls in (red) or pushes away (green). |
 | 0.9.0 | SMART AI levels 3 to 5, as designed in 2010: no wasted shots, then the target the cannon can hit the soonest, then the asteroids about to crash on the planet first. The End key now releases the target at once. |
+| 0.10.0 | A new score: 10 points per asteroid destroyed, plus the mat gathered, plus the seconds survived (the 2010 score rewarded the inhabitants lost). Longest survival is a new record. Recovery, stuck at its maximum since 2010, now starts at 0 and can be bought. |
 
 ## Roadmap (2026)
 
