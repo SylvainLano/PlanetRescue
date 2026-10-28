@@ -49,7 +49,7 @@ img, img a {
  
 /* PAGE ELEMENTS */
 body {
-	background-image: url("../img/spaceBackground1.png");
+	background-image: url("../img/spaceBackground1.jpg");
     background-size: cover;
     background-position: center;
     background-attachment: fixed;
@@ -71,14 +71,13 @@ body {
 
 @font-face {
 	font-family: 'MirageRegular';
-	src: url('../fonts/magenta_bbt-webfont.eot');
-	src: local('?'), url('../fonts/magenta_bbt-webfont.woff') format('woff'), url('../fonts/magenta_bbt-webfont.ttf') format('truetype'), url('../fonts/magenta_bbt-webfont.svg#webfont2GeNYhd2') format('svg');
+	src: url('../fonts/magenta_bbt-webfont.woff') format('woff'), url('../fonts/magenta_bbt-webfont.ttf') format('truetype');
 	font-weight: normal;
 	font-style: normal;
 }
 
 #mainArea{
-	background-image: url("../img/background1.png");
+	background-image: url("../img/background1.jpg");
     background-size: cover;
     background-position: center;
     background-attachment: fixed;
@@ -265,5 +264,134 @@ body {
 
 .center {
 	margin: auto;
+	text-align: center;
+}
+
+
+/* PAUSE MENU (built by src/menu.js) */
+
+#shop {
+	display: flex;
+	flex-direction: column;
+	height: 400px;
+	font-family: Verdana, Arial, sans-serif;
+	font-size: 11px;
+}
+
+#shop .section {
+	display: flex;
+	flex-direction: column;
+	margin-top: 1px;
+}
+
+#shop .section.open {
+	flex: 1;
+	min-height: 0;
+}
+
+#shop .head {
+	position: relative;
+	cursor: pointer;
+	padding: 6px 6px 6px 24px;
+	color: #555;
+	background: linear-gradient(#f4f4f4, #dedede);
+	border: 1px solid #d3d3d3;
+	border-radius: 4px;
+}
+
+#shop .head:hover {
+	color: #212121;
+	border-color: #999;
+	background: linear-gradient(#ececec, #d2d2d2);
+}
+
+#shop .head::before {
+	content: "\25B8";
+	position: absolute;
+	left: 8px;
+	top: 3px;
+	font-size: 15px;
+	color: #888;
+}
+
+#shop .open .head {
+	color: #212121;
+	background: #fff;
+	border-color: #aaa;
+	border-radius: 4px 4px 0 0;
+}
+
+#shop .open .head::before {
+	content: "\25BE";
+	color: #454545;
+}
+
+#shop .content {
+	display: none;
+	flex: 1;
+	overflow: auto;
+	padding: 11px 24px;
+	color: #222;
+	background: #fff;
+	border: 1px solid #aaa;
+	border-top: 0;
+	border-radius: 0 0 4px 4px;
+}
+
+#shop .open .content {
+	display: block;
+}
+
+#shop a {
+	cursor: pointer;
+}
+
+#shop .tabs {
+	overflow: hidden;
+	margin-top: 8px;
+}
+
+#shop .tab {
+	float: left;
+	margin-right: 1px;
+	padding: 3px 6px;
+	color: #fff;
+	background: #000;
+}
+
+#shop .tab.current {
+	background: #39c;
+}
+
+#shop .panel {
+	padding: 20px;
+	background: #ebebeb;
+}
+
+#shop .panel h2 {
+	font-weight: bold;
+	font-size: 1.1em;
+}
+
+#tooltip {
+	display: none;
+	position: absolute;
+	z-index: 3000;
+	width: 210px;
+	padding: 15px 20px;
+	font-family: Arial, sans-serif;
+	font-size: 14px;
+	color: #000;
+	background: #fff;
+	border-radius: 8px;
+	box-shadow: 1px 2px 6px rgba(0,0,0,0.6);
+	opacity: 0.85;
+	pointer-events: none;
+}
+
+#tooltip h3 {
+	margin-bottom: 0.75em;
+	font-size: 12pt;
+	font-weight: bold;
 	text-align: center;
 }

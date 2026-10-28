@@ -443,6 +443,7 @@ function engine() {
 	} else if ( pauseStep == 3 && key[4] == 0 ) {
 		pause=0; pauseStep=0;
 		pauseScreen.style.display = "none";
+		hideTooltip();
 	}
 
 	// Showing the limits of the GRAVITRON's field, with the Field Scanner

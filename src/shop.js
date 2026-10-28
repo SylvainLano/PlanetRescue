@@ -1,0 +1,421 @@
+/*
+//	This file is originaly part of the Planet Rescue Project
+//	It was first made in 2010 by Sylvain Lano ( https://sylvainlano.github.io/ )
+//	This project page is : https://github.com/SylvainLano/PlanetRescue
+//  The old project page was : https://sourceforge.net/projects/planetrescue/
+//
+//	This program is distributed in the hope that it will be fun and useful,
+//	but WITHOUT ANY WARRANTY. If it doesn't work well, contact us
+//	or improve the code and share it alike !
+*/
+
+
+// The upgrades of the pause menu : adding one only takes a new line here, and its place in shopLayout
+//	- name and tip are shown in the menu (the tip is split by " - " into a title and a text)
+//	- max is the maximum level, price the name of its formula in calculate()
+//	- level() reads the current level, raise() buys the next one
+var upgrades = {
+	// GRAVITRON
+	gravSort			: { name : "Sorting", tip : "Sorting the asteroids - This means your Gravitron will attract asteroids less and debris more.",
+							max : 5, price : "5powtimes4",
+							level : function () { return MyGravitron.sort; }, raise : function () { MyGravitron.sort++; } },
+	gravPower			: { name : "Gravity Generator", tip : "Gravity Generator - This represent the suction power of the opened part of the Gravitron.",
+							max : 5, price : "5powtimes4",
+							level : function () { return MyGravitron.power; }, raise : function () { MyGravitron.power++; } },
+	repulsion			: { name : "Repulsion", tip : "Repulsion - This represent the repulsion power of the closed part of the Gravitron. It uses the Gravity Generator power and the Gravitron's sorting effect to perform.",
+							max : 1, price : "plus250",
+							level : function () { return MyGravitron.repulsion; }, raise : function () { MyGravitron.repulsion++; } },
+	gravShield			: { name : "Gravitron Shield", tip : "Gravitron Shield - With a shielding effect, your Gravitron will protect your planet (a few). It loads over time and then unloads on asteroids, thus damaging them.",
+							max : 5, price : "times10plus50",
+							level : function () { return MyGravitron.shield; }, raise : function () { MyGravitron.shield++; } },
+	gravPulse			: { name : "Gravitron Pulse", tip : "Gravitron Pulse - When the shield is hit by an asteroid, it will emit a pulse that causes damages to the nearby asteroids. At level 2 it will also pulse when shield is fully loaded.",
+							max : 2, price : "plus1times500",
+							level : function () { return MyGravitron.pulse; }, raise : function () { MyGravitron.pulse++; } },
+	gravScanner			: { name : "Field Scanner", tip : "Field Scanner - Level 1 shows the limits of the Gravitron's field. Level 2 colors the asteroids it pulls in red, and the ones it pushes away in green.",
+							max : 2, price : "plus1times50",
+							level : function () { return MyGravitron.scanner; }, raise : function () { MyGravitron.scanner++; } },
+
+	// MAIN STRUCTURE
+	mCMSpeed			: { name : "Main Structure Move Speed", tip : "Main Structure Move Speed - Making the Main Structure to move faster.",
+							max : 5, price : "5powtimes4",
+							level : function () { return mainCanMovSpeed; }, raise : function () { mainCanMovSpeed++; } },
+	SMART				: { name : "Main Structure SMART AI", tip : "Main Structure SMART AI - Next level of SMART AI will grant you anticipation, to make basic weapon more effective.",
+							max : 5, price : "times250",
+							level : function () { return mainCannon.smart; }, raise : function () { mainCannon.smart++; } },
+	MaxWAtATime			: { name : "Multiple weapon", tip : "Multiple weapon structure - Each level gives you one more weapon to activate at the same time.",
+							max : 2, price : "times250",
+							level : function () { return maxWAtATime; }, raise : function () { maxWAtATime++; } },
+
+	// BASIC CANNON
+	mCNumber			: { name : "Cannons", tip : "Basic Cannons Number - Increased fire spread, and so fire rate as well.",
+							max : 5, price : "times250",
+							level : function () { return mainCannon.cannonNbr; }, raise : function () { mainCannon.cannonNbr++; } },
+	mCFireRate			: { name : "Fire Rate", tip : "Basic Weapon Fire Rate - Making the weapon to fire faster. Expressed in Shots Per Second.",
+							max : 5, price : "expFrom26times1000squared",
+							level : function () { return Math.floor(2500/mainCannon.fireRate)/100; }, raise : function () { mainCannon.fireRate-=2; } },
+	mainPow				: { name : "Fire Power", tip : "Basic Shots Power - To cause more damages.",
+							max : 5, price : "times3pow2",
+							level : function () { return mainCannon.power; }, raise : function () { mainCannon.power++; } },
+	mainSpeed			: { name : "Fire Speed", tip : "Basic Shots Speed - To reach targets faster.",
+							max : 5, price : "times10plus50",
+							level : function () { return mainCannon.speed; }, raise : function () { mainCannon.speed++; } },
+
+	// SPIRAL AND ORBITAL CANNON
+	SaOCNumber			: { name : "Cannons", tip : "Spiral Cannons Number - Increased fire spread and unlock new modes.",
+							max : 5, price : "times250",
+							level : function () { return spiralCannon.cannonNbr; }, raise : function () { spiralCannon.cannonNbr++; } },
+	SaOCFireRate		: { name : "Fire Rate", tip : "Spiral Weapon Fire Rate - Making the weapon to fire faster. Expressed in Shots Per Second.",
+							max : 5, price : "expFrom26times1000squared",
+							level : function () { return Math.floor(2500/spiralCannon.fireRate)/100; }, raise : function () { spiralCannon.fireRate-=2; } },
+	SaOPow				: { name : "Fire Power", tip : "Spiral Shots Power - To cause more damages.",
+							max : 5, price : "plus1times50",
+							level : function () { return spiralCannon.power; }, raise : function () { spiralCannon.power++; } },
+	// this one goes down : slower spiral shots stay longer in game
+	SaOSpeed			: { name : "Fire Speed", tip : "Spiral Shots Speed - To slow down shoots, thus making more of them staying in game.",
+							max : 1, decreasing : true, price : "from6times100",
+							level : function () { return spiralCannon.speed; }, raise : function () { spiralCannon.speed--; } },
+
+	// MAGNETIC CANNON
+	magneticCNumber		: { name : "Cannons", tip : "Magnetic Cannons Number - Increased fire spread.",
+							max : 5, price : "times250",
+							level : function () { return magneticCannon.cannonNbr; }, raise : function () { magneticCannon.cannonNbr++; } },
+	magneticCFireRate	: { name : "Fire Rate", tip : "Magnetic Weapon Fire Rate - Making the weapon to fire faster. Expressed in Shots Per Second.",
+							max : 5, price : "expFrom26times1000squared",
+							level : function () { return Math.floor(2500/magneticCannon.fireRate)/100; }, raise : function () { magneticCannon.fireRate-=2; } },
+	magneticPow			: { name : "Fire Power", tip : "Magnetic Shots Power - To cause more damages.",
+							max : 5, price : "plus1times3pow2",
+							level : function () { return magneticCannon.power; }, raise : function () { magneticCannon.power++; } },
+	magneticSpeed		: { name : "Fire Friction", tip : "Magnetic Shots Friction - To slow down shoots, thus making more of them staying in game.",
+							max : 5, price : "times10plus50",
+							level : function () { return magneticCannon.speed; }, raise : function () { magneticCannon.speed++; } },
+
+	// HAMMER AND BROOM CANNON
+	HaBCNumber			: { name : "Cannons", tip : "Hammer Cannons Number - Increased fire spread.",
+							max : 5, price : "times250",
+							level : function () { return hammerCannon.cannonNbr; }, raise : function () { hammerCannon.cannonNbr++; } },
+	HaBCFireRate		: { name : "Fire Rate", tip : "Hammer Weapon Fire Rate - Making the weapon to fire faster. Expressed in Shots Per Second.",
+							max : 5, price : "expFrom26times1000squared2",
+							level : function () { return Math.floor(2500/hammerCannon.fireRate)/100; }, raise : function () { hammerCannon.fireRate-=2; } },
+	HaBPow				: { name : "Fire Power", tip : "Hammer Shots Power - To cause more damages.",
+							max : 5, price : "plus1times3pow2",
+							level : function () { return hammerCannon.power; }, raise : function () { hammerCannon.power++; } },
+	HaBSpeed			: { name : "Fire Spread", tip : "Hammer Shots Spread - To slow down shoots, thus making more of them staying in game.",
+							max : 5, price : "times10plus50",
+							level : function () { return hammerCannon.speed; }, raise : function () { hammerCannon.speed++; } },
+
+	// PLANET
+	// healing is bought by the inhabitants : its price counts the ones left to heal, and it can heal a part of them only
+	healing				: { name : "Healing", tip : "Healing - Here you can spend your Mat to help the reconstruction of your planet.",
+							max : function () { return MyPlanet.maxLife; }, price : "times-healFact",
+							level : function () { return MyPlanet.life + planetHealPend; },
+							toPay : function () { return MyPlanet.maxLife - MyPlanet.life - planetHealPend; },
+							raise : function ( healed ) { planetHealPend += healed; } },
+	healFact			: { name : "Healing Factor", tip : "Healing Factor - This will make your healing more effective, thus costing less Mat and healing faster.",
+							max : 10, price : "times100",
+							level : function () { return planetHealFact; }, raise : function () { planetHealFact++; } },
+	maxHealth			: { name : "Maximum Health", tip : "Maximum Health - It's the maximum amount of inhabitants your planet can have on.",
+							max : 50, price : "times5",
+							level : function () { return MyPlanet.maxLife; }, raise : function () { MyPlanet.maxLife+=10; } },
+	maxMat				: { name : "Maximum Mat", tip : "Maximum Mat - It's the maximum amount of material your planet can store.",
+							max : 1000, price : "times0.75",
+							level : function () { return MyPlanet.maxMat; }, raise : function () { MyPlanet.maxMat+=100; } },
+	autoHeal			: { name : "Auto-Healing", tip : "Auto-Healing - If you buy this upgrade, your planet will heal slowly as long as there is Mat to use and houses to build.",
+							max : 10, price : "plus1times50",
+							level : function () { return planetAutoHeal; }, raise : function () { planetAutoHeal++; } },
+	recovery			: { name : "Recovery", tip : "Recovery - With this upgrade, your citizens will be able to get mat from the asteroids crashing on their planet.",
+							max : 5, price : "plus1times50",
+							level : function () { return planetRecovery; }, raise : function () { planetRecovery++; } }
+};
+
+// The layout of the pause menu, built by menu.js : its sections, the weapons' one being split into tabs
+// (a weapon's upgrades are shown once it is bought, the Researches section waits for the research tree)
+var shopLayout = [
+	{ title : "Upgrade Your Gravitron", upgrades : ["gravSort","gravPower","repulsion","gravShield","gravPulse","gravScanner"] },
+	{ title : "Build or upgrade your Weapons", panels : [
+		{ tab : "Structure", title : "Main Structure", upgrades : ["mCMSpeed","SMART","MaxWAtATime"] },
+		{ tab : "Basic", title : "Basic Weapon", weapon : "basicW",
+			statusTip : "By making this weapon active, you could disactivate the current one.",
+			upgrades : ["mCNumber","mCFireRate","mainPow","mainSpeed"] },
+		{ tab : "Spiral", title : "Spiral and Orbital Weapon", weapon : "SaOW", modes : true,
+			statusTip : "By making this weapon active, you could disactivate one of the current one.",
+			upgrades : ["SaOCNumber","SaOCFireRate","SaOPow","SaOSpeed"] },
+		{ tab : "Magnet", title : "Magnetic Weapon", weapon : "magneticW", modes : true,
+			statusTip : "By making this weapon active, you could disactivate one of the current one.",
+			upgrades : ["magneticCNumber","magneticCFireRate","magneticPow","magneticSpeed"] },
+		{ tab : "Hammer", title : "Hammer and Broom Weapon", weapon : "HaBW", modes : true,
+			statusTip : "By making this weapon active, you could disactivate one of the current one.",
+			upgrades : ["HaBCNumber","HaBCFireRate","HaBPow","HaBSpeed"] }
+	] },
+	{ title : "Heal or upgrade your Planet", upgrades : ["healing","healFact","maxHealth","maxMat","autoHeal","recovery"] },
+	{ title : "Researches", text : "Sed non urna. Donec et ante. Phasellus eu ligula. Vestibulum sit amet purus. Vivamus hendrerit, dolor at aliquet laoreet, mauris turpis porttitor velit, faucibus interdum tellus libero ac justo. Vivamus non quam. In suscipit faucibus urna." }
+];
+
+// what the next level of SMART AI brings, for the upgrade menu
+var smartNextLevel = [
+	"",
+	"Next level of SMART AI will grant you anticipation, to make the basic weapon more effective.",
+	"Next level of SMART AI will stop wasting shots : only the shots needed to destroy a target, and none at the asteroids out of reach.",
+	"Next level of SMART AI will choose the target it can hit the soonest, turning and shooting.",
+	"Next level of SMART AI will shoot first at the asteroids going to crash on your planet.",
+	"Your SMART AI is at its best : no more level available."
+];
+
+// function to activate a weapon
+function activate ( weapon ) {
+	// buying the weapon first if needed, so that a lack of mat leaves the active weapons untouched
+	var purchased = false;
+	for ( i in weaponList ) {
+		if ( weaponList[i].type == weapon && weaponList[i].cannonNbr == 0 ) {
+			var price = weaponCost[weapon];
+			if ( MyPlanet.mat < price ) {
+				document.getElementById(weapon).innerHTML = "<span class='red'>not enough mat, please activate another weapon</span>";
+				return;
+			}
+			MyPlanet.mat -= price;
+			nbrUpgrades++;
+			nbrCost += price;
+			weaponList[i].cannonNbr++;
+			purchased = true;
+		}
+	}
+	for ( i in weaponList ) {
+		var item = document.getElementById(weaponList[i].type);
+		if ( weaponList[i].type == weapon ) {
+			weaponList[i].active = 1;
+			item.innerHTML = "<span class='green'>active</span>";
+		} else if ( weaponList[i].cannonNbr == 0 ) {
+			weaponList[i].active = 0;
+			item.innerHTML = purchaseStatus ( weaponList[i] );
+		} else if ( weaponList[i].active >= maxWAtATime || weaponList[i].active == 0 ) {
+			weaponList[i].active = 0;
+			item.innerHTML = "<span class='red'>inactive</span>";
+		} else {
+			weaponList[i].active++;
+		}
+	}
+	if ( purchased ) {
+		refresh();
+	}
+}
+
+// function to display the purchase status of a weapon not bought yet
+function purchaseStatus ( weapon ) {
+	var price = weaponCost[weapon.type];
+	if ( MyPlanet.mat >= price ) {
+		return "<span class='blue'>purchase for " + price + " mat</span>";
+	} else {
+		return "<span class='blue'>" + price + " mat needed to purchase</span>";
+	}
+}
+
+// function to change a weapon's mode
+function modeChange ( weapon ) {
+	for ( i in weaponList ) {
+		if ( weaponList[i].type == weapon ) {
+			if ( weapon == "SaOW" ) {
+				weaponList[i].smart = ( weaponList[i].smart + 1 ) % Math.ceil( weaponList[i].cannonNbr / 2 );
+				modeUpdate ( weaponList[i] );
+			} else if ( weapon == "magneticW" ) {
+				weaponList[i].smart = ( weaponList[i].smart + 1 ) % 2;
+				modeUpdate ( weaponList[i] );
+			} else if ( weapon == "HaBW" ) {
+				weaponList[i].smart = ( weaponList[i].smart + 1 ) % 3;
+				modeUpdate ( weaponList[i] );
+			}
+		}
+	}
+}
+
+// function to update the weapon's mode used
+function modeUpdate ( weapon ) {
+	var item = document.getElementById(weapon.type + "Mode");
+	if ( weapon.type == "SaOW" ) {
+		if ( weapon.smart == 0 ) {
+			item.innerHTML = "<span class='green'>synchronised</span>";
+		} else if ( weapon.smart == 1 ) {
+			item.innerHTML = "<span class='green'>not synchronised</span>";
+		} else {
+			item.innerHTML = "<span class='green'>ORBITAL !</span>";
+		}
+	} else if ( weapon.type == "magneticW" ) {
+		if ( weapon.smart == 0 ) {
+			item.innerHTML = "<span class='green'>following</span>";
+		} else {
+			item.innerHTML = "<span class='green'>revolution</span>";
+		}
+	} else if ( weapon.type == "HaBW" ) {
+		if ( weapon.smart == 0 ) {
+			item.innerHTML = "<span class='green'>following Main Structure</span>";
+		} else if ( weapon.smart == 1 ) {
+			item.innerHTML = "<span class='green'>revolution</span>";
+		} else {
+			item.innerHTML = "<span class='green'>following Gravitron</span>";
+		}
+	}
+}
+
+// function to refresh the upgrade menu
+function refresh() {
+	document.getElementById("matNbr").innerHTML = MyPlanet.mat;
+	for ( var thing in upgrades ) {
+		var item = document.getElementById(thing);
+		item.innerHTML = "<b>" + translate(thing) + "</b>";
+		if ( !maxReached(thing) ) {
+			var price = priceToPay(thing);
+			if ( thing == "healing" ) {
+				var healFact = (maxUpgrade("healFact") - planetHealFact + 1 );
+				var HPRecovery = price / healFact;
+				if ( enoughFor(thing) != false ) {
+					item.innerHTML = " <span class='upgreen'>HEAL ALL HP FOR "+price+" MAT</span>";
+				} else if ( MyPlanet.mat >= healFact ) {
+					HPRecovery = Math.floor ( MyPlanet.mat / healFact );
+					price = HPRecovery * healFact;
+					item.innerHTML = " <span class='upgreen'>HEAL "+HPRecovery+" HP FOR "+price+" MAT</span>";
+				} else {
+					item.innerHTML = " <span class='upred'>COST "+healFact+" MAT</span>";
+				}
+			} else {
+				if ( enoughFor(thing) != false ) {
+					item.innerHTML += " <span class='upgreen'>UPGRADE FOR "+price+" MAT</span>";
+				} else {
+					item.innerHTML += " <span class='upred'>COST "+price+" MAT</span>";
+				}
+			}
+		} else {
+			item.innerHTML = " MAX";
+		}
+	}
+	upgrades.SMART.tip = "Main Structure SMART AI - " + smartNextLevel[translate("SMART")];
+	for ( var iw=1; iw<=weaponList.length; iw++ ){
+		var item = document.getElementById(weaponList[iw-1].type + "Upgrades");
+		if ( weaponList[iw-1].cannonNbr < 1 ) {
+			item.style.display = "none";
+			document.getElementById(weaponList[iw-1].type).innerHTML = purchaseStatus ( weaponList[iw-1] );
+		} else {
+			item.style.display = "block";
+		}
+		modeUpdate ( weaponList[iw-1] );
+	}
+}
+
+// function to determine the maximum update you can reach
+function maxUpgrade(thing) {
+	var max = upgrades[thing].max;
+	if ( typeof max == "function" ) {
+		return max();
+	}
+	return max;
+}
+
+// function to know if an upgrade has reached its maximum
+function maxReached(thing) {
+	if ( upgrades[thing].decreasing ) {
+		return translate(thing) <= maxUpgrade(thing);
+	}
+	return translate(thing) >= maxUpgrade(thing);
+}
+
+// function to upgrade things...
+function upgrade(thing) {
+	if ( maxReached(thing) ) {
+		return;
+	}
+	var price=enoughFor(thing);
+	var HPRecovery = 0;
+	if ( thing == "healing") {
+		// without enough mat to heal everything, healing as many inhabitants as possible
+		var healFact = (maxUpgrade("healFact") - planetHealFact + 1 );
+		HPRecovery = priceToPay("healing") / healFact;
+		if ( MyPlanet.mat >= healFact && price == false) {
+			HPRecovery = Math.floor ( MyPlanet.mat / healFact );
+			price = HPRecovery * healFact;
+		}
+	}
+	if (price != false) {
+		upgrades[thing].raise(HPRecovery);
+		MyPlanet.mat -= price;
+		if ( thing != "healing" ) {
+			// healing is not counted as an upgrade
+			nbrUpgrades++;
+		}
+		nbrCost += price;
+	}
+
+	refresh();
+}
+
+// function to determine if enough mat
+function enoughFor(what) {
+	var price = priceToPay(what);
+	if (MyPlanet.mat >= price) {
+		return price;
+	} else {
+		return false;
+	}
+}
+
+// function to return the price to pay for what
+function priceToPay(what) {
+	var item = upgrades[what];
+	if ( item.toPay ) {
+		return calculate(item.price,item.toPay());
+	}
+	return calculate(item.price,translate(what));
+}
+
+// function to read the current level of an upgrade
+function translate(that) {
+	return upgrades[that].level();
+}
+
+// function to determine a price
+function calculate(type,ref) {
+	switch (type) {
+		case "5powtimes4" :
+			ref = 4 * Math.pow(5,ref);
+			break;
+		case "times10plus50" :
+			ref = ( 10 * ref ) + 50;
+			break;
+		case "times3pow2" :
+			ref = Math.pow((ref*3),2);
+			break;
+		case "plus1times3pow2" :
+			ref = Math.pow(((ref+1)*3),2);
+			break;
+		case "expFrom26times1000squared" :
+			ref = Math.floor(Math.sqrt(Math.exp(26-(25/ref))*1000));
+			break;
+		case "expFrom26times1000squared2" :
+			ref = Math.floor(Math.sqrt(Math.exp(26-(12.5/ref))*1000));
+			break;
+		case "times250" :
+			ref *= 250;
+			break;
+		case "times100" :
+			ref *= 100;
+			break;
+		case "times0.75" :
+			ref *= 0.75;
+			break;
+		case "plus1times50" :
+			ref = ( ref + 1 ) * 50;
+			break;
+		case "times5" :
+			ref *= 5;
+			break;
+		case "times-healFact" :
+			ref *= ( maxUpgrade("healFact") - planetHealFact + 1 );
+			break;
+		case "plus250" :
+			ref += 250;
+			break;
+		case "plus1times500" :
+			ref = ( ref + 1 ) * 500;
+			break;
+		case "from6times100" :
+			ref = ( 6 - ref ) * 100;
+			break;
+	}
+	return ref;
+}
