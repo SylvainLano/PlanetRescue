@@ -1010,105 +1010,40 @@ function displayStatus() {
 }
 
 // function to anticipate asteroid's movement and intercept it ; returns an angle to shoot toward
-// This function has been made with the help of Marc35 from the forum at ilephysique.net
-function interception ( Vx, Vy, Vp, teta, r, d ) {
-	
-	var a1 = d*Vp*Math.sin(teta) - r*Vx;
-	var b1 = r*Vy - d*Vp*Math.sin(teta);
-	var c1 = Vy*d*Math.cos(teta) - Vx*d*Math.sin(teta);
-	var d1 = Math.sqrt(Math.pow(a1, 2) + Math.pow(b1, 2) );	
-	var K1 = c1 / d1;
-	var L1 = a1 / b1;
-	
-	var a2 = r*Vx - d*Vp*Math.cos(teta);
-	var b2 = d*Vp*Math.sin(teta) - r*Vy;
-	var c2 = Vx*d*Math.sin(teta) - Vy*d*Math.cos(teta);
-	var d2 = Math.sqrt(Math.pow(a2, 2) + Math.pow(b2, 2) );	
-	var K2 = c2 / d2;
-	var L2 = a2 / b2;
-	
-	var angle1 = Math.acos( K1 ) + Math.atan( L1 );
-	var angle2 = Math.acos( -K1 ) + Math.atan( L1 );
-	var angle3 = Math.acos( K1 ) + Math.atan( L1 ) + Math.PI;
-	var angle4 = Math.acos( -K1 ) + Math.atan( L1 ) + Math.PI;
-	var angle5 = Math.acos( K2 ) + Math.atan( L2 );
-	var angle6 = Math.acos( -K2 ) + Math.atan( L2 );
-	var angle7 = Math.acos( K2 ) + Math.atan( L2 ) + Math.PI;
-	var angle8 = Math.acos( -K2 ) + Math.atan( L2 ) + Math.PI;
-	
-	var t1 = ( r*Math.cos( angle1 ) - d*Math.cos(teta) ) / ( Vx - Vp*Math.cos( angle1 ) );
-	var t2 = ( r*Math.cos( angle2 ) - d*Math.cos(teta) ) / ( Vx - Vp*Math.cos( angle2 ) );
-	var t3 = ( r*Math.cos( angle3 ) - d*Math.cos(teta) ) / ( Vx - Vp*Math.cos( angle3 ) );
-	var t4 = ( r*Math.cos( angle4 ) - d*Math.cos(teta) ) / ( Vx - Vp*Math.cos( angle4 ) );
-	var t5 = ( r*Math.sin( angle5 ) - d*Math.sin(teta) ) / ( Vy - Vp*Math.sin( angle5 ) );
-	var t6 = ( r*Math.sin( angle6 ) - d*Math.sin(teta) ) / ( Vy - Vp*Math.sin( angle6 ) );
-	var t7 = ( r*Math.sin( angle7 ) - d*Math.sin(teta) ) / ( Vy - Vp*Math.sin( angle7 ) );
-	var t8 = ( r*Math.sin( angle8 ) - d*Math.sin(teta) ) / ( Vy - Vp*Math.sin( angle8 ) );
-	
-	var Xa1 = Math.round((d*Math.cos(teta) + t1*Vx)*100000)/100000;
-	var Xp1 = Math.round((r*Math.cos(angle1) + t1*Vp*Math.cos(angle1))*100000)/100000;
-	var Ya1 = Math.round((d*Math.sin(teta) + t1*Vy)*100000)/100000;
-	var Yp1 = Math.round((r*Math.sin(angle1) + t1*Vp*Math.sin(angle1))*100000)/100000;
-	if( Xa1 == Xp1 && Ya1 == Yp1 ){
-		var angle = angle1;
+// The first version (2010) was made with the help of Marc35 from the forum at ilephysique.net
+// A shot leaves the planet radially : it is at the distance r0 from the planet's center after its
+// first move, then goes Vp further at each turn. It meets the asteroid when both are at the same
+// distance from the planet's center : |A + V*t| = r0 + Vp*t, a second degree equation in t
+function interception ( asteroid, Vp, r0 ) {
+	// asteroid's position relative to the planet
+	var Ax = asteroid.x - MyPlanet.x;
+	var Ay = asteroid.y - MyPlanet.y;
+
+	// coefficients of a*t^2 + b*t + c = 0
+	var a = asteroid.vx*asteroid.vx + asteroid.vy*asteroid.vy - Vp*Vp;
+	var b = 2 * ( Ax*asteroid.vx + Ay*asteroid.vy - r0*Vp );
+	var c = Ax*Ax + Ay*Ay - r0*r0;
+
+	// looking for the first meeting still to come
+	var t = 0;
+	if ( Math.abs(a) < 0.000001 ) {
+		// same speed for the asteroid and the shot : it's only a first degree equation
+		if ( b < 0 ) {
+			t = -c / b;
+		}
 	} else {
-		var Xa2 = Math.round((d*Math.cos(teta) + t2*Vx)*100000)/100000;
-		var Xp2 = Math.round((r*Math.cos(angle2) + t2*Vp*Math.cos(angle2))*100000)/100000;
-		var Ya2 = Math.round((d*Math.sin(teta) + t2*Vy)*100000)/100000;
-		var Yp2 = Math.round((r*Math.sin(angle2) + t2*Vp*Math.sin(angle2))*100000)/100000;
-		if( Xa2 == Xp2 && Ya2 == Yp2 ){
-			var angle = angle2;
-		} else {
-			var Xa3 = Math.round((d*Math.cos(teta) + t3*Vx)*100000)/100000;
-			var Xp3 = Math.round((r*Math.cos(angle3) + t3*Vp*Math.cos(angle3))*100000)/100000;
-			var Ya3 = Math.round((d*Math.sin(teta) + t3*Vy)*100000)/100000;
-			var Yp3 = Math.round((r*Math.sin(angle3) + t3*Vp*Math.sin(angle3))*100000)/100000;
-			if( Xa3 == Xp3 && Ya3 == Yp3 ){
-				var angle = angle3;
-			} else {
-				var Xa4 = Math.round((d*Math.cos(teta) + t4*Vx)*100000)/100000;
-				var Xp4 = Math.round((r*Math.cos(angle4) + t4*Vp*Math.cos(angle4))*100000)/100000;
-				var Ya4 = Math.round((d*Math.sin(teta) + t4*Vy)*100000)/100000;
-				var Yp4 = Math.round((r*Math.sin(angle4) + t4*Vp*Math.sin(angle4))*100000)/100000;
-				if( Xa4 == Xp4 && Ya4 == Yp4 ){
-					var angle = angle4;
-				} else {
-					var Xa5 = Math.round((d*Math.cos(teta) + t5*Vx)*100000)/100000;
-					var Xp5 = Math.round((r*Math.cos(angle5) + t5*Vp*Math.cos(angle5))*100000)/100000;
-					var Ya5 = Math.round((d*Math.sin(teta) + t5*Vy)*100000)/100000;
-					var Yp5 = Math.round((r*Math.sin(angle5) + t5*Vp*Math.sin(angle5))*100000)/100000;
-					if( Xa5 == Xp5 && Ya5 == Yp5 ){
-						var angle = angle5;
-					} else {
-						var Xa6 = Math.round((d*Math.cos(teta) + t6*Vx)*100000)/100000;
-						var Xp6 = Math.round((r*Math.cos(angle6) + t6*Vp*Math.cos(angle6))*100000)/100000;
-						var Ya6 = Math.round((d*Math.sin(teta) + t6*Vy)*100000)/100000;
-						var Yp6 = Math.round((r*Math.sin(angle6) + t6*Vp*Math.sin(angle6))*100000)/100000;
-						if( Xa6 == Xp6 && Ya6 == Yp6 ){
-							var angle = angle6;
-						} else {
-							var Xa7 = Math.round((d*Math.cos(teta) + t7*Vx)*100000)/100000;
-							var Xp7 = Math.round((r*Math.cos(angle7) + t7*Vp*Math.cos(angle7))*100000)/100000;
-							var Ya7 = Math.round((d*Math.sin(teta) + t7*Vy)*100000)/100000;
-							var Yp7 = Math.round((r*Math.sin(angle7) + t7*Vp*Math.sin(angle7))*100000)/100000;
-							if( Xa7 == Xp7 && Ya7 == Yp7 ){
-								var angle = angle7;
-							} else {
-								var Xa8 = Math.round((d*Math.cos(teta) + t8*Vx)*100000)/100000;
-								var Xp8 = Math.round((r*Math.cos(angle8) + t8*Vp*Math.cos(angle8))*100000)/100000;
-								var Ya8 = Math.round((d*Math.sin(teta) + t8*Vy)*100000)/100000;
-								var Yp8 = Math.round((r*Math.sin(angle8) + t8*Vp*Math.sin(angle8))*100000)/100000;
-								if( Xa8 == Xp8 && Ya8 == Yp8 ){
-									var angle = angle8;
-								} else {
-									var angle = teta;
-								}
-							}
-						}
-					}
-				}
+		var delta = b*b - 4*a*c;
+		if ( delta >= 0 ) {
+			var t1 = ( -b - Math.sqrt(delta) ) / ( 2*a );
+			var t2 = ( -b + Math.sqrt(delta) ) / ( 2*a );
+			if ( t1 > 0 && ( t2 <= 0 || t1 < t2 ) ) {
+				t = t1;
+			} else if ( t2 > 0 ) {
+				t = t2;
 			}
 		}
 	}
-	return angle;
+
+	// aiming where the asteroid will be, or where it is if it can't be caught
+	return Math.atan2( Ay + asteroid.vy*t, Ax + asteroid.vx*t );
 }

@@ -817,32 +817,21 @@ function engine() {
 				if( weaponList[i].smart == 1 ){
 					var angle = angleAroundPlanet(closestA.x,closestA.y);
 				} else {
-					
-					var Vx = closestA.vx;
-					var Vy = closestA.vy;
-					var Vp = weaponList[i].speed;
-					var teta = angleAroundPlanet ( closestA.x, closestA.y );
-					var r = MyPlanet.radius;
-					var d = distanceToPlanet ( closestA.x, closestA.y );
-					
-					var angle = interception ( Vx, Vy, Vp, teta, r, d );
-					
-					if( teta < 0 ) {
-						angle = (teta * 1.5) - (angle - Math.PI)/2;
-					}	
-					
-					angle += 3 * Math.PI;
-					angle = angle%(Math.PI*2);
-					angle -= Math.PI;
+					// the shot is at this distance from the planet's center after its first move
+					var r0 = MyPlanet.radius + 5 + weaponList[i].speed;
+					var angle = interception ( closestA, weaponList[i].speed, r0 );
 				}
-				
+
 				var testAngle = angle - weaponList[i].angle;
 				if( (testAngle > moveSpeed && testAngle < Math.PI) || (testAngle < (0 - moveSpeed) && testAngle < (0 - Math.PI)) ) {
 					weaponList[i].angle += moveSpeed;
+					weaponList[i].aligned = false;
 				} else if( (testAngle < (0 - moveSpeed) && testAngle > (0 - Math.PI)) || (testAngle > moveSpeed && testAngle > Math.PI) ) {
 					weaponList[i].angle -= moveSpeed;
+					weaponList[i].aligned = false;
 				} else {
 					weaponList[i].angle = angle;
+					weaponList[i].aligned = true;
 				}
 				weaponList[i].angle += 3 * Math.PI;
 				weaponList[i].angle = weaponList[i].angle % ( Math.PI * 2 );
@@ -880,7 +869,8 @@ function engine() {
 						case "magneticW":
 						case "HaBW":
 						case "basicW":
-							if(closestA == false) {
+							// the basic weapon waits to be turned toward its target before shooting
+							if(closestA == false || ( weaponList[i].type == "basicW" && weaponList[i].aligned == false )) {
 								break;
 							}
 						case "SaOW":

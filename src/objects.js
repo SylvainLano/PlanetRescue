@@ -125,6 +125,7 @@ function Weapon(context,type,color,angle,delay,power,speed,smart,cNbr) {
 					- speed as fire spread, to make the shot follow a sinusoid
 		*/
 	this.active = 0;
+	this.aligned = false;	// for the basic weapon : turned toward its target
 	this.cannonNbr = cNbr;
 
 // object definition
