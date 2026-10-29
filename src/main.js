@@ -30,8 +30,9 @@ window.addEventListener('load', function () {
 	fitGameArea();
 	window.addEventListener('resize', fitGameArea, false);
 
-	// Highlighting the difficulty level chosen last time
+	// Highlighting the difficulty level chosen last time, and reading the achievements obtained
 	showLevel();
+	loadAchievements();
 
 	// Building the pause menu with its upgrades
 	buildShop();

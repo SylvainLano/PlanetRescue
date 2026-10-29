@@ -91,7 +91,9 @@
 	var nbrDamage		= 0;
 	var nbrUpgrades		= 0;
 	var nbrCost			= 0;
-	
+	var calmSince		= 0;		// the turn of the last asteroid crashed on the planet (Untouchable achievement)
+	var bankShot		= false;	// an asteroid destroyed by another one the GRAVITRON deflected (Bank Shot achievement)
+
 	// player's planet parameters
 	var planetSkin		= earthMap;		// the map wrapped around the planet (img/earth.js)
 	var planetTurn		= 2 * Math.PI / ( 60 * framesPerSecond );	// the planet turns on itself once a minute
@@ -135,6 +137,7 @@
 	var asteroidBR		= 8;		// Base radius for the asteroids
 	var asteroidBM		= 8;		// Base mass for the asteroids
 	var MaxCollSpd		= 10;		// Max Collision Speed for the asteroid to bounce without being destroyed
+	var bankShotTurn	= 20 * Math.PI / 180;	// how much the GRAVITRON must turn an asteroid's way for a Bank Shot
 	var targetedA		= false;
 	var aimedA			= false;	// the asteroid the main cannon aims at, circled on screen
 
@@ -164,7 +167,10 @@ function initDefault(context,level) {
 	nbrDamage		= 0;
 	nbrUpgrades		= 0;
 	nbrCost			= 0;
-	
+	calmSince		= 0;
+	bankShot		= false;
+	newAchievements	= [];		// the achievements obtained in this game (achievements.js)
+
 	// player's planet parameters
 	MyPlanet.skin		= planetSkin;
 	MyPlanet.life		= gameValues.planetLife;

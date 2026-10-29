@@ -19,6 +19,7 @@ function engine() {
 	var startMenu = document.getElementById("startMenu");
 	var mainMenu = document.getElementById("mainMenu");
 	var infoText = document.getElementById("infoText");
+	var achievementsText = document.getElementById("achievementsText");
 	var gameOver = document.getElementById("gameOver");
 	var loader = document.getElementById("loader");
 	var pauseScreen = document.getElementById("pause");
@@ -31,6 +32,7 @@ function engine() {
 		startMenu.style.display = "block";
 		mainMenu.style.display = "block";
 		infoText.style.display = "none";
+		achievementsText.style.display = "none";
 		gameOver.style.display = "none";
 		pauseScreen.style.display = "none";
 		status.style.display = "none";
@@ -38,13 +40,14 @@ function engine() {
 		instructions.style.display = "none";
 		countdown.style.display = "none";
 		enableResetHS(resetHS);
-		
+
 	} else if(state == "infos") {
-		
+
 		// Displaying start menu
 		startMenu.style.display = "block";
 		mainMenu.style.display = "none";
 		infoText.style.display = "block";
+		achievementsText.style.display = "none";
 		gameOver.style.display = "none";
 		pauseScreen.style.display = "none";
 		status.style.display = "none";
@@ -52,7 +55,18 @@ function engine() {
 		instructions.style.display = "none";
 		countdown.style.display = "none";
 		enableResetHS(resetHS);
-		
+
+	} else if(state == "achievements") {
+
+		// Displaying the achievements, from the start menu (achievements.js)
+		startMenu.style.display = "block";
+		mainMenu.style.display = "none";
+		infoText.style.display = "none";
+		achievementsText.style.display = "block";
+		resetHS.style.display = "none";
+		showAchievements(achievementsText);
+		state = "stand";
+
 	} else if (state == "tutorial"){
 	
 		startMenu.style.display = "none";
@@ -446,6 +460,7 @@ function engine() {
 		if ( asteroidList.length == 0 ) {
 			// If there is no more asteroid, display the Game Over screen
 			if( pauseStep != 0){
+				checkAchievements();	// the ones of the game's end, before they are listed
 				status.style.display = "none";
 				gameOver.style.display = "block";
 				var gameOverInnerHTML = "<div class=title>Game Over</div><div class=text>Your planet has been destroyed !<br />Difficulty level : <strong>" + levelName() + "</strong><br /><br />You survived ";
@@ -513,7 +528,11 @@ function engine() {
 					// the score rewards what the player does : destroying asteroids, gathering mat, and surviving
 					// (the 2010 score was saved as 'score', this one has its own record)
 					var score = nbrDestroyed * 10 + MyPlanet.totalMat + seconds;
-					gameOverInnerHTML += nbrCost + " mat</span> for them.<br /><br />Score : " + nbrDestroyed + " asteroids &times; 10 + " + MyPlanet.totalMat + " mat + " + seconds + " seconds.</div><div class=title>";
+					gameOverInnerHTML += nbrCost + " mat</span> for them.<br /><br />Score : " + nbrDestroyed + " asteroids &times; 10 + " + MyPlanet.totalMat + " mat + " + seconds + " seconds.";
+					if ( newAchievements.length > 0 ) {
+						gameOverInnerHTML += "<br />Achievements unlocked : <span class=statUpper>" + newAchievements.join(", ") + "</span>";
+					}
+					gameOverInnerHTML += "</div><div class=title>";
 					var hiScore = localStorage[scoreKey('bestScore')];
 					if( hiScore === undefined || hiScore === null ||  hiScore < score ){
 						localStorage[scoreKey('bestScore')] = score;
@@ -568,8 +587,14 @@ function engine() {
 			
 			// Pulling the asteroid if it is into the gravitron's field, or pushing it away with the repulsion
 			var pull = gravitronAcceleration(angle, asteroidList[i].mass);
+			var heading = Math.atan2(asteroidList[i].vy, asteroidList[i].vx);
 			asteroidList[i].vx += pull * Math.cos(angle);
 			asteroidList[i].vy += pull * Math.sin(angle);
+			// how much the GRAVITRON turns its way (a pull straight toward the planet turns nothing)
+			if ( pull != 0 ) {
+				var turn = Math.atan2(asteroidList[i].vy, asteroidList[i].vx) - heading;
+				asteroidList[i].turned += Math.abs ( ( ( turn + 3 * Math.PI ) % ( 2 * Math.PI ) ) - Math.PI );
+			}
 
 			// Testing if asteroid is out of the gravitron's field
 			if (intoArcField(angle,MyGravitron) == false) {
@@ -633,7 +658,8 @@ function engine() {
  			var velocity = (Math.random() * 4 + 1) * asteroidSpeedFactor() * asteroidBS;
 			asteroidList[i].vx = - velocity * Math.cos(angle);
 			asteroidList[i].vy = - velocity * Math.sin(angle);
-			
+			asteroidList[i].turned = 0;		// a new way, which the GRAVITRON has not turned yet
+
 
 		// Testing if asteroid is in collision with the planet
 		} else if ( distance < (MyPlanet.radius + asteroidList[i].radius) ){
@@ -652,6 +678,7 @@ function engine() {
 				MyPlanet.totalMat += temp;
 			}
 			nbrCrashes++;
+			calmSince = gameTime;
 			keepit = 0;
 			redEffect = 256;
 			asteroidList[i].life = 0;
@@ -683,13 +710,21 @@ function engine() {
 						   var CollisionSpeed = Math.abs(vx2minus1)+Math.abs(vy2minus1);
 						   
 						// debris creation from asteroids' life
+							var iLife = asteroidList[i].life;
+							var jLife = asteroidList[j].life;
 							var iColl = Math.floor(asteroidList[j].life * CollisionSpeed / MaxCollSpd );
 							addDebris(ctx,iColl,asteroidList[i].x,asteroidList[i].y,asteroidList[j].vx,asteroidList[j].vy,debrisList);
 							asteroidList[i].life -= iColl;
-							
+
 							var jColl = Math.floor(asteroidList[i].life * CollisionSpeed / MaxCollSpd );
 							addDebris(ctx,jColl,asteroidList[j].x,asteroidList[j].y,asteroidList[i].vx,asteroidList[i].vy,debrisList);
 							asteroidList[j].life -= jColl;
+
+							// an asteroid destroyed by another one which the GRAVITRON sent its way (Bank Shot achievement)
+							if ( ( iLife > 0 && asteroidList[i].life <= 0 && asteroidList[j].turned >= bankShotTurn )
+								|| ( jLife > 0 && asteroidList[j].life <= 0 && asteroidList[i].turned >= bankShotTurn ) ) {
+								bankShot = true;
+							}
 							
 						// calculating the restitution coefficient
 						   var restitution = (MaxCollSpd - CollisionSpeed) / MaxCollSpd ;
@@ -1079,6 +1114,9 @@ function engine() {
 
 
 	}	// Bracket for the state == "playing"
+
+	// Checking the achievements not obtained yet (achievements.js)
+	checkAchievements();
 }
 
 
@@ -1106,6 +1144,8 @@ function drawGame ( blend ) {
 			drawPlaying ( ctx );
 			drawBanner ( ctx );
 		}
+		// an achievement just obtained, over everything
+		drawAchievement ( ctx );
 	} finally {
 		// whatever happens, the objects go back where they really are
 		unblendPlaces();

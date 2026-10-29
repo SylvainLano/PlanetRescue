@@ -11,7 +11,7 @@
 -->
 <html>
 <head>
-	<title>Planet Rescue v0.13.0</title>
+	<title>Planet Rescue v0.14.0</title>
 
 	<link rel="stylesheet" type="text/css" href="css/main.css">
 
@@ -21,6 +21,7 @@
 	<script type="text/javascript" src="src/functions.js"></script>
 	<script type="text/javascript" src="src/shop.js"></script>
 	<script type="text/javascript" src="src/menu.js"></script>
+	<script type="text/javascript" src="src/achievements.js"></script>
 	<script type="text/javascript" src="src/prototypes.js"></script>
 	<script type="text/javascript" src="src/parameters.js"></script>
 	<script type="text/javascript" src="src/engine.js"></script>
@@ -51,7 +52,7 @@
 	</div>
 	<div id="startMenu" class="ui">
 		<div class="title">
-			Planet Rescue <span class="version">v0.13.0</span>
+			Planet Rescue <span class="version">v0.14.0</span>
 		</div>
 		<div id="mainMenu" class="title">
 			<br /><a href="#" onClick='state="init";'>Start</a><br />
@@ -62,10 +63,14 @@
 				&middot;
 				<a href="#" id="level_hard" onClick='chooseLevel("hard");'>Hard</a>
 			</div>
-			<a href="#" onClick='state="tutorial";'>Tutorial</a>
-			-
-			<a href="#" onClick='state="infos";'>Infos</a>
-		</div>		
+			<div id="moreLinks">
+				<a href="#" onClick='state="tutorial";'>Tutorial</a>
+				-
+				<a href="#" onClick='state="infos";'>Infos</a>
+				-
+				<a href="#" onClick='state="achievements";'>Achievements</a>
+			</div>
+		</div>
 		<div id="infoText">
 			<div class="text">
 				<strong>What to do?</strong><br />
@@ -90,6 +95,7 @@
 				<a href="#" onClick='state="menu";'>Back to Menu</a>
 			</div>
 		</div>
+		<div id="achievementsText"></div><!-- built by src/achievements.js -->
 		<div id="resetHS">
 			<a href="#" onClick='state="hiscores";'>see hi-scores</a> - <a href="#" onClick="resetHS()">reset hi-scores</a>
 		</div>

@@ -82,6 +82,7 @@ function Asteroid(context,life,r,m,x,y,vx,vy) {
 
 // element to set up
 	this.pass = 0;			// for the main structure to ignore this asteroid
+	this.turned = 0;		// how much the GRAVITRON has turned its way, in radians (Bank Shot achievement)
 	shapeRock(this);		// its own rock, drawn by the game (prototypes.js)
 
 // object definition
