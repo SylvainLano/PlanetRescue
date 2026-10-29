@@ -759,21 +759,24 @@ function showLevel() {
 }
 
 // function to get the name of the chosen difficulty level, as shown to the player
-function levelName() {
-	return difficulty.charAt(0).toUpperCase() + difficulty.slice(1);
+function levelName(level) {
+	level = level || difficulty;
+	return level.charAt(0).toUpperCase() + level.slice(1);
 }
 
 // function to get where a hi-score is saved : each difficulty level has its own, the normal one keeping the original names
-function scoreKey(name) {
-	if ( difficulty == "normal" ) {
+// (the chosen level, unless another one is given)
+function scoreKey(name,level) {
+	level = level || difficulty;
+	if ( level == "normal" ) {
 		return name;
 	}
-	return name + "_" + difficulty;
+	return name + "_" + level;
 }
 
-// function to read a hi-score of the chosen difficulty level, with a dash when there is none yet
-function savedRecord(name) {
-	var value = localStorage[scoreKey(name)];
+// function to read a hi-score of the chosen difficulty level (or of another one), with a dash when there is none yet
+function savedRecord(name,level) {
+	var value = localStorage[scoreKey(name,level)];
 	if ( value === undefined || value === null ) {
 		return "-";
 	}

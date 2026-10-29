@@ -273,6 +273,39 @@ body {
 	color: #fff;
 }
 
+/* the hi-scores page : a tab for each difficulty level */
+#gameOver .over .levels {
+	margin: 10px 0 4px;
+}
+
+#gameOver .over .level {
+	display: inline-block;
+	margin: 0 4px;
+	padding: 3px 16px;
+	font-family: 'MirageRegular';
+	font-size: 22px;
+	color: #bbb;
+	border: 1px solid rgba(255,255,255,0.2);
+	border-radius: 14px;
+}
+
+#gameOver .over .level:hover {
+	color: #fff;
+	border-color: rgb(255, 71, 71);
+}
+
+#gameOver .over .level.current {
+	color: #fff;
+	background: rgba(255,71,71,0.35);
+	border-color: rgb(255, 71, 71);
+}
+
+#gameOver .over .empty {
+	margin: 60px 0;
+	font-size: 14px;
+	color: #999;
+}
+
 #gameOver .over .buttons {
 	margin-top: 16px;
 }

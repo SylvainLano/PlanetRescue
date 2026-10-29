@@ -10,8 +10,9 @@
 */
 
 
-// The Game Over screen : the score of the game, its numbers, the records it beat and the achievements it brought
-// (until 2026, it was a page of sentences ; the records are saved as they were, by difficulty level)
+// The Game Over screen : the score of the game, its numbers, the records it beat and the achievements it brought,
+// and the hi-scores page, with the records of each difficulty level
+// (until 2026, both were pages of sentences ; the records are saved as they were, by difficulty level)
 
 // function to save a record of the difficulty level if this game beat it, and to tell if it did
 function saveRecord ( name, value ) {
@@ -57,7 +58,7 @@ function showGameOver ( holder ) {
 		+ "<div class='value'>" + score + "</div>"
 		+ "<div class='detail'>" + parts.join ( " + " ) + ( records.score || bestBefore === "-" ? "" : "<br />Best : " + bestBefore ) + "</div></div>"
 		+ "<div class='tiles'>"
-		+ gameOverTile ( "Survived", Math.floor ( seconds / 60 ) + ":" + ( "0" + seconds % 60 ).slice ( -2 ), seconds + " seconds", records.survival )
+		+ gameOverTile ( "Survived", minutes ( seconds ), seconds + " seconds", records.survival )
 		+ gameOverTile ( "Destroyed", nbrDestroyed, nbrGiants > 0 ? "with " + nbrGiants + ( nbrGiants > 1 ? " giants" : " giant" ) : "asteroids", false )
 		+ gameOverTile ( "Mat gathered", MyPlanet.totalMat, "mat", records.mat )
 		+ gameOverTile ( "Accuracy", accuracy + "%", ( nbrShots - nbrLostShots ) + " of " + nbrShots + " shots hit", records.accuracy )
@@ -75,6 +76,45 @@ function showGameOver ( holder ) {
 	html += "<div class='buttons'><a href='#' class='button' onClick='state=\"init\";'>Retry</a><a href='#' class='button' onClick='state=\"menu\";'>Main Menu</a></div></div>";
 	holder.innerHTML = html;
 	achievementQueue = [];		// their banners would go on behind this screen, which shows their medals
+}
+
+// function to show the hi-scores of a difficulty level, the chosen one first : the others are shown by their tabs
+function showHiScores ( holder, level ) {
+	var record = function ( name ) { return savedRecord ( name, level ); };
+	var levels = "";
+	for ( var other in difficultyLevels ) {
+		levels += "<a href='#' class='level" + ( other == level ? " current" : "" ) + "' onClick='showHiScores(document.getElementById(\"gameOver\"),\"" + other + "\");'>" + levelName ( other ) + "</a>";
+	}
+	var html = "<div class='over'><div class='title'>Hi-Scores</div><div class='levels'>" + levels + "</div>";
+	if ( record ( "playedGames" ) == "-" ) {
+		html += "<div class='empty'>No game played at this level yet.</div>";
+	} else {
+		html += "<div class='score'><div class='label'>Best score</div><div class='value'>" + record ( "bestScore" ) + "</div>"
+			+ "<div class='detail'>" + record ( "playedGames" ) + " games played</div></div>"
+			+ "<div class='tiles'>"
+			+ gameOverTile ( "Longest survival", minutes ( record ( "survival" ) ), withUnit ( record ( "survival" ), " seconds" ), false )
+			+ gameOverTile ( "Most mat", record ( "totalMat" ), "gathered in a game", false )
+			+ gameOverTile ( "Best accuracy", withUnit ( record ( "accuracy" ), "%" ), "of the shots", false )
+			+ gameOverTile ( "Most upgrades", record ( "nbrUpgrades" ), withUnit ( record ( "nbrCost" ), " mat spent at most" ), false )
+			+ gameOverTile ( "Most hits taken", record ( "nbrCrashes" ), withUnit ( record ( "nbrDamage" ), "M inhabitants lost at most" ), false )
+			+ gameOverTile ( "Games played", record ( "playedGames" ), "at this level", false )
+			+ "</div>";
+	}
+	html += "<div class='buttons'><a href='#' class='button' onClick='state=\"menu\";'>Main Menu</a></div></div>";
+	holder.innerHTML = html;
+}
+
+// function to write a record with its unit, or a dash alone when it is not saved yet
+function withUnit ( value, unit ) {
+	return ( value == "-" ) ? value : value + unit;
+}
+
+// function to write a number of seconds as minutes and seconds (a record not saved yet stays a dash)
+function minutes ( seconds ) {
+	if ( seconds == "-" ) {
+		return seconds;
+	}
+	return Math.floor ( seconds / 60 ) + ":" + ( "0" + seconds % 60 ).slice ( -2 );
 }
 
 // function to write one of the numbers of the game, with its record if it beat it

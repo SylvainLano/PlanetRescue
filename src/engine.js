@@ -343,26 +343,7 @@ function engine() {
 		pauseScreen.style.display = "none";
 		status.style.display = "none";
 		gameOver.style.display = "block";
-		var gameOverInnerHTML = "<div class=title>Hi-Scores</div><div class=text>Difficulty level : <strong>" + levelName() + "</strong><br /><br />Longest survival (seconds) : ";
-			gameOverInnerHTML += "<span class=statUpper>";
-			gameOverInnerHTML += savedRecord('survival') + "</span><br />Maximum amount of mat gathered : ";
-			gameOverInnerHTML += "<span class=statUpper>";
-			gameOverInnerHTML += savedRecord('totalMat') + "</span><br />Maximum accuracy reached : ";
-			gameOverInnerHTML += "<span class=statUpper>";
-			gameOverInnerHTML += savedRecord('accuracy') + "%</span><br />Maximum crashed asteroids : ";
-			gameOverInnerHTML += "<span class=statUpper>";
-			gameOverInnerHTML += savedRecord('nbrCrashes') + "</span><br />Maximum inhabitants lost : ";
-			gameOverInnerHTML += "<span class=statUpper>";
-			gameOverInnerHTML += savedRecord('nbrDamage') + "</span><br />Maximum upgrade purchased : ";
-			gameOverInnerHTML += "<span class=statUpper>";
-			gameOverInnerHTML += savedRecord('nbrUpgrades') + "</span><br />Maximum mat spent : ";
-			gameOverInnerHTML += "<span class=statUpper>";
-			gameOverInnerHTML += savedRecord('nbrCost') + "</span><br /><br />Number of games played : ";
-			gameOverInnerHTML += "<span class=statUpper>";
-			gameOverInnerHTML += savedRecord('playedGames') + "</span><br /><br />Hi-Score : ";
-			gameOverInnerHTML += "<span class=statUpper>";
-			gameOverInnerHTML += savedRecord('bestScore') + "</span></div><div class=title><br /><a href=# onClick='state=&quot;menu&quot;;'>Back to Main Menu</a></div>";
-			gameOver.innerHTML = gameOverInnerHTML;	
+		showHiScores(gameOver,difficulty);	// the records of the chosen level, the others by their tabs (gameover.js)
 		state = "stand";
 		
 	} else if (state == "playing"){
