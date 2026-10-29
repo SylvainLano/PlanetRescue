@@ -384,6 +384,7 @@ function engine() {
 		nbrLostShots += shotList.length;
 		shotList = [];
 		missileList = [];
+		capsuleList = [];
 	} else if ( key[4] == 1 && pause == 0 ) {
 		pause++; pauseStep++;
 		refresh();
@@ -487,6 +488,10 @@ function engine() {
 			
 		if ( asteroidList[i].life <= 0 ) {
 			// This one is done (the ones crashing on the planet are removed right away, they don't come here)
+			// a bomb destroyed explodes (secondary.js)
+			if ( asteroidList[i].bomb ) {
+				explodeBomb(ctx,asteroidList[i]);
+			}
 			keepit = 0;
 			nbrDestroyed++;
 			if ( asteroidList[i].giant ) {
@@ -579,8 +584,14 @@ function engine() {
 		// Testing if asteroid is in collision with the planet
 		} else if ( distance < (MyPlanet.radius + asteroidList[i].radius) ){
 			// Yes it is ! Decreasing life and destroying asteroid
-			MyPlanet.life -= asteroidList[i].life;
-			nbrDamage += asteroidList[i].life;
+			// (a bomb explodes there, taking its blast's power away too)
+			var crashDamage = asteroidList[i].life;
+			if ( asteroidList[i].bomb ) {
+				crashDamage += asteroidList[i].bomb.power;
+				explodeBomb(ctx,asteroidList[i]);
+			}
+			MyPlanet.life -= crashDamage;
+			nbrDamage += crashDamage;
 			if( MyPlanet.life < 0 ){
 				nbrDamage += MyPlanet.life;
 			}
@@ -607,7 +618,16 @@ function engine() {
 					var tempD = Math.floor( Math.sqrt( Math.pow((asteroidList[i].x - asteroidList[j].x),2) + Math.pow((asteroidList[i].y - asteroidList[j].y),2) ) );
 					if ( tempD < collision ) {
 						// There's a collision between two asteroids
-						
+						// a bomb explodes against the other one instead of bouncing (secondary.js)
+						if ( ( asteroidList[i].bomb || asteroidList[j].bomb ) && asteroidList[i].life > 0 && asteroidList[j].life > 0 ) {
+							if ( asteroidList[i].bomb ) {
+								touchBomb(ctx,asteroidList[i],asteroidList[j]);
+							} else {
+								touchBomb(ctx,asteroidList[j],asteroidList[i]);
+							}
+							continue;
+						}
+
 							// START OF NEW ROUTINE //
 						   
 						   var mass2on1=asteroidList[j].mass/asteroidList[i].mass;
@@ -799,8 +819,10 @@ function engine() {
 			}
 		}
 
-		// The missile launcher, once researched, fires at the main cannon's target (secondary.js)
+		// The secondary weapons, once researched (secondary.js) : the missile launcher fires at the main cannon's target,
+		// the nitroglycerine launcher at an asteroid far from the planet
 		fireMissiles(ctx,closestA);
+		fireCapsules();
 	}
 
 
@@ -917,9 +939,10 @@ function engine() {
 	orbitalNbr = orbitalCount;
 	shotList = tempList;
 
-	// Resolving the missiles and their blasts (secondary.js)
+	// Resolving the missiles, the capsules and the blasts (secondary.js)
 	if ( pause == 0 ) {
 		resolveMissiles(ctx);
+		resolveCapsules();
 		resolveBlasts();
 	}
 
@@ -1057,6 +1080,8 @@ function drawPlaying ( ctx ) {
 		drawFieldLimits(ctx);
 	}
 	drawDebris(ctx);
+	// the bombs' glow, under their rock (secondary.js)
+	drawBombs(ctx);
 	// the asteroids, tinted with the GRAVITRON's effect at Field Scanner level 2
 	for ( var i in asteroidList ) {
 		asteroidList[i].Draw();
@@ -1094,8 +1119,9 @@ function drawPlaying ( ctx ) {
 		ctx.closePath();
 		ctx.fill();
 	}
-	// the missiles and their blasts (secondary.js)
+	// the missiles, the capsules and the blasts (secondary.js)
 	drawMissiles(ctx);
+	drawCapsules(ctx);
 	MyPlanet.Draw();
 	// the shield's energy, vanishing when hit
 	if ( MyGravitron.shield > 0 && pause == 0 && shieldHit[0] != 0 ) {

@@ -12,6 +12,7 @@
 
 // The secondary weapons, planned in 2010 : they take no place among the active weapons, and come from the research tree (researches.js)
 // The first one is the missile launcher : its missiles fly to the main cannon's target, and explode on the first asteroid they touch
+// The second one is the nitroglycerine launcher : its capsule turns an asteroid into a bomb, for the player to steer into the others
 
 // function to make the missile launcher fire at the main cannon's target, once researched
 function fireMissiles ( ctx, target ) {
@@ -174,6 +175,160 @@ function drawMissiles ( ctx ) {
 		ctx.beginPath();
 		ctx.arc ( blast.x, blast.y, Math.max ( 1, blast.size ), 0, 2 * Math.PI );
 		ctx.stroke();
+	}
+	ctx.restore();
+}
+
+// function to make the nitroglycerine launcher fire, once researched : one bomb at a time, its delay counted once the bomb before is gone
+function fireCapsules () {
+	if ( nitroLauncher.cannonNbr < 1 || capsuleList.length > 0 || bombInPlay() ) {
+		return;
+	}
+	nitroLauncher.currentDelay++;
+	if ( nitroLauncher.currentDelay >= nitroLauncher.fireRate ) {
+		var target = bombTarget();
+		if ( target ) {
+			nitroLauncher.currentDelay = 0;
+			var speed = nitroLauncher.speed;
+			var angle = interception ( target, speed, MyPlanet.radius + 5 + speed );
+			capsuleList.push ( {
+				x : MyPlanet.x + ( MyPlanet.radius + 5 ) * Math.cos ( angle ),
+				y : MyPlanet.y + ( MyPlanet.radius + 5 ) * Math.sin ( angle ),
+				vx : speed * Math.cos ( angle ),
+				vy : speed * Math.sin ( angle ),
+				power : nitroLauncher.power,
+				blast : nitroLauncher.blast
+			} );
+		}
+	}
+}
+
+// function to know if a bomb is in game
+function bombInPlay () {
+	for ( var a in asteroidList ) {
+		if ( asteroidList[a].bomb ) {
+			return true;
+		}
+	}
+	return false;
+}
+
+// function to choose the asteroid to turn into a bomb : the one farthest from the planet, still in view,
+// for the player to have time to steer it
+function bombTarget () {
+	var target = false, best = 0;
+	for ( var a in asteroidList ) {
+		var distance = distanceToPlanet ( asteroidList[a].x, asteroidList[a].y );
+		if ( asteroidList[a].life > 0 && distance < gameSize / 2 - 20 && distance > best ) {
+			target = asteroidList[a];
+			best = distance;
+		}
+	}
+	return target;
+}
+
+// function to move the capsules : each one turns the first asteroid it touches into a bomb, or gets lost in space
+function resolveCapsules () {
+	var kept = [];
+	for ( var c in capsuleList ) {
+		var capsule = capsuleList[c];
+		capsule.x += capsule.vx;
+		capsule.y += capsule.vy;
+		if ( distanceToPlanet ( capsule.x, capsule.y ) > gameSize ) {
+			continue;
+		}
+		var hit = false;
+		for ( var a in asteroidList ) {
+			var asteroid = asteroidList[a];
+			if ( asteroid.life > 0 && Math.sqrt ( Math.pow ( asteroid.x - capsule.x, 2 ) + Math.pow ( asteroid.y - capsule.y, 2 ) ) < asteroid.radius + 2 ) {
+				hit = asteroid;
+			}
+		}
+		if ( hit ) {
+			hit.bomb = { power : capsule.power, blast : capsule.blast };
+		} else {
+			kept.push ( capsule );
+		}
+	}
+	capsuleList = kept;
+}
+
+// function to make a bomb explode against the asteroid it touched : the bomb is spent, its life left turned into debris
+// (an asteroid destroyed by a bomb the GRAVITRON sent its way makes a Bank Shot)
+function touchBomb ( ctx, bomb, touched ) {
+	addDebris ( ctx, bomb.life, bomb.x, bomb.y, bomb.vx, bomb.vy, debrisList );
+	bomb.life = 0;
+	var before = touched.life;
+	explodeBomb ( ctx, bomb );
+	if ( before > 0 && touched.life <= 0 && bomb.turned >= bankShotTurn ) {
+		bankShot = true;
+	}
+}
+
+// function to make a bomb explode, against an asteroid, destroyed, or crashing on the planet :
+// every other asteroid in its blast takes its whole power, and leaves debris
+function explodeBomb ( ctx, bomb ) {
+	var power = bomb.bomb.power, blast = bomb.bomb.blast;
+	bomb.bomb = false;
+	for ( var a in asteroidList ) {
+		var asteroid = asteroidList[a];
+		var distance = Math.sqrt ( Math.pow ( asteroid.x - bomb.x, 2 ) + Math.pow ( asteroid.y - bomb.y, 2 ) );
+		if ( asteroid != bomb && asteroid.life > 0 && distance < blast + asteroid.radius ) {
+			addDebris ( ctx, power, asteroid.x, asteroid.y, asteroid.vx, asteroid.vy, debrisList );
+			asteroid.life -= power;
+			if ( asteroid.life <= 0 ) {
+				allPassed = 1;
+			}
+		}
+	}
+	blastList.push ( { x : bomb.x, y : bomb.y, size : 0, age : 0, blast : blast } );
+}
+
+// function to draw the bombs' glow under their rock, with the reach of their blast
+function drawBombs ( ctx ) {
+	var beat = 0.5 + 0.5 * Math.sin ( performance.now() / 120 );
+	ctx.save();
+	for ( var a in asteroidList ) {
+		var bomb = asteroidList[a];
+		if ( !bomb.bomb ) {
+			continue;
+		}
+		var reach = bomb.radius * ( 2 + 0.5 * beat );
+		var glow = ctx.createRadialGradient ( bomb.x, bomb.y, bomb.radius * 0.5, bomb.x, bomb.y, reach );
+		glow.addColorStop ( 0, 'rgba(255,240,120,' + ( 0.6 + 0.3 * beat ) + ')' );
+		glow.addColorStop ( 1, 'rgba(255,200,40,0)' );
+		ctx.fillStyle = glow;
+		ctx.beginPath();
+		ctx.arc ( bomb.x, bomb.y, reach, 0, 2 * Math.PI );
+		ctx.fill();
+		ctx.strokeStyle = 'rgba(255,224,102,0.35)';
+		ctx.lineWidth = 1;
+		ctx.setLineDash ( [4, 4] );
+		ctx.beginPath();
+		ctx.arc ( bomb.x, bomb.y, bomb.bomb.blast, 0, 2 * Math.PI );
+		ctx.stroke();
+		ctx.setLineDash ( [] );
+	}
+	ctx.restore();
+}
+
+// function to draw the capsules, blinking
+function drawCapsules ( ctx ) {
+	var beat = 0.5 + 0.5 * Math.sin ( performance.now() / 80 );
+	ctx.save();
+	for ( var c in capsuleList ) {
+		var capsule = capsuleList[c];
+		var glow = ctx.createRadialGradient ( capsule.x, capsule.y, 0, capsule.x, capsule.y, 7 );
+		glow.addColorStop ( 0, 'rgba(255,240,120,' + ( 0.5 + 0.4 * beat ) + ')' );
+		glow.addColorStop ( 1, 'rgba(255,200,40,0)' );
+		ctx.fillStyle = glow;
+		ctx.beginPath();
+		ctx.arc ( capsule.x, capsule.y, 7, 0, 2 * Math.PI );
+		ctx.fill();
+		ctx.fillStyle = nitroLauncher.color;
+		ctx.beginPath();
+		ctx.arc ( capsule.x, capsule.y, 2.5, 0, 2 * Math.PI );
+		ctx.fill();
 	}
 	ctx.restore();
 }

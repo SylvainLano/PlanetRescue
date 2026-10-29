@@ -115,6 +115,18 @@ var upgrades = {
 							max : 50, price : "times10plus50",
 							level : function () { return missileLauncher.blast; }, raise : function () { missileLauncher.blast+=5; } },
 
+	// NITROGLYCERINE LAUNCHER : another secondary weapon, given by its research
+	// (this one goes down : the seconds it waits for a new capsule, once the bomb before is gone)
+	nitroReload			: { name : "Reload Time", tip : "Nitroglycerine Reload Time - The time the launcher waits before firing a new capsule, once the bomb before is gone. Expressed in seconds.",
+							max : 3, decreasing : true, price : "from9times100",
+							level : function () { return nitroLauncher.fireRate / framesPerSecond; }, raise : function () { nitroLauncher.fireRate-=framesPerSecond; } },
+	nitroPow			: { name : "Blast Power", tip : "Nitroglycerine Blast Power - The damages done to every asteroid caught in the blast of a bomb.",
+							max : 30, price : "squared",
+							level : function () { return nitroLauncher.power; }, raise : function () { nitroLauncher.power+=2; } },
+	nitroBlast			: { name : "Blast Radius", tip : "Nitroglycerine Blast Radius - To catch more asteroids in each blast.",
+							max : 80, price : "times10plus50",
+							level : function () { return nitroLauncher.blast; }, raise : function () { nitroLauncher.blast+=5; } },
+
 	// PLANET
 	// healing is bought by the inhabitants : its price counts the ones left to heal, and it can heal a part of them only
 	healing				: { name : "Healing", tip : "Healing - Here you can spend your Mat to help the reconstruction of your planet.",
@@ -168,7 +180,11 @@ var shopLayout = [
 		{ tab : "Missile", title : "Missile Launcher", secondary : "missileW",
 			appears : function () { return missileLauncher.cannonNbr > 0; },
 			statusTip : "A secondary weapon, always active : it takes no place among your active weapons.",
-			upgrades : ["missileFireRate","missilePow","missileBlast"] }
+			upgrades : ["missileFireRate","missilePow","missileBlast"] },
+		{ tab : "Nitro", title : "Nitroglycerine Launcher", secondary : "nitroW",
+			appears : function () { return nitroLauncher.cannonNbr > 0; },
+			statusTip : "A secondary weapon, always active : it takes no place among your active weapons.",
+			upgrades : ["nitroReload","nitroPow","nitroBlast"] }
 	] },
 	{ title : "Heal or upgrade your Planet", upgrades : ["healing","healFact","maxHealth","maxMat","autoHeal","recovery","lab"] },
 	{ title : "Researches", researches : true }		// filled by refreshResearches() (researches.js)
@@ -330,6 +346,9 @@ function refresh() {
 function weaponOfType ( type ) {
 	if ( type == missileLauncher.type ) {
 		return missileLauncher;
+	}
+	if ( type == nitroLauncher.type ) {
+		return nitroLauncher;
 	}
 	for ( var w in weaponList ) {
 		if ( weaponList[w].type == type ) {
@@ -497,6 +516,12 @@ function calculate(type,ref) {
 			break;
 		case "from6times100" :
 			ref = ( 6 - ref ) * 100;
+			break;
+		case "from9times100" :
+			ref = ( 9 - ref ) * 100;
+			break;
+		case "squared" :
+			ref *= ref;
 			break;
 	}
 	return ref;

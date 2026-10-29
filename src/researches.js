@@ -14,7 +14,8 @@
 // and in a game, each research takes time, one at a time, before it is validated in the pause menu to bring its bonus
 // each branch : its name, and the achievement opening it
 var researchBranches = {
-	missiles	: { name : "Missiles", opener : "survivor" }
+	missiles	: { name : "Missiles", opener : "survivor" },
+	explosives	: { name : "Explosives", opener : "demolisher" }
 };
 
 // each research : its name, its tooltip, its branch, its time (in seconds of play), the researches it needs first, and what it brings
@@ -24,7 +25,10 @@ var researches = {
 					apply : function () { missileLauncher.cannonNbr = 1; } },
 	homing		: { name : "Homing Missiles", branch : "missiles", time : 90, needs : ["missiles"],
 					tip : "Homing Missiles - Your missiles steer toward their target, even when it changes its way, and look for another one if it is destroyed before they reach it.",
-					apply : function () { missileLauncher.smart = 1; } }
+					apply : function () { missileLauncher.smart = 1; } },
+	nitro		: { name : "Nitroglycerine", branch : "explosives", time : 75, needs : [],
+					tip : "Nitroglycerine - A secondary weapon, whose slow capsules turn an asteroid far from your planet into a bomb. It explodes when it touches another asteroid, or when it is destroyed, damaging every asteroid around. Steer it with your Gravitron, but keep it away from your planet : crashing on it, a bomb does more damage.",
+					apply : function () { nitroLauncher.cannonNbr = 1; } }
 };
 
 // the researches of the current game : the planet's lab (an upgrade to buy), the one going on, if it is complete,
