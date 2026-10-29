@@ -151,6 +151,146 @@ body {
 #gameOver {
 	height: 584px;
 	z-index: 5;
+	background-color: rgba(0,0,0,0.65);
+}
+
+/* THE GAME OVER SCREEN (built by src/gameover.js) */
+
+#gameOver .over {
+	text-align: center;
+}
+
+#gameOver .over .title {
+	font-size: 60px;
+	margin: 8px 0 0;
+	color: rgb(255, 71, 71);
+}
+
+#gameOver .over .subtitle {
+	font-size: 13px;
+	color: #bbb;
+}
+
+#gameOver .over .label {
+	font-size: 11px;
+	text-transform: uppercase;
+	letter-spacing: 1px;
+	color: #999;
+}
+
+#gameOver .over .score {
+	margin: 12px auto 14px;
+}
+
+#gameOver .over .score .value {
+	font-family: 'MirageRegular';
+	font-size: 64px;
+	line-height: 1.1;
+	color: #fff;
+}
+
+#gameOver .over .score .detail {
+	font-size: 12px;
+	color: #999;
+}
+
+#gameOver .over .score.record .label {
+	color: #5df45d;
+	font-weight: bold;
+}
+
+#gameOver .over .score.record .value {
+	color: #5df45d;
+	text-shadow: 0 0 18px rgba(93,244,93,0.5);
+}
+
+#gameOver .over .tiles {
+	display: grid;
+	grid-template-columns: repeat(3, 1fr);
+	gap: 8px;
+	width: 520px;
+	margin: auto;
+}
+
+#gameOver .over .tile {
+	position: relative;
+	padding: 8px 6px;
+	background: rgba(14,16,22,0.85);
+	border: 1px solid rgba(255,255,255,0.14);
+	border-radius: 6px;
+}
+
+#gameOver .over .tile .value {
+	font-size: 24px;
+	font-weight: bold;
+	color: #fff;
+}
+
+#gameOver .over .tile .detail {
+	font-size: 11px;
+	color: #999;
+}
+
+#gameOver .over .tile.record {
+	border-color: #5df45d;
+	background: rgba(16,40,20,0.85);
+}
+
+#gameOver .over .tile .badge {
+	position: absolute;
+	top: -7px;
+	right: 6px;
+	padding: 0 4px;
+	border-radius: 3px;
+	font-size: 9px;
+	color: #000;
+	background: #5df45d;
+	font-weight: bold;
+}
+
+#gameOver .over .unlocked {
+	margin-top: 12px;
+}
+
+#gameOver .over .medal {
+	display: inline-block;
+	width: 80px;
+	margin-top: 4px;
+	vertical-align: top;
+}
+
+#gameOver .over .medal svg {
+	display: block;
+	width: 44px;
+	height: 44px;
+	margin: auto;
+}
+
+#gameOver .over .medal .name {
+	margin-top: 2px;
+	font-size: 10px;
+	font-weight: bold;
+	color: #fff;
+}
+
+#gameOver .over .buttons {
+	margin-top: 16px;
+}
+
+#gameOver .over .button {
+	display: inline-block;
+	margin: 0 8px;
+	padding: 6px 26px;
+	font-family: 'MirageRegular';
+	font-size: 28px;
+	color: #fff;
+	background: rgba(255,71,71,0.2);
+	border: 1px solid rgb(255, 71, 71);
+	border-radius: 6px;
+}
+
+#gameOver .over .button:hover {
+	background: rgb(255, 71, 71);
 }
 
 #achievementsText {

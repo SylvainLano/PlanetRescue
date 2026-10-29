@@ -147,7 +147,7 @@ function checkAchievements () {
 		if ( !achieved[id] && achievements[id].test() ) {
 			achieved[id] = new Date().toISOString().substring ( 0, 10 );
 			localStorage["achievements"] = JSON.stringify ( achieved );
-			newAchievements.push ( achievements[id].name );
+			newAchievements.push ( id );
 			achievementQueue.push ( id );
 		}
 	}
