@@ -312,6 +312,46 @@ function refresh() {
 		modeUpdate ( weaponList[iw-1] );
 	}
 	refreshResearches();
+	refreshBadges();
+}
+
+// function to find a weapon by its type, the secondary ones too
+function weaponOfType ( type ) {
+	if ( type == missileLauncher.type ) {
+		return missileLauncher;
+	}
+	for ( var w in weaponList ) {
+		if ( weaponList[w].type == type ) {
+			return weaponList[w];
+		}
+	}
+}
+
+// function to get the price of something of the menu, or false when it can't be bought now :
+// a weapon already bought, an upgrade at its maximum, or the upgrade of a weapon not there yet
+// (healing can be bought for a single inhabitant)
+function thingPrice ( thing ) {
+	if ( thing.weapon ) {
+		return ( weaponOfType ( thing.weapon ).cannonNbr == 0 ) ? weaponCost[thing.weapon] : false;
+	}
+	if ( thing.owner && weaponOfType ( thing.owner ).cannonNbr < 1 ) {
+		return false;
+	}
+	if ( maxReached ( thing.upgrade ) ) {
+		return false;
+	}
+	if ( thing.upgrade == "healing" ) {
+		return maxUpgrade("healFact") - planetHealFact + 1;
+	}
+	return priceToPay ( thing.upgrade );
+}
+
+// function to know if something of the menu is an upgrade at its maximum (not one of a weapon still to buy)
+function thingMaxed ( thing ) {
+	if ( !thing.upgrade || ( thing.owner && weaponOfType ( thing.owner ).cannonNbr < 1 ) ) {
+		return false;
+	}
+	return maxReached ( thing.upgrade );
 }
 
 // function to determine the maximum update you can reach

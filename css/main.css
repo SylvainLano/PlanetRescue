@@ -437,6 +437,68 @@ body {
 	background: #39c;
 }
 
+/* the counters of the titles and tabs (refreshBadges) : green with what can be bought, gold for a research waiting,
+   grey with the price of the cheapest thing otherwise */
+#shop .badge {
+	color: #888;
+}
+
+#shop .head.buyable {
+	color: #1e5e20;
+	background: linear-gradient(#effaef, #cdeacd);
+	border-color: #7cbf7c;
+}
+
+#shop .open .head.buyable {
+	background: #fff;
+}
+
+#shop .head.buyable .badge {
+	color: #2e8b2e;
+	font-weight: bold;
+}
+
+#shop .head.waiting {
+	color: #6b5000;
+	background: linear-gradient(#fff9e6, #f5e2a6);
+	border-color: #d4b24c;
+}
+
+#shop .open .head.waiting {
+	background: #fff;
+}
+
+#shop .head.waiting .badge {
+	color: #b08400;
+	font-weight: bold;
+}
+
+#shop .tab {
+	text-align: center;
+	min-width: 48px;
+}
+
+#shop .tab .badge {
+	display: block;
+	min-height: 12px;
+	font-size: 9px;
+	color: #999;
+}
+
+#shop .tab.buyable {
+	background: #2e8b2e;
+}
+
+#shop .tab.buyable .badge {
+	color: #d8ffd8;
+	font-weight: bold;
+}
+
+#shop .tab.current.buyable {
+	background: #39c;
+	box-shadow: inset 0 -3px 0 #5df45d;
+}
+
 #shop .panel {
 	padding: 20px;
 	background: #ebebeb;
