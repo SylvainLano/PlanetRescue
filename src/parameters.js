@@ -79,6 +79,7 @@
 	var shieldHit		= [0];		// to make the shield's energy vanish when hit
 	var countdownStart	= 100;		// time before game starts
 	var countdownValue	= 100;		// time before game starts
+	var banner			= { text : "", y : 0, alpha : 0, background : 0 };	// the countdown's banner (3, 2, 1, GO !), drawn on the game
 	var passedA			= 0;		// to avoid double switch when changing target
 	var allPassed		= 0;		// to check if all asteroids where passed and get back to beginning
 	
@@ -135,7 +136,8 @@
 	var asteroidBM		= 8;		// Base mass for the asteroids
 	var MaxCollSpd		= 10;		// Max Collision Speed for the asteroid to bounce without being destroyed
 	var targetedA		= false;
-	
+	var aimedA			= false;	// the asteroid the main cannon aims at, circled on screen
+
 	// debris parameters
 	var debrisList		= new Array();
 	var debrisColor		= '#734A12';
@@ -222,7 +224,8 @@ function initDefault(context,level) {
 	asteroidBM		= 8;		// Base mass for the asteroids
 	MaxCollSpd		= 10;		// Max Collision Speed for the asteroid to bounce without being destroyed
 	targetedA		= false;
-	
+	aimedA			= false;
+
 	// debris parameters
 	debrisList		= [];
 	debrisColor		= '#734A12';

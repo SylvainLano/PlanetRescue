@@ -41,54 +41,58 @@ function addDebris(ctx,nb,x,y,vx,vy,debrisList) {
 	return debrisList;
 }
 
-// Function to resolve the pulses
+// Function to resolve the pulses : they spread until their charge is spent
 function resolvePulses (pulseList,ctx) {
 	var tempList = new Array();
-	for (p in pulseList) {		
+	for (p in pulseList) {
 		if ( pulseList[p].charge > 0 ) {
 			// Keeping pulse
 			tempList.push(pulseList[p]);
-			
-			// Displaying pulse
-			var oneStep = 10;
-			var red = 66;
-			var green = 66;
-			var blue = 66;
-			if ( pulseList[p].charge <= oneStep ) {
-				var colorStep = Math.floor( pulseList[p].charge * 190 / oneStep ) + 66;
-				red=green=blue=colorStep;
-			} else if ( pulseList[p].charge <= (2*oneStep) ) {
-				var colorStep = Math.floor( (pulseList[p].charge-oneStep) * 255 / oneStep );
-				red=255;
-				green=blue=255-colorStep;
-			} else if ( pulseList[p].charge <= (3*oneStep) ) {
-				var colorStep = Math.floor( (pulseList[p].charge-(2*oneStep)) * 255 / oneStep );
-				red=255;
-				blue=0;
-				green=colorStep;
-			} else if ( pulseList[p].charge <= (4*oneStep) ) {
-				var colorStep = Math.floor( (pulseList[p].charge-(3*oneStep)) * 255 / oneStep );
-				red=255-colorStep;
-				blue=0;
-				green=255;
-			} else if ( pulseList[p].charge <= (5*oneStep) ) {
-				var colorStep = Math.floor( (pulseList[p].charge-(4*oneStep)) * 255 / oneStep );
-				red=0;
-				blue=colorStep;
-				green=255-colorStep;
-			}
-			ctx.strokeStyle = 'rgba('+red+','+green+','+blue+',0.5)';
-			ctx.lineWidth = Math.floor ( ( pulseList[p].radius - MyGravitron.radius ) / 20 ) ;
-			ctx.lineCap = 'square';
-			ctx.beginPath();
-			ctx.arc(MyPlanet.x,MyPlanet.y,pulseList[p].radius,(pulseList[p].angle + pulseList[p].wideness),pulseList[p].angle,false);
-			ctx.arc(MyPlanet.x,MyPlanet.y,pulseList[p].radius,pulseList[p].angle,(pulseList[p].angle + pulseList[p].wideness),true);
-			ctx.closePath();
-			ctx.stroke();
 			pulseList[p].radius++;
 		}
 	}
 	return tempList;
+}
+
+// Function to draw the pulses, colored by their charge
+function drawPulses (ctx) {
+	for (var p in pulseList) {
+		var oneStep = 10;
+		var red = 66;
+		var green = 66;
+		var blue = 66;
+		if ( pulseList[p].charge <= oneStep ) {
+			var colorStep = Math.floor( pulseList[p].charge * 190 / oneStep ) + 66;
+			red=green=blue=colorStep;
+		} else if ( pulseList[p].charge <= (2*oneStep) ) {
+			var colorStep = Math.floor( (pulseList[p].charge-oneStep) * 255 / oneStep );
+			red=255;
+			green=blue=255-colorStep;
+		} else if ( pulseList[p].charge <= (3*oneStep) ) {
+			var colorStep = Math.floor( (pulseList[p].charge-(2*oneStep)) * 255 / oneStep );
+			red=255;
+			blue=0;
+			green=colorStep;
+		} else if ( pulseList[p].charge <= (4*oneStep) ) {
+			var colorStep = Math.floor( (pulseList[p].charge-(3*oneStep)) * 255 / oneStep );
+			red=255-colorStep;
+			blue=0;
+			green=255;
+		} else if ( pulseList[p].charge <= (5*oneStep) ) {
+			var colorStep = Math.floor( (pulseList[p].charge-(4*oneStep)) * 255 / oneStep );
+			red=0;
+			blue=colorStep;
+			green=255-colorStep;
+		}
+		ctx.strokeStyle = 'rgba('+red+','+green+','+blue+',0.5)';
+		ctx.lineWidth = Math.floor ( ( pulseList[p].radius - MyGravitron.radius ) / 20 ) ;
+		ctx.lineCap = 'square';
+		ctx.beginPath();
+		ctx.arc(MyPlanet.x,MyPlanet.y,pulseList[p].radius,(pulseList[p].angle + pulseList[p].wideness),pulseList[p].angle,false);
+		ctx.arc(MyPlanet.x,MyPlanet.y,pulseList[p].radius,pulseList[p].angle,(pulseList[p].angle + pulseList[p].wideness),true);
+		ctx.closePath();
+		ctx.stroke();
+	}
 }
 
 // Function to resolve the debris
@@ -148,16 +152,20 @@ function resolveDebris (debrisList,ctx,MyPlanet,pause,gravSuction,gravPower,grav
 		if( keepit == 1){
 			// Keeping debris
 			tempList.push(debrisList[i]);
-			
-			// Displaying debris
-			ctx.fillStyle = debrisColor;
-			ctx.beginPath();
-			ctx.arc(debrisList[i].x,debrisList[i].y,1,0,2*Math.PI,true);
-			ctx.closePath();
-			ctx.fill();
 		}
 	}
 	return tempList;
+}
+
+// Function to draw the debris, all at once
+function drawDebris (ctx) {
+	ctx.fillStyle = debrisColor;
+	ctx.beginPath();
+	for (var i in debrisList) {
+		ctx.moveTo(debrisList[i].x + 1,debrisList[i].y);
+		ctx.arc(debrisList[i].x,debrisList[i].y,1,0,2*Math.PI,false);
+	}
+	ctx.fill();
 }
 
 // Function to resolve the GRAVITRON
@@ -201,16 +209,94 @@ function resolveGravitron (ctx,pause,MyGravitron,gravFriction,key,gravMinSize,gr
 		}
 		MyGravitron.angle = MyGravitron.angle % ( 2 * Math.PI );
 		MyGravitron.angle -= Math.PI;
-		
-		// Displaying GRAVITRON
-		ctx.strokeStyle = gravColor;
-		ctx.lineWidth = gravWidth;
-		ctx.lineCap = 'round';
-		ctx.beginPath();
-		ctx.arc(MyPlanet.x,MyPlanet.y,MyGravitron.radius,(MyGravitron.angle + MyGravitron.wideness),MyGravitron.angle,false);
-		ctx.arc(MyPlanet.x,MyPlanet.y,MyGravitron.radius,MyGravitron.angle,(MyGravitron.angle + MyGravitron.wideness),true);
-		ctx.closePath();
-		ctx.stroke();
+	}
+}
+
+// Function to draw the GRAVITRON : an arc around the planet, in the color of its shield's charge
+function drawGravitron (ctx,width) {
+	ctx.strokeStyle = gravColor;
+	ctx.lineWidth = width;
+	ctx.lineCap = 'round';
+	ctx.beginPath();
+	ctx.arc(MyPlanet.x,MyPlanet.y,MyGravitron.radius,(MyGravitron.angle + MyGravitron.wideness),MyGravitron.angle,false);
+	ctx.arc(MyPlanet.x,MyPlanet.y,MyGravitron.radius,MyGravitron.angle,(MyGravitron.angle + MyGravitron.wideness),true);
+	ctx.closePath();
+	ctx.stroke();
+}
+
+// The moving parts of the objects : what changes from one turn of the engine to the next
+// (the objects are drawn in between, so that they move at each refresh of the screen)
+function movingParts() {
+	return [
+		{ objects : [MyPlanet], parts : ["spin"] },
+		{ objects : [MyGravitron], parts : ["angle", "wideness"] },
+		{ objects : asteroidList, parts : ["x", "y", "spin"] },
+		{ objects : debrisList, parts : ["x", "y"] },
+		{ objects : shotList, parts : ["x", "y"] },
+		{ objects : pulseList, parts : ["radius"] },
+		{ objects : weaponList, parts : ["angle"] },	// the Spiral & Orbital weapon's "angle" is a number of cannon, but it is not drawn
+		{ objects : [banner], parts : ["y"] }
+	];
+}
+
+// Function to remember where the moving objects are, before the engine moves them
+function rememberPlaces() {
+	var moving = movingParts();
+	for ( var m in moving ) {
+		for ( var i in moving[m].objects ) {
+			var object = moving[m].objects[i];
+			if ( typeof object != "object" ) {
+				continue;	// the tutorial empties the places of its asteroid and its shot
+			}
+			object.before = object.before || {};
+			for ( var p in moving[m].parts ) {
+				object.before[moving[m].parts[p]] = object[moving[m].parts[p]];
+			}
+		}
+	}
+}
+
+// Function to put the moving objects between their places at the engine's last two turns, "blend" going from 0 to 1 until the next turn
+// (where they really are is kept aside, and put back by unblendPlaces once the game is drawn)
+function blendPlaces ( blend ) {
+	var moving = movingParts();
+	for ( var m in moving ) {
+		for ( var i in moving[m].objects ) {
+			var object = moving[m].objects[i];
+			if ( typeof object != "object" || !object.before ) {
+				continue;	// just born : it is drawn where it is
+			}
+			object.after = object.after || {};
+			for ( var p in moving[m].parts ) {
+				var part = moving[m].parts[p];
+				var change = object[part] - object.before[part];
+				object.after[part] = object[part];
+				if ( part == "angle" ) {
+					// the angles go round from -PI to PI : taking the short way, and staying in that range
+					change = ( ( change + 3 * Math.PI ) % ( 2 * Math.PI ) ) - Math.PI;
+					object[part] = ( ( object.before[part] + change * blend + 3 * Math.PI ) % ( 2 * Math.PI ) ) - Math.PI;
+				} else {
+					object[part] = object.before[part] + change * blend;
+				}
+			}
+			object.blended = true;
+		}
+	}
+}
+
+// Function to put the moving objects back where they really are
+function unblendPlaces() {
+	var moving = movingParts();
+	for ( var m in moving ) {
+		for ( var i in moving[m].objects ) {
+			var object = moving[m].objects[i];
+			if ( typeof object == "object" && object.blended ) {
+				for ( var p in moving[m].parts ) {
+					object[moving[m].parts[p]] = object.after[moving[m].parts[p]];
+				}
+				object.blended = false;
+			}
+		}
 	}
 }
 

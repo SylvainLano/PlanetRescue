@@ -41,10 +41,30 @@ window.addEventListener('load', function () {
 	MyPlanet = new Planet(context,startValues.planetLife,startValues.planetMat,planetSkin,planetRadius,planetMass,planetX,planetY);
 	skinImage(MyPlanet.skin);	// loading its map now, so that it is ready for the first game
 	MyGravitron = new Gravitron(context,gravSuction,0,gravMinSize,startValues.gravShield,startValues.gravPower,startValues.gravSort,startValues.gravRepulsion,startValues.gravPulse,gravRadius);
+	document.fonts.load('85px MirageRegular');	// the countdown's font, for the canvas to have it
 
-	// Setting the call to engine()  so it rolls the dices 25 times a second (25 fps)
-	var interval = setInterval(engine, 1000 / framesPerSecond);
-	
+	// Making engine() roll the dices 25 times a second (25 fps), and drawing the game at each refresh of the screen
+	// (until 2026, setInterval called the engine, which drew the game 25 times a second only)
+	var turn = 1000 / framesPerSecond;
+	var late = 0;		// time since the engine's last turn
+	var last = performance.now();
+	function frame ( now ) {
+		requestAnimationFrame(frame);
+		late += Math.max(0, now - last);
+		last = now;
+		// after a long wait (the browser's tab hidden, a slow computer), the game goes on where it was, instead of rushing to catch up
+		if ( late > turn * 5 ) {
+			late = turn;
+		}
+		while ( late >= turn ) {
+			rememberPlaces();
+			engine();
+			late -= turn;
+		}
+		drawGame(late / turn);
+	}
+	requestAnimationFrame(frame);
+
 	// Setting the call to the changeKey function which will take care of the keyboards events
 	document.onkeydown=function(e){changeKey((e||window.event).keyCode, 1);}
 	document.onkeyup=function(e){changeKey((e||window.event).keyCode, 0);}

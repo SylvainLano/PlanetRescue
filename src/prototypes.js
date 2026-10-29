@@ -11,6 +11,7 @@
 
 
 Planet.prototype.Draw=DrawPlanet;
+Planet.prototype.Turn=TurnPlanet;
 Planet.prototype.ShowLife=ShowLife;
 
 Asteroid.prototype.Draw=DrawRock;
@@ -28,15 +29,18 @@ function skinImage ( file ) {
 	return skins[file];
 }
 
+// function to make the planet turn on itself, at each turn of the engine while the game runs, not during the pause or once destroyed
+function TurnPlanet() {
+	if ( pause == 0 ) {
+		this.spin -= planetTurn;
+	}
+}
+
 // function to draw the planet : its map (its skin) wrapped around a sphere turning on itself, lit from the top left
 function DrawPlanet() {
 	var globe = planetGlobe ( this );
 	if ( globe == false ) {
 		return;		// its map is still loading
-	}
-	// it turns while the game runs, not during the pause or once destroyed
-	if ( pause == 0 ) {
-		this.spin -= planetTurn;
 	}
 	// each pixel of the globe takes its color on the map, shifted by the spin
 	// (the shift falls between two columns of the map : both are mixed, so that the Earth glides instead of jumping a pixel at a time)

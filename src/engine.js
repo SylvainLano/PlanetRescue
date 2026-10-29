@@ -9,15 +9,12 @@
 //	or improve the code and share it alike !
 */
 
-// Explicit function, called 25 times a second
+// Explicit function, called 25 times a second : it plays the game, which drawGame draws at each refresh of the screen
+// (until 2026, it drew the game itself, 25 times a second)
 function engine() {
-	// Clearing the context
+	// The canvas' context, for the objects to know it
 	var main = document.getElementById('mainArea');
 	var ctx = main.getContext('2d');
-	// drawing in game units, whatever the real size of the canvas
-	var scale = main.width / gameSize;
-	ctx.setTransform(scale,0,0,scale,0,0);
-	ctx.clearRect(0,0,gameSize,gameSize);
 	var status = document.getElementById("status");
 	var startMenu = document.getElementById("startMenu");
 	var mainMenu = document.getElementById("mainMenu");
@@ -68,56 +65,16 @@ function engine() {
 		status.style.background = 'rgba(60,60,60,0)';
 		instructions.style.background = 'rgba(60,60,60,0)';
 		countdown.style.top = '35px';
-		countdown.style.transform = 'none';	// where the countdown of a previous game may have moved it
 		instructions.style.top = '155px';
 		initDefault(ctx,"normal");
 		initTutorial(ctx);
 		state = "tutorialSteps";
 		
 	} else if (state == "tutorialSteps"){
-		
+
+		// (what the tutorial shows is drawn by drawTutorial)
 		if ( countdownValue > 10 ) {
-			MyPlanet.Draw();
-		}
-		if ( countdownValue > 57 && countdownValue < 214 ) {
-			asteroidList[0].Draw();
-			if ( countdownValue <= 157 ) {
-				ctx.strokeStyle = 'rgba(255,0,0,1)';
-				ctx.lineWidth = 1;
-				ctx.beginPath();
-				ctx.arc(asteroidList[0].x,asteroidList[0].y,15,0,(Math.PI*2),false);
-				ctx.arc(asteroidList[0].x,asteroidList[0].y,15,(Math.PI*2),0,true);
-				ctx.closePath();
-				ctx.stroke();
-			}
-		}
-		if ( countdownValue > 157) {
-			var sx = MyPlanet.x + MyPlanet.radius * Math.cos(mainCannon.angle);
-			var sy = MyPlanet.y + MyPlanet.radius * Math.sin(mainCannon.angle);
-			var ex = MyPlanet.x + (MyPlanet.radius+4) * Math.cos(mainCannon.angle);
-			var ey = MyPlanet.y + (MyPlanet.radius+4) * Math.sin(mainCannon.angle);
-			ctx.strokeStyle = mainCannon.color;
-			ctx.beginPath();
-			ctx.moveTo(sx,sy);
-			ctx.lineTo(ex,ey);
-			ctx.closePath();
-			ctx.stroke();
-			if ( countdownValue <= 213 ) {
-				ctx.strokeStyle = 'rgba(255,0,0,1)';
-				ctx.lineWidth = 1;
-				ctx.beginPath();
-				ctx.arc(ex,ey,10,0,(Math.PI*2),false);
-				ctx.arc(ex,ey,10,(Math.PI*2),0,true);
-				ctx.closePath();
-				ctx.stroke();
-			}
-		}
-		if ( countdownValue > 193 && countdownValue < 214 ) {
-			ctx.fillStyle = shotList[0].color;
-			ctx.beginPath();
-			ctx.arc(shotList[0].x,shotList[0].y,1,0,2*Math.PI,true);
-			ctx.closePath();
-			ctx.fill();
+			MyPlanet.Turn();
 		}
 		if ( countdownValue > 214 ) {
 			debrisList = resolveDebris(debrisList,ctx,MyPlanet,pause,gravSuction,MyGravitron.power,MyGravitron.sort,debrisColor);
@@ -281,23 +238,11 @@ function engine() {
 			instructions.innerHTML = 'debris are the crumbles of the former asteroid';
 		} else if ( countdownValue < 317 ) {
 			var string = "Get Mat from them";
-			ctx.strokeStyle = 'rgba(255,0,0,1)';
-			ctx.beginPath();
-			ctx.moveTo(50,20);
-			ctx.lineTo(100,20);
-			ctx.closePath();
-			ctx.stroke();
 			countdown.innerHTML = string.substr(0,(countdownValue-296));
 			countdownValue++;
 			instructions.innerHTML = '';
 			status.innerHTML = 'Life : 20 - Mat : 20';
 		} else if ( countdownValue == 317 )  {
-			ctx.strokeStyle = 'rgba(255,0,0,1)';
-			ctx.beginPath();
-			ctx.moveTo(50,20);
-			ctx.lineTo(100,20);
-			ctx.closePath();
-			ctx.stroke();
 			instructions.innerHTML = 'it means "material", and you want MOAR of it';
 		} else if ( countdownValue < 337 ) {
 			var string = "Upgrade costs Mat";
@@ -335,8 +280,13 @@ function engine() {
 		gameOver.style.display = "none";
 		pauseScreen.style.display = "none";
 		initDefault(ctx,difficulty);
+		// the countdown's banner is drawn on the game, at the top, and hidden until the countdown begins
+		// (the "countdown" element of the page only writes the tutorial's texts)
+		countdown.style.display = "none";
+		banner.y = 0;
+		banner.alpha = 0;
+		banner.background = 0;
 		if ( countdownValue > 0 ) {
-			countdown.style.display = "block";
 			state = "countdown";
 		} else {
 			status.style.display = "block";
@@ -352,7 +302,7 @@ function engine() {
 		
 	} else if (state == "countdown"){
 	
-		MyPlanet.Draw();
+		MyPlanet.Turn();
 		if ( countdownValue <= 0 ){
 			status.style.display = "block";
 			status.style.background = 'rgba(60,60,60,0.5)';
@@ -364,13 +314,11 @@ function engine() {
 			var posTop = (300 - (countdownValue*300/countdownStart));
 			if( Z == 0 ) {	Z = "GO !";	}
 			if( posTop > 240) {	posTop = 240;	}
-			countdown.innerHTML = Z;
-			// the browser glides the banner to its new place until the next frame, instead of moving it by leaps 25 times a second
-			// (but it shows up at its first place at once, without gliding there from where the last countdown left it)
-			countdown.style.transition = ( countdownValue == countdownStart ) ? "none" : "transform " + ( 1000 / framesPerSecond ) + "ms linear";
-			countdown.style.top = '0px';
-			countdown.style.transform = 'translateY('+posTop+'px)';
-			countdown.style.color = 'rgba(255,0,0,'+(4*step/100)+')';
+			// the banner going down, drawn on the game by drawGame
+			banner.text = Z;
+			banner.y = posTop;
+			banner.alpha = 4*step/100;
+			banner.background = 0.5;
 			countdownValue--;
 		}
 		
@@ -405,20 +353,18 @@ function engine() {
 		
 	} else if (state == "playing"){
 	
-	// Making the Red Effect when planet is hit!
+	// Making the Red Effect fade, when planet is hit!
 	if ( redEffect != 0 ) {
-		ctx.fillStyle = "rgba(" + redEffect + ", 0, 0, 1)";
-		ctx.fillRect(0,0,gameSize,gameSize);
 		redEffect -= 64;
 		if( redEffect < 0 ) { redEffect = 0; }
 	}
-	
-	// Making the countdown disappear
+
+	// Making the countdown's banner disappear
 	if ( countdownValue <= 0 ) {
-		countdown.style.display = "none";
-		countdown.style.background = 'rgba(60,60,60,0.5)';
+		banner.alpha = 0;
+		banner.background = 0;
 	} else {
-		countdown.style.background = 'rgba(60,60,60,'+(countdownValue/20)+')';
+		banner.background = countdownValue/20;
 		countdownValue--;
 	}
 	
@@ -457,11 +403,6 @@ function engine() {
 		pause=0; pauseStep=0;
 		pauseScreen.style.display = "none";
 		hideTooltip();
-	}
-
-	// Showing the limits of the GRAVITRON's field, with the Field Scanner
-	if ( MyGravitron.scanner > 0 && pause == 0 ) {
-		drawFieldLimits(ctx);
 	}
 
 	// Resolving the debris
@@ -790,14 +731,6 @@ function engine() {
 			}
 			// Keeping the asteroid
 			tempList.push(asteroidList[i]);
-			// Displaying asteroid, tinted with the GRAVITRON's effect at Field Scanner level 2
-			asteroidList[i].Draw();
-			if ( MyGravitron.scanner > 1 && pause == 0 ) {
-				drawFieldTint(ctx,asteroidList[i]);
-			}
-			if(showDetails == true) {
-				asteroidList[i].ShowLife();
-			}
 		}
 	}
 	asteroidList = tempList;
@@ -839,19 +772,11 @@ function engine() {
 	
 		// Resolving the weapons, and making them shoot
 		var moveSpeed = mainCanMovSpeed * Math.PI / 256;
+		aimedA = false;
 		for(i in weaponList){
 			if ( closestA != false && weaponList[i].type == "basicW" ) {
 				weaponList[i].target = closestA;
-				if ( closestA == targetedA ) {
-					ctx.strokeStyle = "rgba(255, 0, 0, 1)";
-				} else {
-					ctx.strokeStyle = "rgba(255, 255, 255, 1)";
-				}
-				
-				ctx.beginPath();
-				ctx.arc(closestA.x,closestA.y,(closestA.radius + 2),0,2*Math.PI,true);
-				ctx.closePath();
-				ctx.stroke();
+				aimedA = closestA;		// circled on screen, in red when chosen by the player
 
 				if( weaponList[i].smart == 1 ){
 					var angle = angleAroundPlanet(closestA.x,closestA.y);
@@ -921,7 +846,6 @@ function engine() {
 							break;
 					}
 				}
-				displayWeapon(ctx,weaponList[i]);
 			}
 		}
 	}
@@ -1030,26 +954,19 @@ function engine() {
 		if( keepit == 1){
 			// Keeping shot
 			tempList.push(shotList[i]);
-			
-			// Displaying shot
+
+			// Making the magnetic shots blink
 			if ( shotList[i].weapon == 3 ) {
 				shotList[i].colorAlpha = ( shotList[i].colorAlpha + 5 ) % 50;
-				ctx.fillStyle = "rgba(255,0,0,"+(100-shotList[i].colorAlpha)/100+")";
-			} else {
-				ctx.fillStyle = shotList[i].color;
 			}
-			ctx.beginPath();
-			ctx.arc(shotList[i].x,shotList[i].y,1,0,2*Math.PI,true);
-			ctx.closePath();
-			ctx.fill();
 		}
 	}
 	orbitalNbr = orbitalCount;
 	shotList = tempList;
-	
-	
-	// Displaying the planet
-	MyPlanet.Draw();
+
+
+	// Turning the planet
+	MyPlanet.Turn();
 
 	
 	// Charging GRAVITRON's shield
@@ -1095,7 +1012,7 @@ function engine() {
 			green=255-colorStep;
 		}
 		
-		// Displaying shield's energy
+		// Making the shield's energy vanish when hit (drawn by drawGame)
 		if ( shieldHit[0] == 0 ) {
 			shieldHit[4] = gravWidth+2;
 			shieldHit[5] = red;
@@ -1103,14 +1020,6 @@ function engine() {
 			shieldHit[7] = blue;
 			shieldHit[8] = 1;
 		} else {
-			ctx.strokeStyle = 'rgba('+shieldHit[5]+','+shieldHit[6]+','+shieldHit[7]+','+shieldHit[8]+')';
-			ctx.lineWidth = shieldHit[4];
-			ctx.lineCap = 'round';
-			ctx.beginPath();
-			ctx.arc(MyPlanet.x,MyPlanet.y,(shieldHit[1]+Math.floor(shieldHit[4]/2)),(shieldHit[2] + shieldHit[3]),shieldHit[2],false);
-			ctx.arc(MyPlanet.x,MyPlanet.y,(shieldHit[1]+Math.floor(shieldHit[4]/2)),shieldHit[2],(shieldHit[2] + shieldHit[3]),true);
-			ctx.closePath();
-			ctx.stroke();
 			shieldHit[8] -= 0.04;
 			if(shieldHit[8]<=0){
 				shieldHit[0] = 0;
@@ -1167,9 +1076,182 @@ function engine() {
 		}
 	}
 	status.innerHTML = statusText;
-	
-	
+
+
 	}	// Bracket for the state == "playing"
+}
+
+
+// Function to draw the game, called at each refresh of the screen
+// (the moving objects are drawn between their places at the engine's last two turns, "blend" going from 0 to 1 until the next turn)
+function drawGame ( blend ) {
+	var main = document.getElementById('mainArea');
+	var ctx = main.getContext('2d');
+	// drawing in game units, whatever the real size of the canvas
+	var scale = main.width / gameSize;
+	ctx.setTransform(scale,0,0,scale,0,0);
+	ctx.clearRect(0,0,gameSize,gameSize);
+
+	blendPlaces ( blend );
+	try {
+		if ( state == "tutorialSteps" ) {
+			drawTutorial ( ctx );
+		} else if ( state == "countdown" ) {
+			MyPlanet.Draw();
+			drawBanner ( ctx );
+		} else if ( state == "playing" ) {
+			drawPlaying ( ctx );
+			drawBanner ( ctx );
+		}
+	} finally {
+		// whatever happens, the objects go back where they really are
+		unblendPlaces();
+	}
+}
+
+// Function to draw a game being played, in the order of 2010 : some drawings keep the line's width left by the one before
+function drawPlaying ( ctx ) {
+	// the Red Effect, when the planet is hit
+	if ( redEffect != 0 ) {
+		ctx.fillStyle = "rgba(" + redEffect + ", 0, 0, 1)";
+		ctx.fillRect(0,0,gameSize,gameSize);
+	}
+	// the limits of the GRAVITRON's field, with the Field Scanner
+	if ( MyGravitron.scanner > 0 && pause == 0 ) {
+		drawFieldLimits(ctx);
+	}
+	drawDebris(ctx);
+	// the asteroids, tinted with the GRAVITRON's effect at Field Scanner level 2
+	for ( var i in asteroidList ) {
+		asteroidList[i].Draw();
+		if ( MyGravitron.scanner > 1 && pause == 0 ) {
+			drawFieldTint(ctx,asteroidList[i]);
+		}
+		if ( showDetails == true ) {
+			asteroidList[i].ShowLife();
+		}
+	}
+	// the weapons, and the asteroid the main cannon aims at, in red when chosen by the player
+	if ( pause == 0 ) {
+		if ( aimedA != false ) {
+			ctx.strokeStyle = ( aimedA == targetedA ) ? "rgba(255, 0, 0, 1)" : "rgba(255, 255, 255, 1)";
+			ctx.beginPath();
+			ctx.arc(aimedA.x,aimedA.y,(aimedA.radius + 2),0,2*Math.PI,true);
+			ctx.closePath();
+			ctx.stroke();
+		}
+		for ( var i in weaponList ) {
+			if ( weaponList[i].active >= 1 ) {
+				displayWeapon(ctx,weaponList[i]);
+			}
+		}
+	}
+	// the shots, the magnetic ones blinking
+	for ( var i in shotList ) {
+		if ( shotList[i].weapon == 3 ) {
+			ctx.fillStyle = "rgba(255,0,0,"+(100-shotList[i].colorAlpha)/100+")";
+		} else {
+			ctx.fillStyle = shotList[i].color;
+		}
+		ctx.beginPath();
+		ctx.arc(shotList[i].x,shotList[i].y,1,0,2*Math.PI,true);
+		ctx.closePath();
+		ctx.fill();
+	}
+	MyPlanet.Draw();
+	// the shield's energy, vanishing when hit
+	if ( MyGravitron.shield > 0 && pause == 0 && shieldHit[0] != 0 ) {
+		ctx.strokeStyle = 'rgba('+shieldHit[5]+','+shieldHit[6]+','+shieldHit[7]+','+shieldHit[8]+')';
+		ctx.lineWidth = shieldHit[4];
+		ctx.lineCap = 'round';
+		ctx.beginPath();
+		ctx.arc(MyPlanet.x,MyPlanet.y,(shieldHit[1]+Math.floor(shieldHit[4]/2)),(shieldHit[2] + shieldHit[3]),shieldHit[2],false);
+		ctx.arc(MyPlanet.x,MyPlanet.y,(shieldHit[1]+Math.floor(shieldHit[4]/2)),shieldHit[2],(shieldHit[2] + shieldHit[3]),true);
+		ctx.closePath();
+		ctx.stroke();
+	}
+	if ( pause == 0 ) {
+		drawPulses(ctx);
+		drawGravitron(ctx,2);
+	}
+}
+
+// Function to draw the tutorial, step by step
+function drawTutorial ( ctx ) {
+	if ( countdownValue > 10 ) {
+		MyPlanet.Draw();
+	}
+	if ( countdownValue > 57 && countdownValue < 214 ) {
+		asteroidList[0].Draw();
+		if ( countdownValue <= 157 ) {
+			ctx.strokeStyle = 'rgba(255,0,0,1)';
+			ctx.lineWidth = 1;
+			ctx.beginPath();
+			ctx.arc(asteroidList[0].x,asteroidList[0].y,15,0,(Math.PI*2),false);
+			ctx.arc(asteroidList[0].x,asteroidList[0].y,15,(Math.PI*2),0,true);
+			ctx.closePath();
+			ctx.stroke();
+		}
+	}
+	if ( countdownValue > 157) {
+		var sx = MyPlanet.x + MyPlanet.radius * Math.cos(mainCannon.angle);
+		var sy = MyPlanet.y + MyPlanet.radius * Math.sin(mainCannon.angle);
+		var ex = MyPlanet.x + (MyPlanet.radius+4) * Math.cos(mainCannon.angle);
+		var ey = MyPlanet.y + (MyPlanet.radius+4) * Math.sin(mainCannon.angle);
+		ctx.strokeStyle = mainCannon.color;
+		ctx.beginPath();
+		ctx.moveTo(sx,sy);
+		ctx.lineTo(ex,ey);
+		ctx.closePath();
+		ctx.stroke();
+		if ( countdownValue <= 213 ) {
+			ctx.strokeStyle = 'rgba(255,0,0,1)';
+			ctx.lineWidth = 1;
+			ctx.beginPath();
+			ctx.arc(ex,ey,10,0,(Math.PI*2),false);
+			ctx.arc(ex,ey,10,(Math.PI*2),0,true);
+			ctx.closePath();
+			ctx.stroke();
+		}
+	}
+	if ( countdownValue > 193 && countdownValue < 214 ) {
+		ctx.fillStyle = shotList[0].color;
+		ctx.beginPath();
+		ctx.arc(shotList[0].x,shotList[0].y,1,0,2*Math.PI,true);
+		ctx.closePath();
+		ctx.fill();
+	}
+	if ( countdownValue > 214 ) {
+		drawDebris(ctx);
+	}
+	if ( countdownValue > 234 ) {
+		drawGravitron(ctx,1);	// thinner than in the game, as the tutorial has always shown it
+	}
+	// the mat, underlined in the status bar
+	if ( countdownValue > 296 && countdownValue <= 317 ) {
+		ctx.strokeStyle = 'rgba(255,0,0,1)';
+		ctx.beginPath();
+		ctx.moveTo(50,20);
+		ctx.lineTo(100,20);
+		ctx.closePath();
+		ctx.stroke();
+	}
+}
+
+// Function to draw the countdown's banner (3, 2, 1, GO !), as the page drew it until 2026 : a grey band with the number in its middle
+function drawBanner ( ctx ) {
+	if ( banner.alpha <= 0 && banner.background <= 0 ) {
+		return;
+	}
+	ctx.save();
+	ctx.fillStyle = 'rgba(60,60,60,' + banner.background + ')';
+	ctx.fillRect(0,banner.y,gameSize,116);			// 100 high, with 8 above and below
+	ctx.fillStyle = 'rgba(255,0,0,' + banner.alpha + ')';
+	ctx.font = '85px MirageRegular';
+	ctx.textAlign = 'center';
+	ctx.textBaseline = 'alphabetic';
+	ctx.fillText(banner.text,gameSize/2,banner.y + 74);	// where the page put the letters' baseline
+	ctx.restore();
 }
 
 

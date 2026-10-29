@@ -56,6 +56,7 @@ In **2026** the game came back to life. The goals are to keep its spirit, make i
 | 0.10.1 | Modernization, with no change in the game: the upgrades are described as data in one table, the pause menu is built from it without jQuery and its plugins (356 KB less), and the background images went from 8.9 MB of PNG to 350 KB of JPEG. |
 | 0.11.0 | The asteroids are now rocks drawn by the game: each one has its own shape, color, grain and craters, spins slowly, and is lit from the top left like the planet. The Field Scanner tints their exact shape. The images are loaded once instead of at every frame. The tutorial no longer crashes when "Space" is pressed at the very moment a step begins. |
 | 0.12.0 | Your planet is now the Earth, turning on itself once a minute: NASA's Blue Marble map is wrapped around a sphere at the screen's resolution, with its tilted axis, its atmosphere and its night side. The map is stored as text (`img/earth.js`), so that the game still works when `index.html` is opened from the disk. |
+| 0.12.1 | Smooth animation: the game is still played 25 times a second, but it is drawn at each refresh of the screen, every moving object between its last two places. The 3, 2, 1, GO! countdown is now drawn on the game. A hidden browser tab now pauses the game instead of slowing it down. |
 
 ## Roadmap (2026)
 
@@ -118,8 +119,8 @@ No build step and no dependencies to install: open `index.html` in a browser and
 |---|---|
 | `index.html` | page and menus |
 | `css/main.css` | layout and look |
-| `src/main.js` | start-up: canvas, zoom, game loop at 25 frames per second, keyboard |
-| `src/engine.js` | the game loop and its states (menu, tutorial, countdown, playing, hi-scores) |
+| `src/main.js` | start-up: canvas, zoom, game loop (25 turns a second, drawn at each refresh of the screen), keyboard |
+| `src/engine.js` | the game's turn and its states (menu, tutorial, countdown, playing, hi-scores), and `drawGame`, which draws them |
 | `src/functions.js` | debris, pulses, Gravitron, weapons, SMART AI, interception |
 | `src/shop.js` | the upgrades, described as data (`upgrades`, `shopLayout`), and the shop |
 | `src/menu.js` | the pause menu, built from the upgrades: sections, weapon tabs, tooltips |
