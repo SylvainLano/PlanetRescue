@@ -53,7 +53,16 @@ var achievements = {
 	genius			: { name : "Genius", text : "Raise your cannon's SMART AI to level 5.", picture : "chip", metal : "gold",
 						test : function () { return state == "playing" && mainCannon.smart >= 5; } },
 	hardRock		: { name : "Hard Rock", text : "Survive 3 minutes in Hard.", picture : "lightning", metal : "gold",
-						test : function () { return difficulty == "hard" && survived ( 180 ); } }
+						test : function () { return difficulty == "hard" && survived ( 180 ); } },
+	// the research tree and its weapons
+	labRat			: { name : "Lab Rat", text : "Validate your first research.", picture : "flask", metal : "bronze",
+						test : function () { return state == "playing" && researchesDone() >= 1; } },
+	fireworks		: { name : "Fireworks", text : "Destroy 3 asteroids with a single bomb, its Chain Reaction included.", picture : "fireworks", metal : "silver",
+						test : function () { return state == "playing" && bestBomb >= 3; } },
+	giantSlayer		: { name : "Giant Slayer", text : "Finish a giant asteroid with your laser.", picture : "sword", metal : "silver",
+						test : function () { return state == "playing" && giantSlain; } },
+	scholar			: { name : "Scholar", text : "Complete every research in a game.", picture : "book", metal : "gold",
+						test : function () { return state == "playing" && researchesDone() == Object.keys ( researches ).length; } }
 };
 
 // The pictures of the medals, drawn in a 64 x 64 square around its center (32, 32), with lines of the color "INK"
@@ -71,7 +80,11 @@ var medalPictures = {
 	billiards	: '<circle cx="23" cy="40" r="7"/><circle fill="INK" stroke="none" cx="42" cy="25" r="7"/><path d="M11 17q2 16 12 23" stroke-dasharray="3 4"/><path d="M50 16l3-3M52 27h4M45 14l1-4" stroke-width="2"/>',
 	cannons		: '<circle cx="32" cy="32" r="7"/><path d="M32 25V13M39 32h12M32 39v12M25 32H13" stroke-width="4"/>',
 	chip		: '<rect x="22" y="22" width="20" height="20" rx="3"/><path d="M27 22v-6M32 22v-6M37 22v-6M27 42v6M32 42v6M37 42v6M22 27h-6M22 32h-6M22 37h-6M42 27h6M42 32h6M42 37h6" stroke-width="2"/>',
-	lightning	: '<path fill="INK" stroke="none" d="M36 13L20 36h11l-3 15 16-24H33z"/>'
+	lightning	: '<path fill="INK" stroke="none" d="M36 13L20 36h11l-3 15 16-24H33z"/>',
+	flask		: '<path d="M27 15h10M29 15v12L18 46c-1 2 0 4 2 4h24c2 0 3-2 2-4L35 27V15"/><path d="M22 40h20" stroke-width="2"/><circle fill="INK" stroke="none" cx="30" cy="45" r="2"/><circle fill="INK" stroke="none" cx="36" cy="44" r="1.5"/>',
+	fireworks	: '<circle fill="INK" stroke="none" cx="32" cy="32" r="3"/><path d="M32 25v-7M37 27l5-5M39 32h7M37 37l5 5M32 39v7M27 37l-5 5M25 32h-7M27 27l-5-5" stroke-width="2.5"/><g fill="INK" stroke="none"><circle cx="32" cy="13" r="2"/><circle cx="45.4" cy="18.6" r="2"/><circle cx="51" cy="32" r="2"/><circle cx="45.4" cy="45.4" r="2"/><circle cx="32" cy="51" r="2"/><circle cx="18.6" cy="45.4" r="2"/><circle cx="13" cy="32" r="2"/><circle cx="18.6" cy="18.6" r="2"/></g>',
+	sword		: '<path d="M46 16L25 37" stroke-width="4"/><path d="M46 16l2-4-4 2M19 33l12 12M24 40l-8 8" stroke-width="3"/><circle fill="INK" stroke="none" cx="15" cy="49" r="2.5"/>',
+	book		: '<path d="M32 21c-5-4-12-5-18-4v26c6-1 13 0 18 4 5-4 12-5 18-4V17c-6-1-13 0-18 4zM32 21v26"/><path d="M19 25c3 0 6 1 8 2M19 31c3 0 6 1 8 2M37 27c2-1 5-2 8-2M37 33c2-1 5-2 8-2" stroke-width="1.5"/>'
 };
 
 // the colors of the medals : their metal's rim, their disk and their picture ; the ones not obtained yet are dark silhouettes
@@ -130,6 +143,15 @@ function ownedWeapons () {
 		}
 	}
 	return owned;
+}
+
+// function to count the researches validated in the current game (researches.js)
+function researchesDone () {
+	var done = 0;
+	for ( var id in research.done ) {
+		done++;
+	}
+	return done;
 }
 
 // function to read the achievements saved by the browser

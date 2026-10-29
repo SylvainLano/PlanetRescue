@@ -107,6 +107,8 @@
 	var nbrCost			= 0;
 	var calmSince		= 0;		// the turn of the last asteroid crashed on the planet (Untouchable achievement)
 	var bankShot		= false;	// an asteroid destroyed by another one the GRAVITRON deflected (Bank Shot achievement)
+	var bestBomb		= 0;		// the most asteroids destroyed by a bomb and the ones of its Chain Reaction (Fireworks achievement)
+	var giantSlain		= false;	// a giant asteroid finished by the laser (Giant Slayer achievement)
 
 	// player's planet parameters
 	var planetSkin		= earthMap;		// the map wrapped around the planet (img/earth.js)
@@ -194,6 +196,8 @@ function initDefault(context,level) {
 	nbrCost			= 0;
 	calmSince		= 0;
 	bankShot		= false;
+	bestBomb		= 0;
+	giantSlain		= false;
 	newAchievements	= [];		// the achievements obtained in this game (achievements.js)
 
 	// player's planet parameters

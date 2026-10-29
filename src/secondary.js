@@ -247,7 +247,8 @@ function resolveCapsules () {
 			}
 		}
 		if ( hit ) {
-			hit.bomb = { power : capsule.power, blast : capsule.blast };
+			// (its family, shared with the bombs of its Chain Reaction, counts the asteroids they destroy)
+			hit.bomb = { power : capsule.power, blast : capsule.blast, family : { destroyed : 0 } };
 		} else {
 			kept.push ( capsule );
 		}
@@ -277,7 +278,7 @@ function detonateBomb ( ctx, bomb ) {
 // every other asteroid in its blast takes its whole power, and leaves debris ; once the Chain Reaction is researched,
 // the ones it doesn't destroy become bombs with half its power, until it is too weak to go on
 function explodeBomb ( ctx, bomb ) {
-	var power = bomb.bomb.power, blast = bomb.bomb.blast;
+	var power = bomb.bomb.power, blast = bomb.bomb.blast, family = bomb.bomb.family;
 	var chained = ( nitroLauncher.smart >= 1 ) ? Math.floor ( power / 2 ) : 0;
 	bomb.bomb = false;
 	for ( var a in asteroidList ) {
@@ -288,11 +289,13 @@ function explodeBomb ( ctx, bomb ) {
 			asteroid.life -= power;
 			if ( asteroid.life <= 0 ) {
 				allPassed = 1;
+				family.destroyed++;
 			} else if ( chained > 0 && !asteroid.bomb ) {
-				asteroid.bomb = { power : chained, blast : blast };
+				asteroid.bomb = { power : chained, blast : blast, family : family };
 			}
 		}
 	}
+	bestBomb = Math.max ( bestBomb, family.destroyed );
 	blastList.push ( { x : bomb.x, y : bomb.y, size : 0, age : 0, blast : blast } );
 }
 
@@ -382,6 +385,7 @@ function fireLaser ( ctx ) {
 		target.life--;
 		if ( target.life <= 0 ) {
 			allPassed = 1;
+			giantSlain = giantSlain || target.giant;
 		}
 	}
 }
