@@ -139,6 +139,18 @@ var upgrades = {
 							max : 4, decreasing : true, price : "from16times100",
 							level : function () { return laserCannon.fireRate / framesPerSecond; }, raise : function () { laserCannon.fireRate-=2*framesPerSecond; } },
 
+	// REBOUND CANNON : the last secondary weapon, given by its research
+	// (its reload time goes down, in seconds)
+	reboundReload		: { name : "Reload Time", tip : "Rebound Reload Time - The time the cannon waits before firing a new shot. Expressed in seconds.",
+							max : 2, decreasing : true, price : "from6times100",
+							level : function () { return reboundCannon.fireRate / framesPerSecond; }, raise : function () { reboundCannon.fireRate-=framesPerSecond/2; } },
+	reboundPow			: { name : "Hit Power", tip : "Rebound Hit Power - The damages done to every asteroid a shot hits.",
+							max : 8, price : "times3pow2",
+							level : function () { return reboundCannon.power; }, raise : function () { reboundCannon.power++; } },
+	reboundBounces		: { name : "Rebounds", tip : "Rebounds - How many times a shot can ricochet, on the asteroids, the edges of space or your planet, before it is spent.",
+							max : 8, price : "times100",
+							level : function () { return reboundCannon.rebounds; }, raise : function () { reboundCannon.rebounds++; } },
+
 	// PLANET
 	// healing is bought by the inhabitants : its price counts the ones left to heal, and it can heal a part of them only
 	healing				: { name : "Healing", tip : "Healing - Here you can spend your Mat to help the reconstruction of your planet.",
@@ -201,7 +213,11 @@ var shopLayout = [
 		{ tab : "Laser", title : "Laser Cannon", secondary : "laserW",
 			appears : function () { return laserCannon.cannonNbr > 0; },
 			statusTip : "A secondary weapon, always active : it takes no place among your active weapons.",
-			upgrades : ["laserPow","laserDuration","laserCooldown"] }
+			upgrades : ["laserPow","laserDuration","laserCooldown"] },
+		{ tab : "Rebound", title : "Rebound Cannon", secondary : "reboundW",
+			appears : function () { return reboundCannon.cannonNbr > 0; },
+			statusTip : "A secondary weapon, always active : it takes no place among your active weapons.",
+			upgrades : ["reboundReload","reboundPow","reboundBounces"] }
 	] },
 	{ title : "Heal or upgrade your Planet", upgrades : ["healing","healFact","maxHealth","maxMat","autoHeal","recovery","lab"] },
 	{ title : "Researches", researches : true }		// filled by refreshResearches() (researches.js)
@@ -369,7 +385,7 @@ function refresh() {
 
 // function to find a weapon by its type, the secondary ones too
 function weaponOfType ( type ) {
-	var secondary = [ missileLauncher, nitroLauncher, laserCannon ];
+	var secondary = [ missileLauncher, nitroLauncher, laserCannon, reboundCannon ];
 	for ( var s in secondary ) {
 		if ( type == secondary[s].type ) {
 			return secondary[s];

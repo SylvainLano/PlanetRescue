@@ -316,6 +316,7 @@ function movingParts() {
 		{ objects : shotList, parts : ["x", "y"] },
 		{ objects : missileList, parts : ["x", "y"] },
 		{ objects : capsuleList, parts : ["x", "y"] },
+		{ objects : reboundList, parts : ["x", "y"] },
 		{ objects : blastList, parts : ["size", "age"] },
 		{ objects : pulseList, parts : ["radius"] },
 		{ objects : weaponList, parts : ["angle"] },	// the Spiral & Orbital weapon's "angle" is a number of cannon, but it is not drawn

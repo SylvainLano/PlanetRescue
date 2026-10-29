@@ -14,6 +14,7 @@
 // The first one is the missile launcher : its missiles fly to the main cannon's target, and explode on the first asteroid they touch
 // The second one is the nitroglycerine launcher : its capsule turns an asteroid into a bomb, for the player to steer into the others
 // The third one is the laser : its beam burns the most dangerous asteroid for a while, then cools down
+// The fourth one is the rebound cannon : its shots ricochet on the asteroids, the edges of space and the planet's atmosphere
 
 // function to make the missile launcher fire at the main cannon's target, once researched
 function fireMissiles ( ctx, target ) {
@@ -516,4 +517,171 @@ function burnMark ( ctx, asteroid, strength ) {
 	ctx.beginPath();
 	ctx.arc ( asteroid.x, asteroid.y, asteroid.radius + 5, 0, 2 * Math.PI );
 	ctx.fill();
+}
+
+// function to make the rebound cannon fire at the main cannon's target, once researched
+function fireRebounds ( target ) {
+	if ( reboundCannon.cannonNbr < 1 ) {
+		return;
+	}
+	reboundCannon.currentDelay++;
+	if ( reboundCannon.currentDelay >= reboundCannon.fireRate && target != false ) {
+		reboundCannon.currentDelay = 0;
+		var speed = reboundCannon.speed;
+		var angle = interception ( target, speed, MyPlanet.radius + 5 + speed );
+		reboundList.push ( {
+			x : MyPlanet.x + ( MyPlanet.radius + 5 ) * Math.cos ( angle ),
+			y : MyPlanet.y + ( MyPlanet.radius + 5 ) * Math.sin ( angle ),
+			vx : speed * Math.cos ( angle ),
+			vy : speed * Math.sin ( angle ),
+			power : reboundCannon.power,
+			rebounds : reboundCannon.rebounds,		// the rebounds it can still make
+			trail : []								// its last places, and the points where it ricocheted
+		} );
+		playSound ( "rebound" );
+	}
+}
+
+// function to move the rebound shots, in small steps not to go through an asteroid : each one ricochets
+// until it has no rebound left
+function resolveRebounds ( ctx ) {
+	var kept = [];
+	for ( var r in reboundList ) {
+		var shot = reboundList[r];
+		shot.trail.push ( { x : shot.x, y : shot.y } );
+		var steps = Math.ceil ( Math.sqrt ( shot.vx * shot.vx + shot.vy * shot.vy ) / 3 );
+		var going = true;
+		for ( var s = 0; s < steps && going; s++ ) {
+			shot.x += shot.vx / steps;
+			shot.y += shot.vy / steps;
+			going = ricochet ( ctx, shot );
+		}
+		shot.trail = shot.trail.slice ( -10 );
+		if ( going ) {
+			kept.push ( shot );
+		}
+	}
+	reboundList = kept;
+}
+
+// function to make a rebound shot ricochet on what it meets : an asteroid, which takes its power, the planet's atmosphere,
+// which it spares, or an edge of space ; returns false once it has no rebound left
+function ricochet ( ctx, shot ) {
+	var touched = false, nx = 0, ny = 0;
+	for ( var a in asteroidList ) {
+		var asteroid = asteroidList[a];
+		if ( asteroid.life > 0 && !touched ) {
+			touched = bounceOn ( shot, asteroid.x, asteroid.y, asteroid.radius + 2 ) && asteroid;
+		}
+	}
+	if ( !touched && bounceOn ( shot, MyPlanet.x, MyPlanet.y, MyPlanet.radius + 2 ) ) {
+		touched = MyPlanet;
+	}
+	if ( touched ) {
+		// (bounceOn has put the shot on its surface, the way out)
+		nx = ( shot.x - touched.x ) / ( touched.radius + 2 );
+		ny = ( shot.y - touched.y ) / ( touched.radius + 2 );
+	} else if ( shot.x < 0 && shot.vx < 0 ) {
+		nx = 1;
+	} else if ( shot.x > gameSize && shot.vx > 0 ) {
+		nx = -1;
+	} else if ( shot.y < 0 && shot.vy < 0 ) {
+		ny = 1;
+	} else if ( shot.y > gameSize && shot.vy > 0 ) {
+		ny = -1;
+	} else {
+		return true;
+	}
+	if ( touched && touched != MyPlanet ) {
+		addDebris ( ctx, shot.power, touched.x, touched.y, touched.vx, touched.vy, debrisList );
+		touched.life -= shot.power;
+		if ( touched.life <= 0 ) {
+			allPassed = 1;
+		}
+	}
+	shot.trail.push ( { x : shot.x, y : shot.y } );
+	sparkList.push ( { x : shot.x, y : shot.y, age : 0 } );
+	playSound ( "ricochet" );
+	if ( shot.rebounds <= 0 ) {
+		return false;
+	}
+	shot.rebounds--;
+	// its way turns over, as a light on a mirror, and goes astray on the rough rock of an asteroid
+	// (else a shot fired straight at it would go to and fro between it and the planet)
+	var along = shot.vx * nx + shot.vy * ny;
+	shot.vx -= 2 * along * nx;
+	shot.vy -= 2 * along * ny;
+	if ( touched && touched != MyPlanet ) {
+		var astray = ( Math.random() * 2 - 1 ) * ricochetScatter;
+		var vx = shot.vx * Math.cos ( astray ) - shot.vy * Math.sin ( astray );
+		var vy = shot.vx * Math.sin ( astray ) + shot.vy * Math.cos ( astray );
+		if ( vx * nx + vy * ny > 0 ) {
+			shot.vx = vx;
+			shot.vy = vy;
+		}
+	}
+	return true;
+}
+
+// function to know if a rebound shot hits a round thing, going into it ; if so, it is put back on its surface
+function bounceOn ( shot, x, y, radius ) {
+	var dx = shot.x - x, dy = shot.y - y;
+	var distance = Math.sqrt ( dx * dx + dy * dy );
+	if ( distance >= radius || distance == 0 || dx * shot.vx + dy * shot.vy >= 0 ) {
+		return false;
+	}
+	shot.x = x + dx / distance * radius;
+	shot.y = y + dy / distance * radius;
+	return true;
+}
+
+// function to make the sparks of the ricochets fade
+function resolveSparks () {
+	var kept = [];
+	for ( var s in sparkList ) {
+		sparkList[s].age++;
+		if ( sparkList[s].age < 8 ) {
+			kept.push ( sparkList[s] );
+		}
+	}
+	sparkList = kept;
+}
+
+// function to draw the rebound shots with their trail, bent where they ricocheted, and the sparks of their ricochets
+function drawRebounds ( ctx ) {
+	ctx.save();
+	ctx.lineCap = 'round';
+	ctx.lineJoin = 'round';
+	for ( var r in reboundList ) {
+		var shot = reboundList[r];
+		var trail = shot.trail.concat ( [ { x : shot.x, y : shot.y } ] );
+		for ( var t = 1; t < trail.length; t++ ) {
+			ctx.strokeStyle = 'rgba(199,125,255,' + ( 0.7 * t / trail.length ) + ')';
+			ctx.lineWidth = 1 + t / trail.length;
+			ctx.beginPath();
+			ctx.moveTo ( trail[t-1].x, trail[t-1].y );
+			ctx.lineTo ( trail[t].x, trail[t].y );
+			ctx.stroke();
+		}
+		var glow = ctx.createRadialGradient ( shot.x, shot.y, 0, shot.x, shot.y, 7 );
+		glow.addColorStop ( 0, 'rgba(230,200,255,0.9)' );
+		glow.addColorStop ( 1, 'rgba(199,125,255,0)' );
+		ctx.fillStyle = glow;
+		ctx.beginPath();
+		ctx.arc ( shot.x, shot.y, 7, 0, 2 * Math.PI );
+		ctx.fill();
+		ctx.fillStyle = '#fff';
+		ctx.beginPath();
+		ctx.arc ( shot.x, shot.y, 2, 0, 2 * Math.PI );
+		ctx.fill();
+	}
+	for ( var s in sparkList ) {
+		var spark = sparkList[s];
+		ctx.strokeStyle = 'rgba(230,200,255,' + ( 1 - spark.age / 8 ) + ')';
+		ctx.lineWidth = 1.5;
+		ctx.beginPath();
+		ctx.arc ( spark.x, spark.y, 2 + spark.age, 0, 2 * Math.PI );
+		ctx.stroke();
+	}
+	ctx.restore();
 }

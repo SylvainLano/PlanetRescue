@@ -928,15 +928,26 @@ a.level.current {
 	color: #9aa8ff;
 }
 
-/* the weapons' tabs, with their counters under their names */
+/* the weapons' tabs, with their counters under their names : the secondary weapons' ones on a second row */
 #shop .tabs {
-	overflow: hidden;
+	display: flex;
+	flex-wrap: wrap;
 	margin-top: 4px;
 }
 
+#shop .tabs::after {
+	content: "";
+	flex-basis: 100%;	/* the break between the two rows */
+	order: 1;
+}
+
+#shop .tab.secondary {
+	order: 2;
+	margin-top: 3px;
+}
+
 #shop .tab {
-	float: left;
-	min-width: 46px;		/* narrow enough for the eight weapons' tabs to stay on one row */
+	min-width: 46px;
 	margin-right: 3px;
 	padding: 4px 4px;
 	text-align: center;

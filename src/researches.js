@@ -16,7 +16,8 @@
 var researchBranches = {
 	missiles	: { name : "Missiles", opener : "survivor" },
 	explosives	: { name : "Explosives", opener : "demolisher" },
-	lasers		: { name : "Lasers", opener : "sharpshooter" }
+	lasers		: { name : "Lasers", opener : "sharpshooter" },
+	ricochets	: { name : "Ricochets", opener : "bankShot" }
 };
 
 // each research : its name, its tooltip, its branch, its time (in seconds of play), the researches it needs first, and what it brings
@@ -38,7 +39,10 @@ var researches = {
 					apply : function () { laserCannon.cannonNbr = 1; } },
 	piercing	: { name : "Piercing Beam", branch : "lasers", time : 90, needs : ["laser"],
 					tip : "Piercing Beam - Your laser's beam goes through its target, and spreads behind it in a cone of light to the edge of space : every other asteroid it reaches, on its way or in the cone, burns at half power.",
-					apply : function () { laserCannon.smart = 1; } }
+					apply : function () { laserCannon.smart = 1; } },
+	rebound		: { name : "Rebound Shot", branch : "ricochets", time : 90, needs : [],
+					tip : "Rebound Shot - A secondary weapon, whose fast shots fly to your main cannon's target, then ricochet on the asteroids they hit, on the edges of space and on your planet's atmosphere, which they don't harm, until they have made all their rebounds.",
+					apply : function () { reboundCannon.cannonNbr = 1; } }
 };
 
 // the researches of the current game : the planet's lab (an upgrade to buy, its level 2 being the Automation), the one going on,

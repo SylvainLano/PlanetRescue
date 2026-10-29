@@ -79,7 +79,7 @@ function addPanels ( content, panels ) {
 // function to add a weapon panel and its tab
 function addPanel ( tabs, holder, panel ) {
 	var index = holder.children.length;
-	var tab = newElement ( "a", "tab", tabs );
+	var tab = newElement ( "a", panel.secondary ? "tab secondary" : "tab", tabs );	// (the secondary weapons' tabs on a row of their own)
 	addBadge ( tab, panel.tab, panelThings ( panel ) );
 	tab.addEventListener ( "click", function () { showPanel ( index, tabs, holder ); } );
 	if ( panel.appears ) {

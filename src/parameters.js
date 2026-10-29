@@ -41,7 +41,8 @@
 		HaBW			: { delay : 50, power : 1, speed : 1, smart : 0, cannons : 0 },
 		missileW		: { delay : 100, power : 3, speed : 1.5, smart : 0, cannons : 0, blast : 25 },	// a secondary weapon, given by its research
 		nitroW			: { delay : 200, power : 12, speed : 1.5, smart : 0, cannons : 0, blast : 40 },	// another one, its delay counted once its bomb is gone
-		laserW			: { delay : 350, power : 6, speed : 0, smart : 0, cannons : 0, duration : 50 },	// and the laser : its power per second, its beam's duration and its cooldown in turns
+		laserW			: { delay : 350, power : 6, speed : 0, smart : 0, cannons : 0, duration : 50 },	// the laser : its power per second, its beam's duration and its cooldown in turns
+		reboundW		: { delay : 125, power : 3, speed : 6, smart : 0, cannons : 0, rebounds : 2 },	// and the rebound shot, with the rebounds it can make
 
 		// player's GRAVITRON
 		gravPower		: 1,
@@ -142,8 +143,12 @@
 	var homingTurn		= 0.08;				// how much a homing missile can turn at each turn, in radians
 	var nitroLauncher	= false;			// the other one, whose capsules turn an asteroid into a bomb (secondary.js)
 	var capsuleList		= new Array();
-	var laserCannon		= false;			// and the laser, burning its target for a while before it cools down (secondary.js)
+	var laserCannon		= false;			// the laser, burning its target for a while before it cools down (secondary.js)
 	var pierceCone		= 20 * Math.PI / 180;	// how much its Piercing Beam spreads behind its target, on each side
+	var reboundCannon	= false;			// and the rebound cannon, whose shots ricochet on the edges, the asteroids and the planet (secondary.js)
+	var reboundList		= new Array();
+	var ricochetScatter	= 30 * Math.PI / 180;	// how much a rebound shot can go astray on an asteroid's rock, on each side
+	var sparkList		= new Array();		// the sparks of their ricochets
 
 	// player's GRAVITRON parameters
 	var key				= [0,0,0,0,0,0,0];		// counterclockwise, clockwise, close, open, pause, change target, erase target choice
@@ -246,6 +251,10 @@ function initDefault(context,level) {
 	laserCannon.firing = 0;		// the turns its beam still burns
 	laserCannon.heat = 0;		// the part of a point of damage it has done
 	laserCannon.pierceHeat = 0;	// the same, for the asteroids its Piercing Beam goes through
+	reboundCannon	= newWeapon(context,"reboundW","#c77dff");	// with no cannon until its research is validated
+	reboundCannon.rebounds = gameValues.reboundW.rebounds;
+	reboundList		= [];
+	sparkList		= [];
 	newResearches();
 	
 	// player's GRAVITRON parameters
