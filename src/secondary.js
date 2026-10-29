@@ -181,6 +181,7 @@ function drawMissiles ( ctx ) {
 }
 
 // function to make the nitroglycerine launcher fire, once researched : one bomb at a time, its delay counted once the bomb before is gone
+// (and the ones its Chain Reaction made)
 function fireCapsules () {
 	if ( nitroLauncher.cannonNbr < 1 || capsuleList.length > 0 || bombInPlay() ) {
 		return;
@@ -254,22 +255,30 @@ function resolveCapsules () {
 	capsuleList = kept;
 }
 
-// function to make a bomb explode against the asteroid it touched : the bomb is spent, its life left turned into debris
+// function to make a bomb explode against the asteroid it touched
 // (an asteroid destroyed by a bomb the GRAVITRON sent its way makes a Bank Shot)
 function touchBomb ( ctx, bomb, touched ) {
-	addDebris ( ctx, bomb.life, bomb.x, bomb.y, bomb.vx, bomb.vy, debrisList );
-	bomb.life = 0;
 	var before = touched.life;
-	explodeBomb ( ctx, bomb );
+	detonateBomb ( ctx, bomb );
 	if ( before > 0 && touched.life <= 0 && bomb.turned >= bankShotTurn ) {
 		bankShot = true;
 	}
 }
 
-// function to make a bomb explode, against an asteroid, destroyed, or crashing on the planet :
-// every other asteroid in its blast takes its whole power, and leaves debris
+// function to make a bomb explode by itself, against an asteroid or once the planet is in its blast, which spares the planet :
+// the bomb is spent, its life left turned into debris
+function detonateBomb ( ctx, bomb ) {
+	addDebris ( ctx, bomb.life, bomb.x, bomb.y, bomb.vx, bomb.vy, debrisList );
+	bomb.life = 0;
+	explodeBomb ( ctx, bomb );
+}
+
+// function to make a bomb explode, by itself or destroyed :
+// every other asteroid in its blast takes its whole power, and leaves debris ; once the Chain Reaction is researched,
+// the ones it doesn't destroy become bombs with half its power, until it is too weak to go on
 function explodeBomb ( ctx, bomb ) {
 	var power = bomb.bomb.power, blast = bomb.bomb.blast;
+	var chained = ( nitroLauncher.smart >= 1 ) ? Math.floor ( power / 2 ) : 0;
 	bomb.bomb = false;
 	for ( var a in asteroidList ) {
 		var asteroid = asteroidList[a];
@@ -279,6 +288,8 @@ function explodeBomb ( ctx, bomb ) {
 			asteroid.life -= power;
 			if ( asteroid.life <= 0 ) {
 				allPassed = 1;
+			} else if ( chained > 0 && !asteroid.bomb ) {
+				asteroid.bomb = { power : chained, blast : blast };
 			}
 		}
 	}
@@ -286,6 +297,7 @@ function explodeBomb ( ctx, bomb ) {
 }
 
 // function to draw the bombs' glow under their rock, with the reach of their blast
+// (the ones of a Chain Reaction, weaker, glow less)
 function drawBombs ( ctx ) {
 	var beat = 0.5 + 0.5 * Math.sin ( performance.now() / 120 );
 	ctx.save();
@@ -294,9 +306,10 @@ function drawBombs ( ctx ) {
 		if ( !bomb.bomb ) {
 			continue;
 		}
+		var strength = Math.min ( 1, 0.4 + 0.6 * bomb.bomb.power / nitroLauncher.power );
 		var reach = bomb.radius * ( 2 + 0.5 * beat );
 		var glow = ctx.createRadialGradient ( bomb.x, bomb.y, bomb.radius * 0.5, bomb.x, bomb.y, reach );
-		glow.addColorStop ( 0, 'rgba(255,240,120,' + ( 0.6 + 0.3 * beat ) + ')' );
+		glow.addColorStop ( 0, 'rgba(255,240,120,' + ( ( 0.6 + 0.3 * beat ) * strength ) + ')' );
 		glow.addColorStop ( 1, 'rgba(255,200,40,0)' );
 		ctx.fillStyle = glow;
 		ctx.beginPath();

@@ -582,17 +582,15 @@ function engine() {
 			asteroidList[i].turned = 0;		// a new way, which the GRAVITRON has not turned yet
 
 
+		// a bomb explodes as soon as the planet comes into its blast, which spares the planet (secondary.js)
+		} else if ( asteroidList[i].bomb && distance < MyPlanet.radius + asteroidList[i].bomb.blast ) {
+			detonateBomb(ctx,asteroidList[i]);
+
 		// Testing if asteroid is in collision with the planet
 		} else if ( distance < (MyPlanet.radius + asteroidList[i].radius) ){
 			// Yes it is ! Decreasing life and destroying asteroid
-			// (a bomb explodes there, taking its blast's power away too)
-			var crashDamage = asteroidList[i].life;
-			if ( asteroidList[i].bomb ) {
-				crashDamage += asteroidList[i].bomb.power;
-				explodeBomb(ctx,asteroidList[i]);
-			}
-			MyPlanet.life -= crashDamage;
-			nbrDamage += crashDamage;
+			MyPlanet.life -= asteroidList[i].life;
+			nbrDamage += asteroidList[i].life;
 			if( MyPlanet.life < 0 ){
 				nbrDamage += MyPlanet.life;
 			}

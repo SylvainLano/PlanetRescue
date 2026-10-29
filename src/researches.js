@@ -28,8 +28,11 @@ var researches = {
 					tip : "Homing Missiles - Your missiles steer toward their target, even when it changes its way, and look for another one if it is destroyed before they reach it.",
 					apply : function () { missileLauncher.smart = 1; } },
 	nitro		: { name : "Nitroglycerine", branch : "explosives", time : 75, needs : [],
-					tip : "Nitroglycerine - A secondary weapon, whose slow capsules turn an asteroid far from your planet into a bomb. It explodes when it touches another asteroid, or when it is destroyed, damaging every asteroid around. Steer it with your Gravitron, but keep it away from your planet : crashing on it, a bomb does more damage.",
+					tip : "Nitroglycerine - A secondary weapon, whose slow capsules turn an asteroid far from your planet into a bomb, damaging every asteroid around when it explodes : when it touches another asteroid, when it is destroyed, or as soon as your planet comes into its blast, which spares your planet. Steer it into the others with your Gravitron.",
 					apply : function () { nitroLauncher.cannonNbr = 1; } },
+	chain		: { name : "Chain Reaction", branch : "explosives", time : 90, needs : ["nitro"],
+					tip : "Chain Reaction - The asteroids a bomb's blast doesn't destroy become bombs too, with half its power : their blasts do the same, until the reaction fades out.",
+					apply : function () { nitroLauncher.smart = 1; } },
 	laser		: { name : "Laser", branch : "lasers", time : 90, needs : [],
 					tip : "Laser - A secondary weapon, whose beam burns an asteroid for a while, then cools down. It aims first at the giants, then at the asteroids going to crash on your planet, the soonest first.",
 					apply : function () { laserCannon.cannonNbr = 1; } }
