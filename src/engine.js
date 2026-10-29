@@ -452,11 +452,15 @@ function engine() {
 				if ( asteroidList.length > 2 ) {
 					angle = angle - Math.PI / 4 + Math.random() * Math.PI / 2;
 				}
-				var velocity = (Math.random() * 2 + 1) * asteroidSpeedFactor() * asteroidBS;
+				// a giant now and then, after a while : much stronger, bigger, heavier and slower, a threat to destroy first
+				var giant = gameTime >= gameValues.giantFrom * framesPerSecond && Math.random() < gameValues.giantChance;
+				var velocity = (Math.random() * 2 + 1) * asteroidSpeedFactor() * asteroidBS * ( giant ? giantSpeed : 1 );
 				var vx = - velocity * Math.cos(angle);
 				var vy = - velocity * Math.sin(angle);
-			
-			item = new Asteroid(ctx,gameValues.asteroidLife,asteroidBR,asteroidBM,AsterX,AsterY,vx,vy);
+
+			// its life grows as time passes
+			var life = ( giant ? gameValues.giantLife : gameValues.asteroidLife ) + asteroidExtraLife();
+			item = new Asteroid(ctx,life,asteroidBR * ( giant ? giantSize : 1 ),asteroidBM * ( giant ? giantMass : 1 ),AsterX,AsterY,vx,vy,giant);
 			asteroidList.push(item);
 		}
 	}	// this is the pause bracket
@@ -533,10 +537,14 @@ function engine() {
 					} else {
 						gameOverInnerHTML += "<span class=statLower>";
 					}
-					// the score rewards what the player does : destroying asteroids, gathering mat, and surviving
+					// the score rewards what the player does : destroying asteroids (a giant is worth 50), gathering mat, and surviving
 					// (the 2010 score was saved as 'score', this one has its own record)
-					var score = nbrDestroyed * 10 + MyPlanet.totalMat + seconds;
-					gameOverInnerHTML += nbrCost + " mat</span> for them.<br /><br />Score : " + nbrDestroyed + " asteroids &times; 10 + " + MyPlanet.totalMat + " mat + " + seconds + " seconds.";
+					var score = ( nbrDestroyed - nbrGiants ) * 10 + nbrGiants * 50 + MyPlanet.totalMat + seconds;
+					gameOverInnerHTML += nbrCost + " mat</span> for them.<br /><br />Score : " + ( nbrDestroyed - nbrGiants ) + " asteroids &times; 10 + ";
+					if ( nbrGiants > 0 ) {
+						gameOverInnerHTML += nbrGiants + " giants &times; 50 + ";
+					}
+					gameOverInnerHTML += MyPlanet.totalMat + " mat + " + seconds + " seconds.";
 					if ( newAchievements.length > 0 ) {
 						gameOverInnerHTML += "<br />Achievements unlocked : <span class=statUpper>" + newAchievements.join(", ") + "</span>";
 					}
@@ -585,6 +593,9 @@ function engine() {
 			// This one is done (the ones crashing on the planet are removed right away, they don't come here)
 			keepit = 0;
 			nbrDestroyed++;
+			if ( asteroidList[i].giant ) {
+				nbrGiants++;
+			}
 		} else if (pause == 0) {
 		
 		// Calculating distance to the player's planet
@@ -663,7 +674,7 @@ function engine() {
 			// angle has already been calculated before
 			
 			// lauching asteroid right through
- 			var velocity = (Math.random() * 4 + 1) * asteroidSpeedFactor() * asteroidBS;
+ 			var velocity = (Math.random() * 4 + 1) * asteroidSpeedFactor() * asteroidBS * ( asteroidList[i].giant ? giantSpeed : 1 );
 			asteroidList[i].vx = - velocity * Math.cos(angle);
 			asteroidList[i].vy = - velocity * Math.sin(angle);
 			asteroidList[i].turned = 0;		// a new way, which the GRAVITRON has not turned yet

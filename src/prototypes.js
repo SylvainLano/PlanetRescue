@@ -186,7 +186,7 @@ function shapeRock ( asteroid ) {
 	var r = asteroid.radius;
 	asteroid.rockHalf = r * 1.2;
 	asteroid.outline = rockOutline ( r );
-	asteroid.rock = rockTexture ( asteroid.outline, asteroid.rockHalf, r, asteroid.context );
+	asteroid.rock = rockTexture ( asteroid.outline, asteroid.rockHalf, r, asteroid.context, asteroid.giant );
 	asteroid.spin = Math.random() * 2 * Math.PI;
 	asteroid.spinSpeed = ( 0.01 + Math.random() * 0.03 ) * ( Math.random() < 0.5 ? -1 : 1 );
 	asteroid.shade = rockShade ( r, asteroid.context );
@@ -224,7 +224,7 @@ function rockOutline ( r ) {
 }
 
 // function to draw the rock once, at the resolution of the game's canvas : its color, its grain and its craters
-function rockTexture ( outline, half, r, context ) {
+function rockTexture ( outline, half, r, context, giant ) {
 	var rock = document.createElement ( "canvas" );
 	rock.width = rock.height = Math.ceil ( half * 2 * Math.max ( 2, context.canvas.width / gameSize ) );
 	var ctx = rock.getContext ( "2d" );
@@ -232,9 +232,12 @@ function rockTexture ( outline, half, r, context ) {
 	ctx.translate ( half, half );
 	ctx.clip ( outline );
 
-	// a brownish grey, different for each rock
-	var hue = 20 + Math.random() * 20;
-	ctx.fillStyle = "hsl(" + hue + "," + ( 8 + Math.random() * 12 ) + "%," + ( 30 + Math.random() * 10 ) + "%)";
+	// a brownish grey, different for each rock ; a dark rusty red for the giants, to see them coming
+	if ( giant ) {
+		ctx.fillStyle = "hsl(" + ( 5 + Math.random() * 10 ) + "," + ( 30 + Math.random() * 15 ) + "%," + ( 22 + Math.random() * 6 ) + "%)";
+	} else {
+		ctx.fillStyle = "hsl(" + ( 20 + Math.random() * 20 ) + "," + ( 8 + Math.random() * 12 ) + "%," + ( 30 + Math.random() * 10 ) + "%)";
+	}
 	ctx.fill ( outline );
 
 	// some lighter and darker patches, then the fine grain of the stone

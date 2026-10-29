@@ -21,7 +21,10 @@ var researchBranches = {
 var researches = {
 	missiles	: { name : "Missile Launcher", branch : "missiles", time : 60, needs : [],
 					tip : "Missile Launcher - A secondary weapon, which takes no place among your active weapons. Its missiles fly to your main cannon's target, and explode on the first asteroid they touch, damaging every asteroid around.",
-					apply : function () { missileLauncher.cannonNbr = 1; } }
+					apply : function () { missileLauncher.cannonNbr = 1; } },
+	homing		: { name : "Homing Missiles", branch : "missiles", time : 90, needs : ["missiles"],
+					tip : "Homing Missiles - Your missiles steer toward their target, even when it changes its way, and look for another one if it is destroyed before they reach it.",
+					apply : function () { missileLauncher.smart = 1; } }
 };
 
 // the researches of the current game : the one going on, if it is complete, the time spent on each one (in turns), and the ones validated

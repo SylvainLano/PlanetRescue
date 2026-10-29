@@ -18,7 +18,11 @@
 		spawnSlowness	: 180,		// seconds for the interval to go about two thirds of the way down
 		speedGrowth		: 400,		// seconds for the asteroids' speed to grow by its starting value
 		asteroidLife	: 10,
+		lifeGrowth		: 60,		// seconds for the asteroids to get one more point of life
 		asteroidSpeed	: 0.25,		// base speed for the asteroids, each one being 1 to 3 times faster
+		giantFrom		: 120,		// seconds before the first giant asteroid may come
+		giantChance		: 0.1,		// part of the asteroids coming as giants after that
+		giantLife		: 40,		// a giant's life, growing with time as the others'
 
 		// player's planet
 		planetLife		: 20,
@@ -35,7 +39,7 @@
 		SaOW			: { delay : 25, power : 1, speed : 5, smart : 0, cannons : 0 },
 		magneticW		: { delay : 25, power : 3, speed : 1, smart : 0, cannons : 0 },
 		HaBW			: { delay : 50, power : 1, speed : 1, smart : 0, cannons : 0 },
-		missileW		: { delay : 75, power : 4, speed : 2, smart : 0, cannons : 0, blast : 30 },	// a secondary weapon, given by its research
+		missileW		: { delay : 100, power : 3, speed : 1.5, smart : 0, cannons : 0, blast : 25 },	// a secondary weapon, given by its research
 
 		// player's GRAVITRON
 		gravPower		: 1,
@@ -89,6 +93,7 @@
 	var nbrLostShots	= 0;
 	var nbrCrashes		= 0;
 	var nbrDestroyed	= 0;
+	var nbrGiants		= 0;		// the giant asteroids among the destroyed ones
 	var nbrDamage		= 0;
 	var nbrUpgrades		= 0;
 	var nbrCost			= 0;
@@ -124,6 +129,7 @@
 	var missileLauncher	= false;			// the secondary weapon of the research tree (secondary.js)
 	var missileList		= new Array();
 	var blastList		= new Array();		// the missiles' explosions
+	var homingTurn		= 0.08;				// how much a homing missile can turn at each turn, in radians
 
 	// player's GRAVITRON parameters
 	var key				= [0,0,0,0,0,0,0];		// counterclockwise, clockwise, close, open, pause, change target, erase target choice
@@ -141,6 +147,9 @@
 	var asteroidBR		= 8;		// Base radius for the asteroids
 	var asteroidBM		= 8;		// Base mass for the asteroids
 	var MaxCollSpd		= 10;		// Max Collision Speed for the asteroid to bounce without being destroyed
+	var giantSize		= 1.5;		// a giant asteroid is this much bigger,
+	var giantMass		= 3;		// heavier, for the GRAVITRON to move it less,
+	var giantSpeed		= 0.6;		// and slower, to give time to destroy it before it crashes with all its life
 	var bankShotTurn	= 20 * Math.PI / 180;	// how much the GRAVITRON must turn an asteroid's way for a Bank Shot
 	var targetedA		= false;
 	var aimedA			= false;	// the asteroid the main cannon aims at, circled on screen
@@ -168,6 +177,7 @@ function initDefault(context,level) {
 	nbrLostShots	= 0;
 	nbrCrashes		= 0;
 	nbrDestroyed	= 0;
+	nbrGiants		= 0;
 	nbrDamage		= 0;
 	nbrUpgrades		= 0;
 	nbrCost			= 0;

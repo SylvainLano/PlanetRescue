@@ -459,6 +459,11 @@ function asteroidSpeedFactor() {
 	return 1 + gameTime / framesPerSecond / gameValues.speedGrowth;
 }
 
+// Function to get the life the asteroids get as time passes, over their base life
+function asteroidExtraLife() {
+	return Math.floor( gameTime / framesPerSecond / gameValues.lifeGrowth );
+}
+
 // Calculating angle around the player's planet
 function angleAroundPlanet(x,y) {
 	if ( MyPlanet.y != y || x > MyPlanet.x) {

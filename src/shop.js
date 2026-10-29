@@ -54,7 +54,7 @@ var upgrades = {
 							max : 5, price : "expFrom26times1000squared",
 							level : function () { return Math.floor(2500/mainCannon.fireRate)/100; }, raise : function () { mainCannon.fireRate-=2; } },
 	mainPow				: { name : "Fire Power", tip : "Basic Shots Power - To cause more damages.",
-							max : 5, price : "times3pow2",
+							max : 10, price : "times3pow2",
 							level : function () { return mainCannon.power; }, raise : function () { mainCannon.power++; } },
 	mainSpeed			: { name : "Fire Speed", tip : "Basic Shots Speed - To reach targets faster.",
 							max : 5, price : "times10plus50",
@@ -68,7 +68,7 @@ var upgrades = {
 							max : 5, price : "expFrom26times1000squared",
 							level : function () { return Math.floor(2500/spiralCannon.fireRate)/100; }, raise : function () { spiralCannon.fireRate-=2; } },
 	SaOPow				: { name : "Fire Power", tip : "Spiral Shots Power - To cause more damages.",
-							max : 5, price : "plus1times50",
+							max : 10, price : "plus1times50",
 							level : function () { return spiralCannon.power; }, raise : function () { spiralCannon.power++; } },
 	// this one goes down : slower spiral shots stay longer in game
 	SaOSpeed			: { name : "Fire Speed", tip : "Spiral Shots Speed - To slow down shoots, thus making more of them staying in game.",
@@ -83,7 +83,7 @@ var upgrades = {
 							max : 5, price : "expFrom26times1000squared",
 							level : function () { return Math.floor(2500/magneticCannon.fireRate)/100; }, raise : function () { magneticCannon.fireRate-=2; } },
 	magneticPow			: { name : "Fire Power", tip : "Magnetic Shots Power - To cause more damages.",
-							max : 5, price : "plus1times3pow2",
+							max : 10, price : "plus1times3pow2",
 							level : function () { return magneticCannon.power; }, raise : function () { magneticCannon.power++; } },
 	magneticSpeed		: { name : "Fire Friction", tip : "Magnetic Shots Friction - To slow down shoots, thus making more of them staying in game.",
 							max : 5, price : "times10plus50",
@@ -97,7 +97,7 @@ var upgrades = {
 							max : 5, price : "expFrom26times1000squared2",
 							level : function () { return Math.floor(2500/hammerCannon.fireRate)/100; }, raise : function () { hammerCannon.fireRate-=2; } },
 	HaBPow				: { name : "Fire Power", tip : "Hammer Shots Power - To cause more damages.",
-							max : 5, price : "plus1times3pow2",
+							max : 10, price : "plus1times3pow2",
 							level : function () { return hammerCannon.power; }, raise : function () { hammerCannon.power++; } },
 	HaBSpeed			: { name : "Fire Spread", tip : "Hammer Shots Spread - To slow down shoots, thus making more of them staying in game.",
 							max : 5, price : "times10plus50",
@@ -105,13 +105,13 @@ var upgrades = {
 
 	// MISSILE LAUNCHER : a secondary weapon, given by its research (researches.js)
 	missileFireRate		: { name : "Fire Rate", tip : "Missile Fire Rate - Making the launcher to fire faster. Expressed in Missiles Per Second.",
-							max : 0.71, price : "times600",
+							max : 0.5, price : "times600",
 							level : function () { return Math.floor(2500/missileLauncher.fireRate)/100; }, raise : function () { missileLauncher.fireRate-=10; } },
-	missilePow			: { name : "Blast Power", tip : "Missile Blast Power - The damages done to every asteroid caught in the blast.",
-							max : 9, price : "times3pow2",
+	missilePow			: { name : "Blast Power", tip : "Missile Blast Power - The damages done to the asteroid touched, and half of them to the others caught in the blast.",
+							max : 8, price : "times3pow2",
 							level : function () { return missileLauncher.power; }, raise : function () { missileLauncher.power++; } },
 	missileBlast		: { name : "Blast Radius", tip : "Missile Blast Radius - To catch more asteroids in each blast.",
-							max : 55, price : "times10plus50",
+							max : 50, price : "times10plus50",
 							level : function () { return missileLauncher.blast; }, raise : function () { missileLauncher.blast+=5; } },
 
 	// PLANET

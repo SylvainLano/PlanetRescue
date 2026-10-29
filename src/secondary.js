@@ -35,15 +35,50 @@ function launchMissile ( target ) {
 		vx : speed * Math.cos ( angle ),
 		vy : speed * Math.sin ( angle ),
 		power : missileLauncher.power,
-		blast : missileLauncher.blast
+		blast : missileLauncher.blast,
+		target : target
 	} );
 }
 
+// function to get the asteroid nearest to a point, still in game
+function nearestAsteroid ( x, y ) {
+	var nearest = false, best = gameSize * 2;
+	for ( var a in asteroidList ) {
+		var distance = Math.sqrt ( Math.pow ( asteroidList[a].x - x, 2 ) + Math.pow ( asteroidList[a].y - y, 2 ) );
+		if ( asteroidList[a].life > 0 && distance < best ) {
+			nearest = asteroidList[a];
+			best = distance;
+		}
+	}
+	return nearest;
+}
+
+// function to make a homing missile turn toward its target, a little at each turn ; if its target is gone, it takes the nearest asteroid
+function steerMissile ( missile ) {
+	if ( !missile.target || missile.target.life <= 0 || asteroidList.indexOf ( missile.target ) < 0 ) {
+		missile.target = nearestAsteroid ( missile.x, missile.y );
+		if ( !missile.target ) {
+			return;
+		}
+	}
+	var speed = Math.sqrt ( missile.vx * missile.vx + missile.vy * missile.vy );
+	var heading = Math.atan2 ( missile.vy, missile.vx );
+	var wanted = Math.atan2 ( missile.target.y - missile.y, missile.target.x - missile.x );
+	var turn = ( ( wanted - heading + 3 * Math.PI ) % ( 2 * Math.PI ) ) - Math.PI;
+	heading += Math.max ( - homingTurn, Math.min ( homingTurn, turn ) );
+	missile.vx = speed * Math.cos ( heading );
+	missile.vy = speed * Math.sin ( heading );
+}
+
 // function to move the missiles : each one explodes on the first asteroid it touches, or gets lost in space
+// (once the Homing Missiles are researched, they steer toward their target)
 function resolveMissiles ( ctx ) {
 	var kept = [];
 	for ( var m in missileList ) {
 		var missile = missileList[m];
+		if ( missileLauncher.smart >= 1 ) {
+			steerMissile ( missile );
+		}
 		missile.x += missile.vx;
 		missile.y += missile.vy;
 		if ( distanceToPlanet ( missile.x, missile.y ) > gameSize ) {
@@ -53,11 +88,11 @@ function resolveMissiles ( ctx ) {
 		for ( var a in asteroidList ) {
 			var asteroid = asteroidList[a];
 			if ( asteroid.life > 0 && Math.sqrt ( Math.pow ( asteroid.x - missile.x, 2 ) + Math.pow ( asteroid.y - missile.y, 2 ) ) < asteroid.radius + 2 ) {
-				hit = true;
+				hit = asteroid;
 			}
 		}
 		if ( hit ) {
-			explodeMissile ( ctx, missile );
+			explodeMissile ( ctx, missile, hit );
 		} else {
 			kept.push ( missile );
 		}
@@ -65,14 +100,16 @@ function resolveMissiles ( ctx ) {
 	missileList = kept;
 }
 
-// function to make a missile explode : every asteroid in its blast is damaged, and leaves debris
-function explodeMissile ( ctx, missile ) {
+// function to make a missile explode : the asteroid it touched takes its whole power, the others in its blast half of it,
+// and every one of them leaves debris
+function explodeMissile ( ctx, missile, touched ) {
 	for ( var a in asteroidList ) {
 		var asteroid = asteroidList[a];
 		var distance = Math.sqrt ( Math.pow ( asteroid.x - missile.x, 2 ) + Math.pow ( asteroid.y - missile.y, 2 ) );
 		if ( asteroid.life > 0 && distance < missile.blast + asteroid.radius ) {
-			addDebris ( ctx, missile.power, asteroid.x, asteroid.y, asteroid.vx, asteroid.vy, debrisList );
-			asteroid.life -= missile.power;
+			var damage = ( asteroid == touched ) ? missile.power : Math.ceil ( missile.power / 2 );
+			addDebris ( ctx, damage, asteroid.x, asteroid.y, asteroid.vx, asteroid.vy, debrisList );
+			asteroid.life -= damage;
 			if ( asteroid.life <= 0 ) {
 				allPassed = 1;
 			}

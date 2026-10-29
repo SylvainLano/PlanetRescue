@@ -69,7 +69,7 @@ function Pulse(context,angle,wideness,charge,gravRadius) {
 }
 
 // asteroids  pseudo-class
-function Asteroid(context,life,r,m,x,y,vx,vy) {
+function Asteroid(context,life,r,m,x,y,vx,vy,giant) {
 // elements from the function call
 	this.life=life;
 	this.context=context;
@@ -83,6 +83,7 @@ function Asteroid(context,life,r,m,x,y,vx,vy) {
 // element to set up
 	this.pass = 0;			// for the main structure to ignore this asteroid
 	this.turned = 0;		// how much the GRAVITRON has turned its way, in radians (Bank Shot achievement)
+	this.giant = giant || false;	// a giant asteroid : rarer, much stronger, and darker
 	shapeRock(this);		// its own rock, drawn by the game (prototypes.js)
 
 // object definition
