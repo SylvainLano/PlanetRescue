@@ -127,6 +127,18 @@ var upgrades = {
 							max : 80, price : "times10plus50",
 							level : function () { return nitroLauncher.blast; }, raise : function () { nitroLauncher.blast+=5; } },
 
+	// LASER : one more secondary weapon, given by its research
+	// (its cooldown goes down, in seconds as its beam's duration)
+	laserPow			: { name : "Beam Power", tip : "Laser Beam Power - The damages done by the beam each second.",
+							max : 24, price : "squaredtimes3",
+							level : function () { return laserCannon.power; }, raise : function () { laserCannon.power+=2; } },
+	laserDuration		: { name : "Beam Duration", tip : "Laser Beam Duration - How long the beam burns, before it cools down. Expressed in seconds.",
+							max : 5, price : "times100",
+							level : function () { return laserCannon.duration / framesPerSecond; }, raise : function () { laserCannon.duration+=framesPerSecond/2; } },
+	laserCooldown		: { name : "Cooldown", tip : "Laser Cooldown - The time the laser needs to cool down, before it fires again. Expressed in seconds.",
+							max : 4, decreasing : true, price : "from16times100",
+							level : function () { return laserCannon.fireRate / framesPerSecond; }, raise : function () { laserCannon.fireRate-=2*framesPerSecond; } },
+
 	// PLANET
 	// healing is bought by the inhabitants : its price counts the ones left to heal, and it can heal a part of them only
 	healing				: { name : "Healing", tip : "Healing - Here you can spend your Mat to help the reconstruction of your planet.",
@@ -184,7 +196,11 @@ var shopLayout = [
 		{ tab : "Nitro", title : "Nitroglycerine Launcher", secondary : "nitroW",
 			appears : function () { return nitroLauncher.cannonNbr > 0; },
 			statusTip : "A secondary weapon, always active : it takes no place among your active weapons.",
-			upgrades : ["nitroReload","nitroPow","nitroBlast"] }
+			upgrades : ["nitroReload","nitroPow","nitroBlast"] },
+		{ tab : "Laser", title : "Laser Cannon", secondary : "laserW",
+			appears : function () { return laserCannon.cannonNbr > 0; },
+			statusTip : "A secondary weapon, always active : it takes no place among your active weapons.",
+			upgrades : ["laserPow","laserDuration","laserCooldown"] }
 	] },
 	{ title : "Heal or upgrade your Planet", upgrades : ["healing","healFact","maxHealth","maxMat","autoHeal","recovery","lab"] },
 	{ title : "Researches", researches : true }		// filled by refreshResearches() (researches.js)
@@ -344,11 +360,11 @@ function refresh() {
 
 // function to find a weapon by its type, the secondary ones too
 function weaponOfType ( type ) {
-	if ( type == missileLauncher.type ) {
-		return missileLauncher;
-	}
-	if ( type == nitroLauncher.type ) {
-		return nitroLauncher;
+	var secondary = [ missileLauncher, nitroLauncher, laserCannon ];
+	for ( var s in secondary ) {
+		if ( type == secondary[s].type ) {
+			return secondary[s];
+		}
 	}
 	for ( var w in weaponList ) {
 		if ( weaponList[w].type == type ) {
@@ -522,6 +538,12 @@ function calculate(type,ref) {
 			break;
 		case "squared" :
 			ref *= ref;
+			break;
+		case "squaredtimes3" :
+			ref = ref * ref * 3;
+			break;
+		case "from16times100" :
+			ref = ( 16 - ref ) * 100;
 			break;
 	}
 	return ref;

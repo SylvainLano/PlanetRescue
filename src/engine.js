@@ -385,6 +385,7 @@ function engine() {
 		shotList = [];
 		missileList = [];
 		capsuleList = [];
+		laserCannon.firing = 0;
 	} else if ( key[4] == 1 && pause == 0 ) {
 		pause++; pauseStep++;
 		refresh();
@@ -820,9 +821,10 @@ function engine() {
 		}
 
 		// The secondary weapons, once researched (secondary.js) : the missile launcher fires at the main cannon's target,
-		// the nitroglycerine launcher at an asteroid far from the planet
+		// the nitroglycerine launcher at an asteroid far from the planet, the laser at the most dangerous one
 		fireMissiles(ctx,closestA);
 		fireCapsules();
+		fireLaser(ctx);
 	}
 
 
@@ -1119,9 +1121,10 @@ function drawPlaying ( ctx ) {
 		ctx.closePath();
 		ctx.fill();
 	}
-	// the missiles, the capsules and the blasts (secondary.js)
+	// the missiles, the capsules, the blasts and the laser's beam, from under the planet (secondary.js)
 	drawMissiles(ctx);
 	drawCapsules(ctx);
+	drawLaser(ctx);
 	MyPlanet.Draw();
 	// the shield's energy, vanishing when hit
 	if ( MyGravitron.shield > 0 && pause == 0 && shieldHit[0] != 0 ) {

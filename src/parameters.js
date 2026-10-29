@@ -41,6 +41,7 @@
 		HaBW			: { delay : 50, power : 1, speed : 1, smart : 0, cannons : 0 },
 		missileW		: { delay : 100, power : 3, speed : 1.5, smart : 0, cannons : 0, blast : 25 },	// a secondary weapon, given by its research
 		nitroW			: { delay : 200, power : 12, speed : 1.5, smart : 0, cannons : 0, blast : 40 },	// another one, its delay counted once its bomb is gone
+		laserW			: { delay : 350, power : 6, speed : 0, smart : 0, cannons : 0, duration : 50 },	// and the laser : its power per second, its beam's duration and its cooldown in turns
 
 		// player's GRAVITRON
 		gravPower		: 1,
@@ -139,6 +140,7 @@
 	var homingTurn		= 0.08;				// how much a homing missile can turn at each turn, in radians
 	var nitroLauncher	= false;			// the other one, whose capsules turn an asteroid into a bomb (secondary.js)
 	var capsuleList		= new Array();
+	var laserCannon		= false;			// and the laser, burning its target for a while before it cools down (secondary.js)
 
 	// player's GRAVITRON parameters
 	var key				= [0,0,0,0,0,0,0];		// counterclockwise, clockwise, close, open, pause, change target, erase target choice
@@ -234,6 +236,10 @@ function initDefault(context,level) {
 	nitroLauncher	= newWeapon(context,"nitroW","#ffe066");	// with no cannon until its research is validated
 	nitroLauncher.blast = gameValues.nitroW.blast;
 	capsuleList		= [];
+	laserCannon		= newWeapon(context,"laserW","#ff3355");		// with no cannon until its research is validated
+	laserCannon.duration = gameValues.laserW.duration;
+	laserCannon.firing = 0;		// the turns its beam still burns
+	laserCannon.heat = 0;		// the part of a point of damage it has done
 	newResearches();
 	
 	// player's GRAVITRON parameters

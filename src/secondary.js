@@ -13,6 +13,7 @@
 // The secondary weapons, planned in 2010 : they take no place among the active weapons, and come from the research tree (researches.js)
 // The first one is the missile launcher : its missiles fly to the main cannon's target, and explode on the first asteroid they touch
 // The second one is the nitroglycerine launcher : its capsule turns an asteroid into a bomb, for the player to steer into the others
+// The third one is the laser : its beam burns the most dangerous asteroid for a while, then cools down
 
 // function to make the missile launcher fire at the main cannon's target, once researched
 function fireMissiles ( ctx, target ) {
@@ -330,5 +331,109 @@ function drawCapsules ( ctx ) {
 		ctx.arc ( capsule.x, capsule.y, 2.5, 0, 2 * Math.PI );
 		ctx.fill();
 	}
+	ctx.restore();
+}
+
+// function to make the laser burn its target, once researched : once cooled down, it fires for a while,
+// and takes a new target if the one it burns is destroyed
+function fireLaser ( ctx ) {
+	if ( laserCannon.cannonNbr < 1 ) {
+		return;
+	}
+	if ( laserCannon.firing == 0 ) {
+		laserCannon.currentDelay++;
+		if ( laserCannon.currentDelay < laserCannon.fireRate ) {
+			return;
+		}
+		laserCannon.target = laserTarget();
+		if ( !laserCannon.target ) {
+			return;
+		}
+		laserCannon.firing = laserCannon.duration;
+		laserCannon.currentDelay = 0;
+	}
+	laserCannon.firing--;
+	if ( laserCannon.target.life <= 0 || asteroidList.indexOf ( laserCannon.target ) < 0 ) {
+		laserCannon.target = laserTarget();
+		if ( !laserCannon.target ) {
+			laserCannon.firing = 0;
+			return;
+		}
+	}
+	// its power is per second, done a point of damage at a time
+	var target = laserCannon.target;
+	laserCannon.heat += laserCannon.power / framesPerSecond;
+	while ( laserCannon.heat >= 1 && target.life > 0 ) {
+		laserCannon.heat--;
+		addDebris ( ctx, 1, target.x, target.y, target.vx, target.vy, debrisList );
+		target.life--;
+		if ( target.life <= 0 ) {
+			allPassed = 1;
+		}
+	}
+}
+
+// function to choose the laser's target among the asteroids in view : the giants first, the closest one, then the asteroids
+// going to crash on the planet, the soonest crash first, or else the closest asteroid
+function laserTarget () {
+	var best = false, bestRank = 0, bestScore = 0;
+	for ( var a in asteroidList ) {
+		var asteroid = asteroidList[a];
+		var distance = distanceToPlanet ( asteroid.x, asteroid.y );
+		if ( asteroid.life <= 0 || distance > gameSize / 2 - 20 ) {
+			continue;
+		}
+		var rank = 0, score = distance;
+		if ( asteroid.giant ) {
+			rank = 2;
+		} else {
+			var crash = crashTime ( asteroid );
+			if ( crash !== false ) {
+				rank = 1;
+				score = crash;
+			}
+		}
+		if ( best === false || rank > bestRank || ( rank == bestRank && score < bestScore ) ) {
+			best = asteroid;
+			bestRank = rank;
+			bestScore = score;
+		}
+	}
+	return best;
+}
+
+// function to draw the laser's beam, flickering, from the planet to the asteroid it burns
+function drawLaser ( ctx ) {
+	var target = laserCannon.target;
+	if ( laserCannon.firing <= 0 || !target || target.life <= 0 ) {
+		return;
+	}
+	var angle = Math.atan2 ( target.y - MyPlanet.y, target.x - MyPlanet.x );
+	var x0 = MyPlanet.x + MyPlanet.radius * Math.cos ( angle );
+	var y0 = MyPlanet.y + MyPlanet.radius * Math.sin ( angle );
+	var flicker = 0.75 + 0.25 * Math.sin ( performance.now() / 25 );
+	ctx.save();
+	ctx.lineCap = 'round';
+	// its glow, then its core
+	ctx.strokeStyle = 'rgba(255,51,85,' + ( 0.3 * flicker ) + ')';
+	ctx.lineWidth = 6;
+	ctx.beginPath();
+	ctx.moveTo ( x0, y0 );
+	ctx.lineTo ( target.x, target.y );
+	ctx.stroke();
+	ctx.strokeStyle = 'rgba(255,190,200,' + flicker + ')';
+	ctx.lineWidth = 1.5;
+	ctx.beginPath();
+	ctx.moveTo ( x0, y0 );
+	ctx.lineTo ( target.x, target.y );
+	ctx.stroke();
+	// the burn on the asteroid
+	var burn = ctx.createRadialGradient ( target.x, target.y, 0, target.x, target.y, target.radius + 5 );
+	burn.addColorStop ( 0, 'rgba(255,230,230,' + ( 0.9 * flicker ) + ')' );
+	burn.addColorStop ( 1, 'rgba(255,51,85,0)' );
+	ctx.fillStyle = burn;
+	ctx.beginPath();
+	ctx.arc ( target.x, target.y, target.radius + 5, 0, 2 * Math.PI );
+	ctx.fill();
 	ctx.restore();
 }
