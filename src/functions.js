@@ -847,6 +847,34 @@ function displayStatus() {
 	localStorage["displayS"] = displayS;
 }
 
+// function to show the planet's life, its mat and the shield's charge at the top of the game area, as gauges or as digits
+// (until 2026, the gauges were drawn with boxes of the page, and the digits written as a sentence)
+function showStatus(status) {
+	// the life counts the inhabitant being healed, and the ones waiting to be, lighter
+	var healing = planetHealTimer / ( 135 - ( 11 * planetHealFact ) );
+	var life = ( MyPlanet.life + healing ) / MyPlanet.maxLife;
+	var lifeColor = ( life <= 0.25 ) ? "#ff4747" : ( life <= 0.5 ) ? "#f2c94c" : "#5df45d";
+	// the mat turns yellow, then red, as the storage fills up
+	var mat = MyPlanet.mat / MyPlanet.maxMat;
+	var matColor = ( mat >= 1 ) ? "#ff4747" : ( mat > 0.8 ) ? "#f2c94c" : "#aab0b8";
+	var html = statusGauge ( "Life", life, lifeColor, MyPlanet.life + ( planetHealPend > 0 ? "<i>+" + planetHealPend + "</i>" : "" ), MyPlanet.maxLife, planetHealPend / MyPlanet.maxLife )
+		+ statusGauge ( "Mat", mat, matColor, MyPlanet.mat, MyPlanet.maxMat, 0 );
+	if ( MyGravitron.shield > 0 ) {
+		html += statusGauge ( "Shield", MyGravitron.charge / ( MyGravitron.shield * 10 ), gravColor, MyGravitron.charge, MyGravitron.shield * 10, 0 );
+	}
+	status.classList.toggle ( "digits", displayS == "digits" );
+	status.innerHTML = "<div class='stats'>" + html + "</div>";
+}
+
+// function to write one of the status bar's numbers : its name, its gauge (with what is still to come, lighter), and its value
+function statusGauge ( name, part, color, value, max, coming ) {
+	var width = Math.max ( 0, Math.min ( 100, part * 100 ) );
+	return "<span class='stat'><span class='name'>" + name + "</span>"
+		+ "<span class='gauge'><span style='width:" + width + "%;background:" + color + "'></span>"
+		+ ( coming > 0 ? "<span class='coming' style='width:" + Math.min ( 100 - width, coming * 100 ) + "%'></span>" : "" ) + "</span>"
+		+ "<span class='value' style='color:" + color + "'>" + value + "<em>/" + max + "</em></span></span>";
+}
+
 // function to anticipate asteroid's movement and intercept it ; returns an angle to shoot toward
 // The first version (2010) was made with the help of Marc35 from the forum at ilephysique.net
 function interception ( asteroid, Vp, r0 ) {

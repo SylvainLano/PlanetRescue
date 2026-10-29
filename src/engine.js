@@ -316,7 +316,7 @@ function engine() {
 		MyPlanet.Turn();
 		if ( countdownValue <= 0 ){
 			status.style.display = "block";
-			status.style.background = 'rgba(60,60,60,0.5)';
+			status.style.background = "";		// as css/main.css draws it, whatever the tutorial left
 			state = "playing";
 			countdownValue=10;
 		} else {
@@ -998,43 +998,8 @@ function engine() {
 	resolveGravitron (ctx,pause,MyGravitron,gravFriction,key,gravMinSize,gravMaxSize,gravColor,gravWidth,MyPlanet,gravRadius);
 	
 	
-	// Displaying counters
-	var lifePC = Math.round( ( MyPlanet.life + ( planetHealTimer / ( 135 - ( 11 * planetHealFact ) ) ) ) * 100 /  MyPlanet.maxLife);
-	if ( lifePC <= 25 ) {
-		var lifeColor = "#FF0000";
-	} else if ( lifePC <= 50 ) {
-		var lifeColor = "#FFFF00";
-	} else {
-		var lifeColor = "#009900";
-	}
-	var matPC = Math.round(MyPlanet.mat * 100 /  MyPlanet.maxMat);
-	if ( matPC == 100 ) {
-		var matColor = "#FF0000";
-	} else if ( matPC > 80 ) {
-		var matColor = "#FFFF00";
-	} else {
-		var matColor = "#999999";
-	}
-	if ( displayS == "digits" ) {
-		var statusText = "Life : <span style='color:" + lifeColor + "'>" + MyPlanet.life + "</span>";
-		if ( planetHealPend > 0 ) {
-			statusText += " (+" + planetHealPend + ")";
-		}
-		statusText += " / " + MyPlanet.maxLife + " - Mat : <span style='color:" + matColor + "'>" + MyPlanet.mat + "</span> / " + MyPlanet.maxMat;
-		if(MyGravitron.shield > 0){
-			statusText += " - Shield : <span style='color:" + gravColor + "'>" + MyGravitron.charge + "</span> / " + (MyGravitron.shield * 10);
-		}
-	} else {
-		var statusText = "Life : <div style='display:inline-block;width:100px; padding:1px; border:1px solid #999999; background-color:black; height:5px;'><div style='float:left;width:" + lifePC + "px; background-color:" + lifeColor + ";height:5px;'></div>";
-		if ( planetHealPend > 0 ) {
-			statusText += "<div style='float:left;width:" + ( Math.round ( ( MyPlanet.life + planetHealPend ) * 100 / MyPlanet.maxLife ) - lifePC ) + "px; background-color:#999999;height:5px;'></div>";
-		}
-		statusText += "</div> - Mat : <div style='display:inline-block;width:100px; padding:1px; border:1px solid #999999; background-color:black; height:5px;'><div style='float:left;width:" + matPC + "px; background-color:" + matColor + ";height:5px;'></div></div>";
-		if(MyGravitron.shield > 0){
-			statusText += " - Shield : <div style='display:inline-block;width:" + ( MyGravitron.shield * 10 ) + "px; padding:1px; border:1px solid #999999; background-color:black; height:5px;'><div style='float:left;width:" + MyGravitron.charge + "px; background-color:" + gravColor + ";height:5px;'></div></div>";
-		}
-	}
-	status.innerHTML = statusText;
+	// Displaying counters : the planet's life, its mat and the shield's charge (functions.js)
+	showStatus(status);
 
 
 	}	// Bracket for the state == "playing"

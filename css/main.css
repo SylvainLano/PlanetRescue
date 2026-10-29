@@ -124,6 +124,69 @@ body {
 #status {
 	height: 15px;
 	z-index: 2;
+	cursor: pointer;
+	background-color: rgba(10,12,16,0.72);
+	border-bottom: 1px solid rgba(255,255,255,0.1);
+}
+
+#status .stats {
+	display: flex;
+	align-items: center;
+	gap: 18px;
+	height: 100%;
+}
+
+/* each number of the status bar : its name, its gauge, its value (showStatus) ; the gauges hide as digits are asked */
+#status .stat {
+	display: flex;
+	align-items: center;
+	gap: 6px;
+}
+
+#status .name {
+	font-size: 9px;
+	letter-spacing: 1px;
+	text-transform: uppercase;
+	color: #888;
+}
+
+#status .gauge {
+	display: flex;
+	width: 74px;
+	height: 7px;
+	overflow: hidden;
+	background: rgba(255,255,255,0.1);
+	border-radius: 4px;
+}
+
+#status .gauge .coming {
+	background: rgba(255,255,255,0.35);
+}
+
+#status .value {
+	font-size: 11px;
+	font-weight: bold;
+}
+
+#status .value em {
+	font-style: normal;
+	font-weight: normal;
+	color: #777;
+}
+
+#status .value i {
+	margin-left: 2px;
+	font-style: normal;
+	font-size: 10px;
+	color: #5df45d;
+}
+
+#status.digits .gauge {
+	display: none;
+}
+
+#status.digits .value {
+	font-size: 13px;
 }
 
 #instructions {
