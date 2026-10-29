@@ -35,6 +35,7 @@
 		SaOW			: { delay : 25, power : 1, speed : 5, smart : 0, cannons : 0 },
 		magneticW		: { delay : 25, power : 3, speed : 1, smart : 0, cannons : 0 },
 		HaBW			: { delay : 50, power : 1, speed : 1, smart : 0, cannons : 0 },
+		missileW		: { delay : 75, power : 4, speed : 2, smart : 0, cannons : 0, blast : 30 },	// a secondary weapon, given by its research
 
 		// player's GRAVITRON
 		gravPower		: 1,
@@ -120,7 +121,10 @@
 	var mainCanMovSpeed	= startValues.mainCanMovSpeed;
 	var maxWAtATime		= startValues.maxWAtATime;
 	var orbitalNbr		= 0;
-	
+	var missileLauncher	= false;			// the secondary weapon of the research tree (secondary.js)
+	var missileList		= new Array();
+	var blastList		= new Array();		// the missiles' explosions
+
 	// player's GRAVITRON parameters
 	var key				= [0,0,0,0,0,0,0];		// counterclockwise, clockwise, close, open, pause, change target, erase target choice
 	var gravSuction		= 0.05;
@@ -204,6 +208,11 @@ function initDefault(context,level) {
 	activate("basicW");
 	mainCanMovSpeed	= gameValues.mainCanMovSpeed;
 	orbitalNbr		= 0;
+	missileLauncher	= newWeapon(context,"missileW","#ff9933");	// with no cannon until its research is validated
+	missileLauncher.blast = gameValues.missileW.blast;
+	missileList		= [];
+	blastList		= [];
+	newResearches();
 	
 	// player's GRAVITRON parameters
 	MyGravitron.suction		= gravSuction;

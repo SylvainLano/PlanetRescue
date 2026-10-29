@@ -12,6 +12,7 @@ Your planet, the Earth, sits in the middle of the screen and asteroids come from
 - **The weapons fire automatically.** You start with a basic cannon guided by its SMART AI, which goes up to level 5: it learns to aim ahead of its targets, then to choose them wisely. You can also buy the Spiral & Orbital, Magnetic, and Hammer & Broom weapons, each with its own firing modes.
 - **The upgrade menu** opens with the pause. There you spend your mat on the Gravitron, the weapons and the planet: healing, maximum health, storage, auto-healing, and recovery of mat from crashed asteroids.
 - **Three difficulty levels** can be chosen in the start menu. Easy gives your planet more life and mat, sends the asteroids more slowly and lets your cannon anticipate from the start. Hard sends them faster and faster, sooner.
+- **The research tree** grows with your achievements: each one of its branches opens for good with an achievement. In a game, a research takes time, not mat: start one from the pause menu, and validate it there once complete to get its bonus. Only one research goes on at a time; you can stop it and go back to it later, its time is kept. A note at the bottom right tells you when a research waits for you. The first branch brings the **Missile Launcher**, a secondary weapon whose missiles explode on the asteroids, damaging every one around.
 - **18 achievements** reward your feats, from your first destroyed asteroid to six minutes of survival, or an asteroid you sent into another one with your Gravitron. Each one is a bronze, silver or gold medal, announced at the bottom of the game area when you get it. The Achievements page of the start menu shows your medals; the others stay secret until you get them. They are saved in your browser, whatever the difficulty level.
 - At the end of a game you get your statistics (survival time, mat gathered, accuracy, crashes, inhabitants lost, upgrades) and the hi-scores of your difficulty level, which are saved in your browser. The score is 10 points per asteroid destroyed, plus the mat gathered, plus the seconds survived.
 
@@ -60,6 +61,7 @@ In **2026** the game came back to life. The goals are to keep its spirit, make i
 | 0.12.1 | Smooth animation: the game is still played 25 times a second, but it is drawn at each refresh of the screen, every moving object between its last two places. The 3, 2, 1, GO! countdown is now drawn on the game. A hidden browser tab now pauses the game instead of slowing it down. |
 | 0.13.0 | The stars of the game area's sky twinkle: each star of the picture shines now and then at its own pace, the big ones with their cross, in the game as in the menus. Their places were found once in the picture (`img/stars.js`). The game area's sky is in line with the page's again, as a darker window on the same sky: the zoom of 0.5.0 had made it a smaller copy. |
 | 0.14.0 | 18 achievements, the four of the 2010 to-do list and fourteen more: surviving, destroying, gathering, aiming, owning every weapon, finishing the tutorial, or deflecting an asteroid into another one (Bank Shot). Each one is a medal drawn by the game, announced when you get it, and shown on its own page of the start menu, where the others stay secret. The Game Over screen tells the ones of the game. |
+| 0.15.0 | The research tree of 2010, in the pause menu: its branches open with achievements, and each research takes time in the game, then waits to be validated. A note at the bottom right of the game area tells when a research is available or complete. Its first branch, opened by the Survivor achievement, brings the Missile Launcher: a secondary weapon, firing missiles at the main cannon's target, which explode and damage every asteroid in their blast. |
 
 ## Roadmap (2026)
 
@@ -69,7 +71,7 @@ The order may change as we go.
 2. **Modernization:** upgrades described as data, a pause menu without jQuery (ready for the research tree), lighter assets (all done in 0.10.1).
 3. **Graphics:** rocky asteroids (done in 0.11.0) and the Earth as your planet (done in 0.12.0), both drawn at the screen's resolution, a smooth animation (done in 0.12.1) and twinkling stars (done in 0.13.0), then a hand-made animated background.
 4. **Touch screens:** given up. Playing without a keyboard would take simpler Gravitron controls, which would change the game too much.
-5. **The 2010 ideas:** achievements (done in 0.14.0), then the research tree, then the free-play mode, new secondary weapons, and maybe one day the story mode.
+5. **The 2010 ideas:** achievements (done in 0.14.0), then the research tree (started in 0.15.0 with its first branch, the missiles), then the free-play mode, new secondary weapons, and maybe one day the story mode.
 
 ## The original to-do list (2010)
 
@@ -128,6 +130,8 @@ No build step and no dependencies to install: open `index.html` in a browser and
 | `src/shop.js` | the upgrades, described as data (`upgrades`, `shopLayout`), and the shop |
 | `src/menu.js` | the pause menu, built from the upgrades: sections, weapon tabs, tooltips |
 | `src/achievements.js` | the achievements, described as data (`achievements`), their medals, their saving, their announcement and their page |
+| `src/researches.js` | the research tree, described as data (`researchBranches`, `researches`): the research going on, its section of the pause menu, and its note at the bottom right |
+| `src/secondary.js` | the secondary weapons, which take no place among the active ones: the missile launcher, its missiles and their blasts |
 | `src/objects.js`, `src/prototypes.js` | game objects and their drawing: the turning Earth and the asteroids' rocks |
 | `img/earth.js` | the Earth's map, written as text: a browser opening `index.html` from the disk would not let the game read the pixels of an image file |
 | `img/stars.js` | the stars of the game area's sky, found once in its picture, for the game to make them twinkle |

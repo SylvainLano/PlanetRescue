@@ -405,10 +405,15 @@ function engine() {
 		pause = 2;
 		nbrLostShots += shotList.length;
 		shotList = [];
+		missileList = [];
 	} else if ( key[4] == 1 && pause == 0 ) {
 		pause++; pauseStep++;
 		refresh();
 		pauseScreen.style.display = "block";
+		// a research waiting for the player : its section opens with the pause (researches.js)
+		if ( researchNews() == "complete" || researchNews() == "available" ) {
+			openSection(researchSection);
+		}
 	} else if ( pauseStep == 1 && key[4] == 0 ) {
 		pauseStep++;
 	} else if ( pauseStep == 2 && key[4] == 1 ) {
@@ -424,6 +429,9 @@ function engine() {
 
 	
 	if ( pause == 0 ) {
+		// The research going on advances with the time of play (researches.js)
+		advanceResearch();
+
 		// Creating an asteroid when the timer runs out, the timer getting shorter as time passes
 		gameTime++;
 		spawnTimer--;
@@ -883,9 +891,12 @@ function engine() {
 				}
 			}
 		}
+
+		// The missile launcher, once researched, fires at the main cannon's target (secondary.js)
+		fireMissiles(ctx,closestA);
 	}
-	
-	
+
+
 	// Resolving the shots
 	var tempList = new Array();
 	var orbitalCount = 0;
@@ -998,6 +1009,12 @@ function engine() {
 	}
 	orbitalNbr = orbitalCount;
 	shotList = tempList;
+
+	// Resolving the missiles and their blasts (secondary.js)
+	if ( pause == 0 ) {
+		resolveMissiles(ctx);
+		resolveBlasts();
+	}
 
 
 	// Turning the planet
@@ -1143,6 +1160,10 @@ function drawGame ( blend ) {
 		} else if ( state == "playing" ) {
 			drawPlaying ( ctx );
 			drawBanner ( ctx );
+			// what the player should know about the researches, while playing (researches.js)
+			if ( pause == 0 ) {
+				drawResearchCorner ( ctx );
+			}
 		}
 		// an achievement just obtained, over everything
 		drawAchievement ( ctx );
@@ -1201,6 +1222,8 @@ function drawPlaying ( ctx ) {
 		ctx.closePath();
 		ctx.fill();
 	}
+	// the missiles and their blasts (secondary.js)
+	drawMissiles(ctx);
 	MyPlanet.Draw();
 	// the shield's energy, vanishing when hit
 	if ( MyGravitron.shield > 0 && pause == 0 && shieldHit[0] != 0 ) {

@@ -13,6 +13,7 @@
 // The pause menu, built from shopLayout and upgrades (shop.js) : its sections open one at a time,
 // the weapons are shown by tabs, and every line has a tooltip. (It used jQuery and its plugins until 2026.)
 var shopTooltip = false;
+var researchSection = false;	// the Researches section, opened with the pause when a research waits for the player
 
 // function to build the pause menu
 function buildShop() {
@@ -45,6 +46,10 @@ function addSection ( shop, section ) {
 		addUpgrades ( content, section.upgrades );
 	} else if ( section.panels ) {
 		addPanels ( content, section.panels );
+	} else if ( section.researches ) {
+		// filled at each refresh (researches.js)
+		newElement ( "div", "", content ).id = "researchList";
+		researchSection = block;
 	} else {
 		content.textContent = section.text;
 	}
@@ -77,7 +82,12 @@ function addPanel ( tabs, holder, panel ) {
 	var box = newElement ( "div", "panel", holder );
 	newElement ( "h2", "", box ).textContent = panel.title;
 	var list = box;
-	if ( panel.weapon ) {
+	if ( panel.secondary ) {
+		// a secondary weapon, always active once researched : its tab stays hidden until then
+		tab.id = panel.secondary + "Tab";
+		var status = addLine ( box, "Status", panel.secondary, panel.statusTip, function () {} );
+		status.querySelector ( "a" ).innerHTML = "<span class='green'>active</span>";
+	} else if ( panel.weapon ) {
 		addLine ( box, "Status", panel.weapon, panel.statusTip, function () { activate ( panel.weapon ); } );
 		// the weapon's upgrades, shown by refresh() once it is bought
 		list = newElement ( "div", "", box );
@@ -94,6 +104,15 @@ function showPanel ( index, tabs, holder ) {
 	for ( var n = 0; n < holder.children.length; n++ ) {
 		holder.children[n].style.display = ( n == index ) ? "block" : "none";
 		tabs.children[n].className = ( n == index ) ? "tab current" : "tab";
+	}
+}
+
+// function to show the tab of a secondary weapon once researched, or to hide it (back to the first tab if it was the one shown)
+function showSecondaryTab ( weapon, shown ) {
+	var tab = document.getElementById ( weapon + "Tab" );
+	tab.style.display = shown ? "" : "none";
+	if ( !shown && tab.className == "tab current" ) {
+		tab.parentNode.firstChild.click();
 	}
 }
 

@@ -103,6 +103,17 @@ var upgrades = {
 							max : 5, price : "times10plus50",
 							level : function () { return hammerCannon.speed; }, raise : function () { hammerCannon.speed++; } },
 
+	// MISSILE LAUNCHER : a secondary weapon, given by its research (researches.js)
+	missileFireRate		: { name : "Fire Rate", tip : "Missile Fire Rate - Making the launcher to fire faster. Expressed in Missiles Per Second.",
+							max : 0.71, price : "times600",
+							level : function () { return Math.floor(2500/missileLauncher.fireRate)/100; }, raise : function () { missileLauncher.fireRate-=10; } },
+	missilePow			: { name : "Blast Power", tip : "Missile Blast Power - The damages done to every asteroid caught in the blast.",
+							max : 9, price : "times3pow2",
+							level : function () { return missileLauncher.power; }, raise : function () { missileLauncher.power++; } },
+	missileBlast		: { name : "Blast Radius", tip : "Missile Blast Radius - To catch more asteroids in each blast.",
+							max : 55, price : "times10plus50",
+							level : function () { return missileLauncher.blast; }, raise : function () { missileLauncher.blast+=5; } },
+
 	// PLANET
 	// healing is bought by the inhabitants : its price counts the ones left to heal, and it can heal a part of them only
 	healing				: { name : "Healing", tip : "Healing - Here you can spend your Mat to help the reconstruction of your planet.",
@@ -128,7 +139,7 @@ var upgrades = {
 };
 
 // The layout of the pause menu, built by menu.js : its sections, the weapons' one being split into tabs
-// (a weapon's upgrades are shown once it is bought, the Researches section waits for the research tree)
+// (a weapon's upgrades are shown once it is bought, a secondary weapon's tab once its research is validated)
 var shopLayout = [
 	{ title : "Upgrade Your Gravitron", upgrades : ["gravSort","gravPower","repulsion","gravShield","gravPulse","gravScanner"] },
 	{ title : "Build or upgrade your Weapons", panels : [
@@ -144,10 +155,14 @@ var shopLayout = [
 			upgrades : ["magneticCNumber","magneticCFireRate","magneticPow","magneticSpeed"] },
 		{ tab : "Hammer", title : "Hammer and Broom Weapon", weapon : "HaBW", modes : true,
 			statusTip : "By making this weapon active, you could disactivate one of the current one.",
-			upgrades : ["HaBCNumber","HaBCFireRate","HaBPow","HaBSpeed"] }
+			upgrades : ["HaBCNumber","HaBCFireRate","HaBPow","HaBSpeed"] },
+		// a secondary weapon : its tab is shown once its research is validated
+		{ tab : "Missile", title : "Missile Launcher", secondary : "missileW",
+			statusTip : "A secondary weapon, always active : it takes no place among your active weapons.",
+			upgrades : ["missileFireRate","missilePow","missileBlast"] }
 	] },
 	{ title : "Heal or upgrade your Planet", upgrades : ["healing","healFact","maxHealth","maxMat","autoHeal","recovery"] },
-	{ title : "Researches", text : "Sed non urna. Donec et ante. Phasellus eu ligula. Vestibulum sit amet purus. Vivamus hendrerit, dolor at aliquet laoreet, mauris turpis porttitor velit, faucibus interdum tellus libero ac justo. Vivamus non quam. In suscipit faucibus urna." }
+	{ title : "Researches", researches : true }		// filled by refreshResearches() (researches.js)
 ];
 
 // what the next level of SMART AI brings, for the upgrade menu
@@ -296,6 +311,7 @@ function refresh() {
 		}
 		modeUpdate ( weaponList[iw-1] );
 	}
+	refreshResearches();
 }
 
 // function to determine the maximum update you can reach
@@ -394,6 +410,9 @@ function calculate(type,ref) {
 			break;
 		case "times100" :
 			ref *= 100;
+			break;
+		case "times600" :
+			ref = Math.round ( ref * 600 );
 			break;
 		case "times0.75" :
 			ref *= 0.75;
