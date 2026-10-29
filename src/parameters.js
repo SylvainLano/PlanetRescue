@@ -148,6 +148,8 @@
 	var reboundCannon	= false;			// and the rebound cannon, whose shots ricochet on the edges, the asteroids and the planet (secondary.js)
 	var reboundList		= new Array();
 	var ricochetScatter	= 30 * Math.PI / 180;	// how much a rebound shot can go astray on an asteroid's rock, on each side
+	var trickAngles		= 72;		// the angles the Trick Shot tries, all around the planet
+	var trickHorizon	= 100;		// and how far ahead it follows each way, in turns
 	var sparkList		= new Array();		// the sparks of their ricochets
 
 	// player's GRAVITRON parameters

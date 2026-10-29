@@ -520,6 +520,7 @@ function burnMark ( ctx, asteroid, strength ) {
 }
 
 // function to make the rebound cannon fire at the main cannon's target, once researched
+// (once the Trick Shot is researched, it fires where its ricochets will hit the most asteroids)
 function fireRebounds ( target ) {
 	if ( reboundCannon.cannonNbr < 1 ) {
 		return;
@@ -529,6 +530,9 @@ function fireRebounds ( target ) {
 		reboundCannon.currentDelay = 0;
 		var speed = reboundCannon.speed;
 		var angle = interception ( target, speed, MyPlanet.radius + 5 + speed );
+		if ( reboundCannon.smart >= 1 ) {
+			angle = trickAngle ( angle );
+		}
 		reboundList.push ( {
 			x : MyPlanet.x + ( MyPlanet.radius + 5 ) * Math.cos ( angle ),
 			y : MyPlanet.y + ( MyPlanet.radius + 5 ) * Math.sin ( angle ),
@@ -567,32 +571,13 @@ function resolveRebounds ( ctx ) {
 // function to make a rebound shot ricochet on what it meets : an asteroid, which takes its power, the planet's atmosphere,
 // which it spares, or an edge of space ; returns false once it has no rebound left
 function ricochet ( ctx, shot ) {
-	var touched = false, nx = 0, ny = 0;
-	for ( var a in asteroidList ) {
-		var asteroid = asteroidList[a];
-		if ( asteroid.life > 0 && !touched ) {
-			touched = bounceOn ( shot, asteroid.x, asteroid.y, asteroid.radius + 2 ) && asteroid;
-		}
-	}
-	if ( !touched && bounceOn ( shot, MyPlanet.x, MyPlanet.y, MyPlanet.radius + 2 ) ) {
-		touched = MyPlanet;
-	}
-	if ( touched ) {
-		// (bounceOn has put the shot on its surface, the way out)
-		nx = ( shot.x - touched.x ) / ( touched.radius + 2 );
-		ny = ( shot.y - touched.y ) / ( touched.radius + 2 );
-	} else if ( shot.x < 0 && shot.vx < 0 ) {
-		nx = 1;
-	} else if ( shot.x > gameSize && shot.vx > 0 ) {
-		nx = -1;
-	} else if ( shot.y < 0 && shot.vy < 0 ) {
-		ny = 1;
-	} else if ( shot.y > gameSize && shot.vy > 0 ) {
-		ny = -1;
-	} else {
+	var contact = contactOf ( shot, asteroidList );
+	if ( !contact ) {
 		return true;
 	}
-	if ( touched && touched != MyPlanet ) {
+	var touched = contact.rock;
+	var rock = touched && touched != MyPlanet;
+	if ( rock ) {
 		addDebris ( ctx, shot.power, touched.x, touched.y, touched.vx, touched.vy, debrisList );
 		touched.life -= shot.power;
 		if ( touched.life <= 0 ) {
@@ -606,21 +591,140 @@ function ricochet ( ctx, shot ) {
 		return false;
 	}
 	shot.rebounds--;
-	// its way turns over, as a light on a mirror, and goes astray on the rough rock of an asteroid
-	// (else a shot fired straight at it would go to and fro between it and the planet)
-	var along = shot.vx * nx + shot.vy * ny;
-	shot.vx -= 2 * along * nx;
-	shot.vy -= 2 * along * ny;
-	if ( touched && touched != MyPlanet ) {
-		var astray = ( Math.random() * 2 - 1 ) * ricochetScatter;
-		var vx = shot.vx * Math.cos ( astray ) - shot.vy * Math.sin ( astray );
-		var vy = shot.vx * Math.sin ( astray ) + shot.vy * Math.cos ( astray );
-		if ( vx * nx + vy * ny > 0 ) {
+	turnAway ( shot, contact, rock && reboundCannon.smart < 1 );
+	return true;
+}
+
+// function to find what a rebound shot meets : the first of the rocks it goes into (the asteroids, or none when the Trick Shot
+// looks for the others itself), the planet's atmosphere, or an edge of space ; returns what it touched (false for an edge)
+// and the way out of it, or false when it meets nothing
+function contactOf ( shot, rocks ) {
+	var touched = false;
+	for ( var r = 0; r < rocks.length; r++ ) {
+		if ( rocks[r].life > 0 && bounceOn ( shot, rocks[r].x, rocks[r].y, rocks[r].radius + 2 ) ) {
+			touched = rocks[r];
+			break;
+		}
+	}
+	if ( !touched && bounceOn ( shot, MyPlanet.x, MyPlanet.y, MyPlanet.radius + 2 ) ) {
+		touched = MyPlanet;
+	}
+	if ( touched ) {
+		// (bounceOn has put the shot on its surface, the way out)
+		return { rock : touched, nx : ( shot.x - touched.x ) / ( touched.radius + 2 ), ny : ( shot.y - touched.y ) / ( touched.radius + 2 ) };
+	} else if ( shot.x < 0 && shot.vx < 0 ) {
+		return { rock : false, nx : 1, ny : 0 };
+	} else if ( shot.x > gameSize && shot.vx > 0 ) {
+		return { rock : false, nx : -1, ny : 0 };
+	} else if ( shot.y < 0 && shot.vy < 0 ) {
+		return { rock : false, nx : 0, ny : 1 };
+	} else if ( shot.y > gameSize && shot.vy > 0 ) {
+		return { rock : false, nx : 0, ny : -1 };
+	}
+	return false;
+}
+
+// function to turn a rebound shot's way over, as a light on a mirror ; on the rough rock of an asteroid, it can go astray
+// (else a shot fired straight at it would go to and fro between it and the planet)
+function turnAway ( shot, contact, astray ) {
+	var along = shot.vx * contact.nx + shot.vy * contact.ny;
+	shot.vx -= 2 * along * contact.nx;
+	shot.vy -= 2 * along * contact.ny;
+	if ( astray ) {
+		var turn = ( Math.random() * 2 - 1 ) * ricochetScatter;
+		var vx = shot.vx * Math.cos ( turn ) - shot.vy * Math.sin ( turn );
+		var vy = shot.vx * Math.sin ( turn ) + shot.vy * Math.cos ( turn );
+		if ( vx * contact.nx + vy * contact.ny > 0 ) {
 			shot.vx = vx;
 			shot.vy = vy;
 		}
 	}
-	return true;
+}
+
+// function to choose the Trick Shot's angle : the rebound cannon follows its shot's way for many angles around the planet,
+// starting from the one aimed at its target, and takes the one hitting the most asteroids (the first one found on a tie)
+function trickAngle ( aimed ) {
+	var ways = futureWays();
+	var best = aimed, bestHits = -1;
+	for ( var n = 0; n < trickAngles; n++ ) {
+		var angle = aimed + 2 * Math.PI * n / trickAngles;
+		var hits = trickHits ( angle, ways );
+		if ( hits > bestHits ) {
+			best = angle;
+			bestHits = hits;
+		}
+	}
+	return best;
+}
+
+// function to foresee the places of the asteroids, turn by turn, moved as crashTime() moves them (functions.js)
+function futureWays () {
+	var ways = [];
+	for ( var a in asteroidList ) {
+		var asteroid = asteroidList[a];
+		if ( asteroid.life <= 0 ) {
+			continue;
+		}
+		var x = asteroid.x - MyPlanet.x, y = asteroid.y - MyPlanet.y, vx = asteroid.vx, vy = asteroid.vy;
+		var way = { asteroid : asteroid, radius : asteroid.radius, xs : [], ys : [] };
+		for ( var n = 0; n < trickHorizon; n++ ) {
+			way.xs.push ( MyPlanet.x + x );
+			way.ys.push ( MyPlanet.y + y );
+			var angle = Math.atan2 ( y, x );
+			var pull = gravitronAcceleration ( angle, asteroid.mass );
+			vx += pull * Math.cos ( angle );
+			vy += pull * Math.sin ( angle );
+			x += vx;
+			y += vy;
+		}
+		ways.push ( way );
+	}
+	return ways;
+}
+
+// function to count the asteroids a rebound shot fired at an angle would hit before its rebounds are made,
+// with the rules of ricochet() on the foreseen ways of the asteroids ; one it would destroy is no longer in its way
+function trickHits ( angle, ways ) {
+	var speed = reboundCannon.speed;
+	var shot = {
+		x : MyPlanet.x + ( MyPlanet.radius + 5 ) * Math.cos ( angle ),
+		y : MyPlanet.y + ( MyPlanet.radius + 5 ) * Math.sin ( angle ),
+		vx : speed * Math.cos ( angle ),
+		vy : speed * Math.sin ( angle )
+	};
+	var rebounds = reboundCannon.rebounds, hits = 0;
+	var steps = Math.ceil ( speed / 3 );
+	for ( var w = 0; w < ways.length; w++ ) {
+		ways[w].life = ways[w].asteroid.life;
+	}
+	for ( var turn = 0; turn < trickHorizon; turn++ ) {
+		for ( var s = 0; s < steps; s++ ) {
+			shot.x += shot.vx / steps;
+			shot.y += shot.vy / steps;
+			// the asteroids first, as contactOf() does, in a loop of their own : this one runs many times
+			var contact = false;
+			for ( w = 0; w < ways.length && !contact; w++ ) {
+				var way = ways[w], x = way.xs[turn], y = way.ys[turn], reach = way.radius + 2;
+				var dx = shot.x - x, dy = shot.y - y;
+				if ( way.life > 0 && dx * dx + dy * dy < reach * reach && bounceOn ( shot, x, y, reach ) ) {
+					contact = { rock : way, nx : ( shot.x - x ) / reach, ny : ( shot.y - y ) / reach };
+				}
+			}
+			contact = contact || contactOf ( shot, [] );
+			if ( contact ) {
+				if ( contact.rock && contact.rock != MyPlanet ) {
+					hits++;
+					contact.rock.life -= reboundCannon.power;
+				}
+				if ( rebounds <= 0 ) {
+					return hits;
+				}
+				rebounds--;
+				turnAway ( shot, contact, false );
+			}
+		}
+	}
+	return hits;
 }
 
 // function to know if a rebound shot hits a round thing, going into it ; if so, it is put back on its surface

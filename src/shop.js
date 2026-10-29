@@ -147,9 +147,10 @@ var upgrades = {
 	reboundPow			: { name : "Hit Power", tip : "Rebound Hit Power - The damages done to every asteroid a shot hits.",
 							max : 8, price : "times3pow2",
 							level : function () { return reboundCannon.power; }, raise : function () { reboundCannon.power++; } },
-	reboundBounces		: { name : "Rebounds", tip : "Rebounds - How many times a shot can ricochet, on the asteroids, the edges of space or your planet, before it is spent.",
-							max : 8, price : "times100",
-							level : function () { return reboundCannon.rebounds; }, raise : function () { reboundCannon.rebounds++; } },
+	// (two at a time : a shot going to and fro between an asteroid and the planet only hits it again every two rebounds)
+	reboundBounces		: { name : "Rebounds", tip : "Rebounds - How many times a shot can ricochet, on the asteroids, the edges of space or your planet, before it is spent. Two more at each level.",
+							max : 8, price : "times150",
+							level : function () { return reboundCannon.rebounds; }, raise : function () { reboundCannon.rebounds+=2; } },
 
 	// PLANET
 	// healing is bought by the inhabitants : its price counts the ones left to heal, and it can heal a part of them only
@@ -530,6 +531,9 @@ function calculate(type,ref) {
 			break;
 		case "times100" :
 			ref *= 100;
+			break;
+		case "times150" :
+			ref *= 150;
 			break;
 		case "times600" :
 			ref = Math.round ( ref * 600 );
