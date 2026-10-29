@@ -12,7 +12,7 @@
 <html>
 <head>
 	<meta charset="utf-8">
-	<title>Planet Rescue v0.20.0</title>
+	<title>Planet Rescue v0.21.0</title>
 
 	<link rel="stylesheet" type="text/css" href="css/main.css">
 
@@ -56,7 +56,7 @@
 	</div>
 	<div id="startMenu" class="ui">
 		<div class="title">
-			Planet Rescue <span class="version">v0.20.0</span>
+			Planet Rescue <span class="version">v0.21.0</span>
 		</div>
 		<div id="mainMenu">
 			<a href="#" class="button primary" onClick='state="init";'>Start</a>
@@ -74,28 +74,32 @@
 			</div>
 		</div>
 		<div id="infoText">
-			<div class="text">
-				<strong>What to do?</strong><br />
-				Collect the debris with the open space from your Gravitron.<br />
-				Avoid the destruction of your planet by upgrading its weapons.<br /><br />
-				Your planet start with an upgradable main cannon and a basic Gravitron.<br />
-				To pause game and get to the upgrade menu, press space.<br />
-				All weapons shoot automatically, you just control the Gravitron.<br /><br />
-				Control the Gravitron with the arrow key :
-				<ul>
-					<li><strong>UP :</strong> shorten the aperture
-					<li><strong>DOWN :</strong> widen the aperture
-					<li><strong>LEFT & RIGHT :</strong> rotate the Gravitron
-					<li><strong>DELETE :</strong> change target
-					<li><strong>END :</strong> erase target selection
-				</ul>
-				<br />
-				<strong>Where to find?</strong><br />
-				You can find the whole project on <a href="https://github.com/SylvainLano/PlanetRescue">GitHub</a>.<br />
+			<div class="columns">
+				<div>
+					<h3>Your mission</h3>
+					<p>Asteroids rain on the Earth from every direction. Your weapons fire on their own: you steer the Gravitron, gather the debris it pulls in as mat, and spend your mat on upgrades in the pause menu.</p>
+					<h3>Good to know</h3>
+					<ul>
+						<li>The open part of the Gravitron pulls the debris in&hellip; and the asteroids too.</li>
+						<li>An asteroid crashing on the Earth takes away as many million inhabitants as it has life left.</li>
+						<li>After two minutes, rusty red giants come along: destroy them first.</li>
+						<li>Your achievements open the branches of the research tree: start a research from the pause menu.</li>
+					</ul>
+				</div>
+				<div>
+					<h3>Controls</h3>
+					<div class="control"><span class="keys"><kbd>&larr;</kbd><kbd>&rarr;</kbd><em>or</em><kbd data-code="KeyA">A</kbd><kbd data-code="KeyD">D</kbd></span>rotate the Gravitron</div>
+					<div class="control"><span class="keys"><kbd>&darr;</kbd><em>or</em><kbd data-code="KeyS">S</kbd></span>widen its opening</div>
+					<div class="control"><span class="keys"><kbd>&uarr;</kbd><em>or</em><kbd data-code="KeyW">W</kbd></span>narrow its opening</div>
+					<div class="control"><span class="keys"><kbd>Space</kbd></span>pause, and upgrades</div>
+					<div class="control"><span class="keys"><kbd>Delete</kbd><em>or</em><kbd data-code="KeyT">T</kbd></span>change the cannon's target</div>
+					<div class="control"><span class="keys"><kbd>End</kbd><em>or</em><kbd data-code="KeyR">R</kbd></span>let the cannon choose again</div>
+					<div class="control"><span class="keys"><kbd>click</kbd></span>the status bar: bars or digits</div>
+					<div id="keysNote">The letters are keys by their place: Z Q S D on an AZERTY keyboard.</div>
+				</div>
 			</div>
-			<div class="title">
-				<a href="#" onClick='state="menu";'>Back to Menu</a>
-			</div>
+			<div class="credits">Made in 2010 by Sylvain Lano, back to life in 2026 &middot; the whole project is on <a href="https://github.com/SylvainLano/PlanetRescue">GitHub</a> &middot; Earth map: NASA's Blue Marble</div>
+			<div class="buttons"><a href="#" class="button" onClick='state="menu";'>Main Menu</a></div>
 		</div>
 		<div id="achievementsText"></div><!-- built by src/achievements.js -->
 	</div>

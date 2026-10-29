@@ -383,17 +383,45 @@ function unblendPlaces() {
 	}
 }
 
-// Function to take care of the keyboard events
-function changeKey(which, to){
-	switch (which){
-		case 65: case 37: key[0]=to; break;		// left
-		case 87: case 38: key[2]=to; break;		// up
-		case 68: case 39: key[1]=to; break;		// right
-		case 83: case 40: key[3]=to; break;		// down
-		case 32: key[4]=to; break;				// space bar
-		case 46: key[5]=to; break;				// delete
-		case 35: key[6]=to; break;				// end
+// Function to take care of the keyboard events : the keys with a name are read by it (the numeric keypad's ones too),
+// the letters by their place on the keyboard, so that W A S D on a QWERTY keyboard are Z Q S D on an AZERTY one
+// (until 2026, the letters were read as letters)
+function changeKey(e, to){
+	var name = e.key;
+	var place = e.code;
+	if ( name == "ArrowLeft" || place == "KeyA" ) {
+		key[0]=to;		// left
+	} else if ( name == "ArrowRight" || place == "KeyD" ) {
+		key[1]=to;		// right
+	} else if ( name == "ArrowUp" || place == "KeyW" ) {
+		key[2]=to;		// up
+	} else if ( name == "ArrowDown" || place == "KeyS" ) {
+		key[3]=to;		// down
+	} else if ( name == " " || place == "Space" ) {
+		key[4]=to;		// space bar
+	} else if ( name == "Delete" || place == "KeyT" ) {
+		key[5]=to;		// delete, or T (Target), for the keyboards without these keys
+	} else if ( name == "End" || place == "KeyR" ) {
+		key[6]=to;		// end, or R (Reset)
 	}
+}
+
+// function to write on the Infos page the letters as the player's keyboard has them (Z Q S D on an AZERTY one),
+// when the browser can tell them : a note tells it otherwise
+function showKeyLabels() {
+	if ( !navigator.keyboard || !navigator.keyboard.getLayoutMap ) {
+		return;
+	}
+	navigator.keyboard.getLayoutMap().then( function ( layout ) {
+		var keys = document.querySelectorAll("#infoText kbd[data-code]");
+		for ( var k = 0; k < keys.length; k++ ) {
+			var letter = layout.get(keys[k].getAttribute("data-code"));
+			if ( letter ) {
+				keys[k].textContent = letter.toUpperCase();
+			}
+		}
+		document.getElementById("keysNote").style.display = "none";
+	} ).catch( function () {} );
 }
 
 // Function to test if an object is into the GRAVITRON field from is angle

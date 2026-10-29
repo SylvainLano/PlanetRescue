@@ -22,14 +22,14 @@ The asteroids get tougher as time passes, one more point of life each minute. Af
 
 | Key | Action |
 |---|---|
-| ← → (or A, D) | rotate the Gravitron |
-| ↑ (or W) | shorten the Gravitron's aperture |
+| ← → (or A, D; Q, D on an AZERTY keyboard) | rotate the Gravitron |
+| ↑ (or W; Z on an AZERTY keyboard) | shorten the Gravitron's aperture |
 | ↓ (or S) | widen the Gravitron's aperture |
 | Space | pause and open the upgrade menu |
-| Delete | change the cannon's target |
-| End | clear the target selection |
+| Delete (or T, for Target) | change the cannon's target |
+| End (or R, for Reset) | clear the target selection |
 
-Click the status bar at the top to switch between bars and digits.
+Click the status bar at the top to switch between bars and digits. The letters are read by their place on the keyboard: W A S D on a QWERTY keyboard are Z Q S D on an AZERTY one, and the Infos page shows the letters of your own keyboard.
 
 ## History
 
@@ -69,6 +69,7 @@ In **2026** the game came back to life. The goals are to keep its spirit, make i
 | 0.18.0 | A new Game Over screen: the score in large, with its details and the best one to beat, six tiles for the game's numbers, a badge on each record beaten, the medals of the achievements of the game, and real Retry and Main Menu buttons. It replaces the sentences of 2010 (and their typos), with the records saved as before. |
 | 0.19.0 | A new hi-scores page, in the style of the Game Over screen: the best score in large, six tiles for the other records, and a tab for each difficulty level, to see their records without changing the level you play. |
 | 0.20.0 | A new start menu: a large Start button, the difficulty levels as pills with a line telling what the chosen one changes, and buttons for the Tutorial, the Infos, the Achievements (with how many you have) and the Hi-Scores. The buttons and pills now share one style across the game. Erasing the hi-scores moved to the hi-scores page: it erases the level shown, once you confirm it. |
+| 0.21.0 | A new Infos page: your mission and what is good to know (the giants, the research tree) on one side, the controls drawn as keyboard keys on the other, and the credits. It replaces the text of 2010 and its typos. The T and R keys now do what Delete and End do, for the keyboards without them, and the letters are read by their place on the keyboard: Z Q S D work on an AZERTY keyboard as W A S D on a QWERTY one. |
 
 ## Roadmap (2026)
 

@@ -67,7 +67,8 @@ window.addEventListener('load', function () {
 	requestAnimationFrame(frame);
 
 	// Setting the call to the changeKey function which will take care of the keyboards events
-	document.onkeydown=function(e){changeKey((e||window.event).keyCode, 1);}
-	document.onkeyup=function(e){changeKey((e||window.event).keyCode, 0);}
+	document.onkeydown=function(e){changeKey(e||window.event, 1);}
+	document.onkeyup=function(e){changeKey(e||window.event, 0);}
+	showKeyLabels();	// the letters of the Infos page, as the player's keyboard has them
 
 }, false);

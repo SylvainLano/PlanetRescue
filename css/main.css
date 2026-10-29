@@ -143,6 +143,90 @@ body {
 	z-index: 7;
 }
 
+/* the Infos page : the mission and what is good to know on the left, the controls on the right */
+#infoText .columns {
+	display: grid;
+	grid-template-columns: 1fr 1.15fr;
+	gap: 24px;
+	width: 566px;
+	margin: 0 auto;
+	font-size: 12px;
+	line-height: 1.35;
+	color: #ccc;
+}
+
+#infoText h3 {
+	margin: 0 0 4px;
+	font-family: 'MirageRegular';
+	font-size: 27px;
+	font-weight: normal;
+	color: rgb(255, 71, 71);
+}
+
+#infoText p {
+	margin-bottom: 10px;
+}
+
+#infoText ul {
+	list-style: disc;
+	padding-left: 16px;
+}
+
+#infoText li {
+	margin-bottom: 3px;
+}
+
+#infoText .control {
+	display: flex;
+	align-items: center;
+	margin-bottom: 8px;
+}
+
+#infoText .keys {
+	flex: none;
+	width: 136px;
+	white-space: nowrap;
+}
+
+#infoText .keys em {
+	margin: 0 4px 0 2px;
+	font-style: normal;
+	color: #888;
+}
+
+#infoText kbd {
+	display: inline-block;
+	min-width: 14px;
+	margin-right: 2px;
+	padding: 1px 5px;
+	font-family: Arial, sans-serif;
+	font-size: 11px;
+	text-align: center;
+	color: #fff;
+	background: linear-gradient(#3c414a, #23272e);
+	border: 1px solid #5a5f68;
+	border-bottom-width: 3px;
+	border-radius: 4px;
+}
+
+#keysNote {
+	margin-top: 4px;
+	font-size: 11px;
+	color: #888;
+}
+
+#infoText .credits {
+	margin-top: 8px;
+	font-size: 11px;
+	text-align: center;
+	color: #888;
+}
+
+#infoText .buttons {
+	margin-top: 8px;
+	text-align: center;
+}
+
 #pause {
 	height: 584px;
 	z-index: 4;
