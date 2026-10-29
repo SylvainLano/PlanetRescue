@@ -68,6 +68,7 @@ function engine() {
 		status.style.background = 'rgba(60,60,60,0)';
 		instructions.style.background = 'rgba(60,60,60,0)';
 		countdown.style.top = '35px';
+		countdown.style.transform = 'none';	// where the countdown of a previous game may have moved it
 		instructions.style.top = '155px';
 		initDefault(ctx,"normal");
 		initTutorial(ctx);
@@ -364,7 +365,11 @@ function engine() {
 			if( Z == 0 ) {	Z = "GO !";	}
 			if( posTop > 240) {	posTop = 240;	}
 			countdown.innerHTML = Z;
-			countdown.style.top = posTop+'px';
+			// the browser glides the banner to its new place until the next frame, instead of moving it by leaps 25 times a second
+			// (but it shows up at its first place at once, without gliding there from where the last countdown left it)
+			countdown.style.transition = ( countdownValue == countdownStart ) ? "none" : "transform " + ( 1000 / framesPerSecond ) + "ms linear";
+			countdown.style.top = '0px';
+			countdown.style.transform = 'translateY('+posTop+'px)';
 			countdown.style.color = 'rgba(255,0,0,'+(4*step/100)+')';
 			countdownValue--;
 		}

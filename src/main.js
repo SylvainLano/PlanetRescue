@@ -39,6 +39,7 @@ window.addEventListener('load', function () {
 	// Creation of the Planet
 	// (its weapons are created with each new game, by initDefault)
 	MyPlanet = new Planet(context,startValues.planetLife,startValues.planetMat,planetSkin,planetRadius,planetMass,planetX,planetY);
+	skinImage(MyPlanet.skin);	// loading its map now, so that it is ready for the first game
 	MyGravitron = new Gravitron(context,gravSuction,0,gravMinSize,startValues.gravShield,startValues.gravPower,startValues.gravSort,startValues.gravRepulsion,startValues.gravPulse,gravRadius);
 
 	// Setting the call to engine()  so it rolls the dices 25 times a second (25 fps)

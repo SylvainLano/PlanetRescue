@@ -92,7 +92,10 @@
 	var nbrCost			= 0;
 	
 	// player's planet parameters
-	var planetSkin		= 'img/planet.png';
+	var planetSkin		= earthMap;		// the map wrapped around the planet (img/earth.js)
+	var planetTurn		= 2 * Math.PI / ( 60 * framesPerSecond );	// the planet turns on itself once a minute
+	var planetTilt		= 23.4 * Math.PI / 180;	// its axis leans like the Earth's
+	var planetView		= 15 * Math.PI / 180;	// and we see it from a bit above its equator
 	var planetAutoHeal	= startValues.planetAutoHeal;
 	var planetHealFact	= startValues.planetHealFact;
 	var planetHealTimer	= 0;

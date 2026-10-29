@@ -10,7 +10,7 @@
 */
 
 
-Planet.prototype.Draw=Draw;
+Planet.prototype.Draw=DrawPlanet;
 Planet.prototype.ShowLife=ShowLife;
 
 Asteroid.prototype.Draw=DrawRock;
@@ -28,8 +28,130 @@ function skinImage ( file ) {
 	return skins[file];
 }
 
-function Draw() {
-	this.context.drawImage(skinImage(this.skin),(this.x-this.radius),(this.y-this.radius),(this.radius*2),(this.radius*2));
+// function to draw the planet : its map (its skin) wrapped around a sphere turning on itself, lit from the top left
+function DrawPlanet() {
+	var globe = planetGlobe ( this );
+	if ( globe == false ) {
+		return;		// its map is still loading
+	}
+	// it turns while the game runs, not during the pause or once destroyed
+	if ( pause == 0 ) {
+		this.spin -= planetTurn;
+	}
+	// each pixel of the globe takes its color on the map, shifted by the spin
+	// (the shift falls between two columns of the map : both are mixed, so that the Earth glides instead of jumping a pixel at a time)
+	var turn = this.spin / ( 2 * Math.PI ) * globe.width;
+	var shift = Math.floor ( turn );
+	var next = Math.round ( ( turn - shift ) * 256 );	// the share of the next column, out of 256
+	var left = 256 - next;
+	shift %= globe.width;
+	if ( shift < 0 ) {
+		shift += globe.width;
+	}
+	for ( var n = 0; n < globe.count; n++ ) {
+		var column = globe.columns[n] + shift;
+		if ( column >= globe.width ) {
+			column -= globe.width;
+		}
+		var after = ( column + 1 == globe.width ) ? 0 : column + 1;
+		var a = globe.map[globe.rows[n] + column];
+		var b = globe.map[globe.rows[n] + after];
+		// red and blue are mixed together, then green, then the opacity of the globe's edge is added
+		var color = ( ( ( ( a & 0xFF00FF ) * left + ( b & 0xFF00FF ) * next ) >>> 8 ) & 0xFF00FF )
+			| ( ( ( ( a & 0xFF00 ) * left + ( b & 0xFF00 ) * next ) >>> 8 ) & 0xFF00 );
+		globe.pixels[globe.places[n]] = color | ( globe.alphas[n] << 24 );
+	}
+	var ctx = globe.context;
+	ctx.putImageData ( globe.image, 0, 0 );
+	// its atmosphere at the edge, then the night on the bottom right
+	ctx.globalCompositeOperation = "source-atop";
+	ctx.fillStyle = globe.air;
+	ctx.fillRect ( 0, 0, globe.size, globe.size );
+	ctx.fillStyle = globe.shade;
+	ctx.fillRect ( 0, 0, globe.size, globe.size );
+	ctx.globalCompositeOperation = "source-over";
+	this.context.drawImage ( globe.canvas, this.x - this.radius, this.y - this.radius, this.radius * 2, this.radius * 2 );
+}
+
+// function to get the planet's globe at the canvas' resolution : where each of its pixels takes its color on the map
+// (computed once, then again only when the zoom changes)
+function planetGlobe ( planet ) {
+	var size = Math.ceil ( planet.radius * 2 * planet.context.canvas.width / gameSize );
+	if ( planet.globe && planet.globe.size == size && planet.globe.skin == planet.skin ) {
+		return planet.globe;
+	}
+	var skin = skinImage ( planet.skin );
+	if ( !skin.complete || skin.naturalWidth == 0 || size < 2 ) {
+		return false;
+	}
+	var globe = { size : size, skin : planet.skin };
+	var radius = size / 2;
+
+	// the map, with about one of its pixels for one of the screen's at the globe's center
+	globe.width = Math.round ( 2 * Math.PI * radius );
+	var height = Math.round ( globe.width / 2 );
+	var texture = document.createElement ( "canvas" );
+	texture.width = globe.width;
+	texture.height = height;
+	var ctx = texture.getContext ( "2d" );
+	ctx.imageSmoothingQuality = "high";
+	ctx.drawImage ( skin, 0, 0, globe.width, height );
+	globe.map = new Uint32Array ( ctx.getImageData ( 0, 0, globe.width, height ).data.buffer );
+
+	// for each pixel of the globe : its place, the row and column of its color on the map, and its opacity at the edge
+	var places = [], rows = [], columns = [], alphas = [];
+	for ( var py = 0; py < size; py++ ) {
+		for ( var px = 0; px < size; px++ ) {
+			// the pixel's center, from the globe's center, in radii
+			var sx = ( px + 0.5 - radius ) / radius;
+			var sy = ( py + 0.5 - radius ) / radius;
+			var d = Math.sqrt ( sx * sx + sy * sy );
+			var cover = ( 1 - d ) * radius + 0.5;
+			if ( cover <= 0 ) {
+				continue;
+			}
+			if ( d > 1 ) {
+				sx /= d;
+				sy /= d;
+			}
+			// standing its axis upright (x to the east, y to the north, z toward us), then looking from above the equator
+			var x = sx * Math.cos ( planetTilt ) + sy * Math.sin ( planetTilt );
+			var y = sx * Math.sin ( planetTilt ) - sy * Math.cos ( planetTilt );
+			var z = Math.sqrt ( Math.max ( 0, 1 - x * x - y * y ) );
+			var north = y * Math.cos ( planetView ) + z * Math.sin ( planetView );
+			var front = z * Math.cos ( planetView ) - y * Math.sin ( planetView );
+			var latitude = Math.asin ( Math.max ( -1, Math.min ( 1, north ) ) );
+			var longitude = Math.atan2 ( x, front );
+			places.push ( py * size + px );
+			rows.push ( Math.min ( height - 1, Math.floor ( ( 0.5 - latitude / Math.PI ) * height ) ) * globe.width );
+			columns.push ( Math.floor ( ( longitude / ( 2 * Math.PI ) + 0.5 ) * globe.width ) % globe.width );
+			alphas.push ( Math.round ( Math.min ( 1, cover ) * 255 ) );
+		}
+	}
+	globe.count = places.length;
+	globe.places = new Int32Array ( places );
+	globe.rows = new Int32Array ( rows );
+	globe.columns = new Int32Array ( columns );
+	globe.alphas = new Uint8Array ( alphas );
+
+	// the globe's own canvas, with its atmosphere and its shading
+	globe.canvas = document.createElement ( "canvas" );
+	globe.canvas.width = globe.canvas.height = size;
+	globe.context = globe.canvas.getContext ( "2d" );
+	globe.image = globe.context.createImageData ( size, size );
+	globe.pixels = new Uint32Array ( globe.image.data.buffer );
+	globe.air = globe.context.createRadialGradient ( radius, radius, radius * 0.8, radius, radius, radius );
+	globe.air.addColorStop ( 0, "rgba(120,170,255,0)" );
+	globe.air.addColorStop ( 1, "rgba(120,170,255,0.45)" );
+	var light = radius * 0.55;
+	globe.shade = globe.context.createRadialGradient ( light, light, 0, light, light, radius * 1.7 );
+	globe.shade.addColorStop ( 0, "rgba(255,245,230,0.15)" );
+	globe.shade.addColorStop ( 0.35, "rgba(255,245,230,0)" );
+	globe.shade.addColorStop ( 0.55, "rgba(0,0,0,0.35)" );
+	globe.shade.addColorStop ( 0.8, "rgba(0,0,0,0.88)" );
+	globe.shade.addColorStop ( 1, "rgba(0,0,0,0.95)" );
+	planet.globe = globe;
+	return globe;
 }
 
 // function to draw an asteroid : its rock turns on itself, while its shading stays lit from the top left, like the planet

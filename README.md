@@ -6,7 +6,7 @@ Defend your planet against a never-ending rain of asteroids: your weapons fire o
 
 ## The game
 
-Your planet sits in the middle of the screen and asteroids come from every direction. When one crashes on the planet, you lose as many million inhabitants as it had life left. If your population reaches zero, the game is over.
+Your planet, the Earth, sits in the middle of the screen and asteroids come from every direction. When one crashes on the planet, you lose as many million inhabitants as it had life left. If your population reaches zero, the game is over.
 
 - **The Gravitron** is an arc around your planet. Its open part pulls debris in, which turns them into **mat** (material), but it also pulls asteroids toward you. Its closed part can push them away once you buy the Repulsion upgrade. It can also become a shield and send out damaging pulses. The whole art is to gather debris without drawing the asteroids in: the Field Scanner upgrade shows the limits of the field, then which asteroids are pulled (red) or pushed (green).
 - **The weapons fire automatically.** You start with a basic cannon guided by its SMART AI, which goes up to level 5: it learns to aim ahead of its targets, then to choose them wisely. You can also buy the Spiral & Orbital, Magnetic, and Hammer & Broom weapons, each with its own firing modes.
@@ -55,6 +55,7 @@ In **2026** the game came back to life. The goals are to keep its spirit, make i
 | 0.10.0 | A new score: 10 points per asteroid destroyed, plus the mat gathered, plus the seconds survived (the 2010 score rewarded the inhabitants lost). Longest survival is a new record. Recovery, stuck at its maximum since 2010, now starts at 0 and can be bought. |
 | 0.10.1 | Modernization, with no change in the game: the upgrades are described as data in one table, the pause menu is built from it without jQuery and its plugins (356 KB less), and the background images went from 8.9 MB of PNG to 350 KB of JPEG. |
 | 0.11.0 | The asteroids are now rocks drawn by the game: each one has its own shape, color, grain and craters, spins slowly, and is lit from the top left like the planet. The Field Scanner tints their exact shape. The images are loaded once instead of at every frame. The tutorial no longer crashes when "Space" is pressed at the very moment a step begins. |
+| 0.12.0 | Your planet is now the Earth, turning on itself once a minute: NASA's Blue Marble map is wrapped around a sphere at the screen's resolution, with its tilted axis, its atmosphere and its night side. The map is stored as text (`img/earth.js`), so that the game still works when `index.html` is opened from the disk. |
 
 ## Roadmap (2026)
 
@@ -62,7 +63,7 @@ The order may change as we go.
 
 1. **Fairer difficulty:** difficulty levels (done in 0.7.0), the Field Scanner (done in 0.8.0), and SMART AI levels 3 to 5 as designed in 2010 (done in 0.9.0).
 2. **Modernization:** upgrades described as data, a pause menu without jQuery (ready for the research tree), lighter assets (all done in 0.10.1).
-3. **Graphics:** rocky asteroids (done in 0.11.0), the Earth as your planet, high-resolution images, a hand-made animated background.
+3. **Graphics:** rocky asteroids (done in 0.11.0) and the Earth as your planet (done in 0.12.0), both drawn at the screen's resolution, then a hand-made animated background.
 4. **Touch screens.**
 5. **The 2010 ideas:** achievements, then the research tree, then the free-play mode, new secondary weapons, and maybe one day the story mode.
 
@@ -122,7 +123,8 @@ No build step and no dependencies to install: open `index.html` in a browser and
 | `src/functions.js` | debris, pulses, Gravitron, weapons, SMART AI, interception |
 | `src/shop.js` | the upgrades, described as data (`upgrades`, `shopLayout`), and the shop |
 | `src/menu.js` | the pause menu, built from the upgrades: sections, weapon tabs, tooltips |
-| `src/objects.js`, `src/prototypes.js` | game objects and their drawing, including the asteroids' rocks |
+| `src/objects.js`, `src/prototypes.js` | game objects and their drawing: the turning Earth and the asteroids' rocks |
+| `img/earth.js` | the Earth's map, written as text: a browser opening `index.html` from the disk would not let the game read the pixels of an image file |
 | `src/parameters.js` | settings, the starting values that tune the difficulty (`startValues`), and what each difficulty level changes (`difficultyLevels`) |
 
 Adding an upgrade only takes a line in `upgrades` and its place in `shopLayout`. The game uses no library: the pause menu used jQuery 1.4.3, jQuery UI 1.8.5 and three plugins until 0.10.1.
@@ -131,5 +133,6 @@ Adding an upgrade only takes a line in `upgrades` and its place in `shopLayout`.
 
 - Game and code: [Sylvain Lano](https://sylvainlano.github.io/)
 - Help with the 2010 interception equation: Marc35, from the [ilephysique.net](https://www.ilephysique.net/) forum
+- Earth map: [The Blue Marble](https://visibleearth.nasa.gov/images/57735) (2002), NASA Goddard Space Flight Center, image by Reto Stöckli, enhancements by Robert Simmon, from NASA Visible Earth (public domain)
 
 *This program is distributed in the hope that it will be fun and useful, but WITHOUT ANY WARRANTY. If it doesn't work well, contact us or improve the code and share it alike!*

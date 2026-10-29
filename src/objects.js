@@ -24,6 +24,10 @@ function Planet(context,life,mat,skin,r,m,x,y) {
 	this.x=x;
 	this.y=y;
 
+// elements to set up
+	this.spin = 0.3;		// longitude seen at its center : Europe and Africa first
+	this.globe = false;		// its globe, computed for the canvas' resolution (prototypes.js)
+
 // object definition
 	this.type="Planet";
 }
