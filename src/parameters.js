@@ -164,6 +164,10 @@
 	var gravMinSize		= Math.PI / 64;
 	var gravMaxSize		= 2 * Math.PI - gravMinSize;
 	var pulseList		= new Array();
+	var wideNetMargin	= 20 * Math.PI / 180;	// how much the Wide Net widens the GRAVITRON's field for the debris, on each side
+	var brakeRate		= 0.01;		// the speed an asteroid of base mass loses at each turn in the opening, with the Gravity Brake
+	var compactorBonus	= 0.1;		// the mat more for each debris gathered, at each level of the Compactor
+	var slingshotHit	= 2;		// how much harder an asteroid the GRAVITRON has turned hits another one, with the Slingshot
 	
 	// asteroids parameters
 	var asteroidList	= new Array();
@@ -275,6 +279,11 @@ function initDefault(context,level) {
 	MyGravitron.sort		= gameValues.gravSort;
 	MyGravitron.pulse		= gameValues.gravPulse;
 	MyGravitron.scanner		= gameValues.gravScanner;
+	MyGravitron.wideNet		= 0;		// what its researches bring (researches.js)
+	MyGravitron.brake		= 0;
+	MyGravitron.slingshot	= 0;
+	MyGravitron.compactor	= 0;		// and the levels of its Compactor, an upgrade its research brings,
+	MyGravitron.compacted	= 0;		// with the part of a mat it has made from the debris
 	pulseList				= [];
 	gravColor				= '#666666';
 	gravRadius				= planetRadius * 1.1;

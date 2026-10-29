@@ -521,6 +521,12 @@ function engine() {
 				var turn = Math.atan2(asteroidList[i].vy, asteroidList[i].vx) - heading;
 				asteroidList[i].turned += Math.abs ( ( ( turn + 3 * Math.PI ) % ( 2 * Math.PI ) ) - Math.PI );
 			}
+			// in the opening, the Gravity Brake slows it down, the heavy ones less (researches.js)
+			if ( MyGravitron.brake > 0 && pull < 0 ) {
+				var brake = 1 - brakeRate * asteroidBM / asteroidList[i].mass;
+				asteroidList[i].vx *= brake;
+				asteroidList[i].vy *= brake;
+			}
 
 			// Testing if asteroid is out of the gravitron's field
 			if (intoArcField(angle,MyGravitron) == false) {
@@ -653,11 +659,11 @@ function engine() {
 						// debris creation from asteroids' life
 							var iLife = asteroidList[i].life;
 							var jLife = asteroidList[j].life;
-							var iColl = Math.floor(asteroidList[j].life * CollisionSpeed / MaxCollSpd );
+							var iColl = Math.floor(asteroidList[j].life * CollisionSpeed / MaxCollSpd * slung(asteroidList[j]) );
 							addDebris(ctx,iColl,asteroidList[i].x,asteroidList[i].y,asteroidList[j].vx,asteroidList[j].vy,debrisList);
 							asteroidList[i].life -= iColl;
 
-							var jColl = Math.floor(asteroidList[i].life * CollisionSpeed / MaxCollSpd );
+							var jColl = Math.floor(asteroidList[i].life * CollisionSpeed / MaxCollSpd * slung(asteroidList[i]) );
 							addDebris(ctx,jColl,asteroidList[j].x,asteroidList[j].y,asteroidList[i].vx,asteroidList[i].vy,debrisList);
 							asteroidList[j].life -= jColl;
 

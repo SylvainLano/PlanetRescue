@@ -67,8 +67,8 @@ var achievements = {
 						test : function () { return state == "playing" && bestPinball >= 3; } },
 	goliath			: { name : "David and Goliath", text : "Finish a giant asteroid with a rebound shot, after a ricochet.", picture : "sling", metal : "gold",
 						test : function () { return state == "playing" && goliath; } },
-	scholar			: { name : "Scholar", text : "Complete every research in a game.", picture : "book", metal : "gold",
-						test : function () { return state == "playing" && researchesDone() == Object.keys ( researches ).length; } }
+	scholar			: { name : "Scholar", text : "Complete 8 researches in a game.", picture : "book", metal : "gold",
+						test : function () { return state == "playing" && researchesDone() >= 8; } }
 };
 
 // The pictures of the medals, drawn in a 64 x 64 square around its center (32, 32), with lines of the color "INK"

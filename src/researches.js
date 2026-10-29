@@ -17,10 +17,12 @@ var researchBranches = {
 	missiles	: { name : "Missiles", opener : "survivor" },
 	explosives	: { name : "Explosives", opener : "demolisher" },
 	lasers		: { name : "Lasers", opener : "sharpshooter" },
-	ricochets	: { name : "Ricochets", opener : "bankShot" }
+	ricochets	: { name : "Ricochets", opener : "bankShot" },
+	gravitron	: { name : "Gravitron", opener : "collector" }
 };
 
 // each research : its name, its tooltip, its branch, its time (in seconds of play), the researches it needs first, and what it brings
+// (a research with an opener also waits for that achievement, once its branch is open)
 var researches = {
 	missiles	: { name : "Missile Launcher", branch : "missiles", time : 60, needs : [],
 					tip : "Missile Launcher - A secondary weapon, which takes no place among your active weapons. Its missiles fly to your main cannon's target, and explode on the first asteroid they touch, damaging every asteroid around.",
@@ -45,7 +47,19 @@ var researches = {
 					apply : function () { reboundCannon.cannonNbr = 1; } },
 	trick		: { name : "Trick Shot", branch : "ricochets", time : 90, needs : ["rebound"],
 					tip : "Trick Shot - Your rebound cannon reckons its ricochets before it fires : among many angles, it takes the one whose way hits the most asteroids, rebounds included, and its shots no longer go astray on the rock.",
-					apply : function () { reboundCannon.smart = 1; } }
+					apply : function () { reboundCannon.smart = 1; } },
+	wideNet		: { name : "Wide Net", branch : "gravitron", time : 45, needs : [], opener : "collector",
+					tip : "Wide Net - Out of its opening, your Gravitron pulls the debris too, more weakly, but never the asteroids.",
+					apply : function () { MyGravitron.wideNet = 1; } },
+	compactor	: { name : "Compactor", branch : "gravitron", time : 45, needs : [], opener : "hoarder",
+					tip : "Compactor - Brings the Compactor upgrade of your Gravitron : each of its levels makes more mat from the debris gathered.",
+					apply : function () {} },
+	gravityBrake: { name : "Gravity Brake", branch : "gravitron", time : 60, needs : [], opener : "exterminator",
+					tip : "Gravity Brake - The asteroids in your Gravitron's opening slow down, the heavy ones less : your cannons have more time to destroy them.",
+					apply : function () { MyGravitron.brake = 1; } },
+	slingshot	: { name : "Slingshot", branch : "gravitron", time : 60, needs : [], opener : "bankShot",
+					tip : "Slingshot - An asteroid your Gravitron has turned from its way hits twice as hard the asteroids it runs into.",
+					apply : function () { MyGravitron.slingshot = 1; } }
 };
 
 // the researches of the current game : the planet's lab (an upgrade to buy, its level 2 being the Automation), the one going on,
@@ -72,10 +86,16 @@ function anyBranchOpen () {
 	return false;
 }
 
-// function to know if a research can be done : the lab built, its branch open, not done yet, and the researches it needs done
+// function to know if a research is opened : its branch, and its own achievement if it has one
+function researchOpened ( id ) {
+	var opener = researches[id].opener;
+	return branchOpen ( researches[id].branch ) && ( !opener || achieved[opener] ? true : false );
+}
+
+// function to know if a research can be done : the lab built, opened, not done yet, and the researches it needs done
 function researchOpen ( id ) {
 	var item = researches[id];
-	if ( !research.lab || research.done[id] || !branchOpen ( item.branch ) ) {
+	if ( !research.lab || research.done[id] || !researchOpened ( id ) ) {
 		return false;
 	}
 	for ( var n in item.needs ) {
@@ -206,6 +226,9 @@ function addResearchLine ( holder, id ) {
 	} else if ( research.current == id ) {
 		var done = Math.floor ( 100 * research.spent[id] / ( item.time * framesPerSecond ) );
 		link.innerHTML = "<span><span class='blue'>" + done + "% done, " + researchLeft ( id ) + " s left</span> <span class='upred'>STOP</span></span>";
+	} else if ( !researchOpened ( id ) ) {
+		// its achievement stays secret, as a closed branch's
+		link.innerHTML = "<span class='upred'>opened by an achievement</span>";
 	} else if ( !researchOpen ( id ) ) {
 		var needs = research.lab ? [] : [ upgrades.lab.name ];
 		for ( var n in item.needs ) {

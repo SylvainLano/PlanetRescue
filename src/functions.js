@@ -98,6 +98,7 @@ function drawPulses (ctx) {
 // Function to resolve the debris
 function resolveDebris (debrisList,ctx,MyPlanet,pause,gravSuction,gravPower,gravSort,debrisColor) {
 	var tempList = new Array();
+	var net = ( MyGravitron.wideNet > 0 ) ? wideNetArc() : false;	// the Wide Net, wider than the field for the debris (researches.js)
 	for (i in debrisList) {
 		// a var to know if we're gonna keep this debris into the array
 		var keepit = 1;
@@ -112,11 +113,11 @@ function resolveDebris (debrisList,ctx,MyPlanet,pause,gravSuction,gravPower,grav
 				
 				// Testing if debris is into the gravitron's field
 				if ( pause == 0 ) {
-					if ( intoArcField(angle,MyGravitron) == true ) {
+					if ( intoArcField(angle,MyGravitron) == true || ( net && intoArcField(angle,net) ) ) {
 						// Yes it is !
 						debrisList[i].vx -= gravSuction * gravPower * Math.cos(angle);
 						debrisList[i].vy -= gravSuction * gravPower * Math.sin(angle);
-						
+
 					} else if ( MyGravitron.repulsion > 0 ) {
 							debrisList[i].vx += gravSuction / Math.pow(gravSort, gravPower) * Math.cos(angle);
 							debrisList[i].vy += gravSuction / Math.pow(gravSort, gravPower) * Math.sin(angle);
@@ -139,9 +140,14 @@ function resolveDebris (debrisList,ctx,MyPlanet,pause,gravSuction,gravPower,grav
 				
 				// Debris collected, adding material and destroying it
 				if ( pause == 0 ) {
-					if ( MyPlanet.maxMat > MyPlanet.mat ){
-						MyPlanet.mat++;
-						MyPlanet.totalMat++;
+					// (each level of the Compactor makes a part of a mat more, given once it makes a whole one)
+					MyGravitron.compacted += MyGravitron.compactor * compactorBonus;
+					var gathered = 1 + Math.floor ( MyGravitron.compacted + 1e-9 );
+					MyGravitron.compacted -= gathered - 1;
+					gathered = Math.min ( gathered, MyPlanet.maxMat - MyPlanet.mat );
+					if ( gathered > 0 ){
+						MyPlanet.mat += gathered;
+						MyPlanet.totalMat += gathered;
 					}
 				}
 				keepit = 0;
@@ -222,6 +228,19 @@ function drawGravitron (ctx,width) {
 	ctx.arc(MyPlanet.x,MyPlanet.y,MyGravitron.radius,MyGravitron.angle,(MyGravitron.angle + MyGravitron.wideness),true);
 	ctx.closePath();
 	ctx.stroke();
+	// the Wide Net, on each side of the opening, just outside the GRAVITRON : dotted, for it only pulls the debris (researches.js)
+	if ( MyGravitron.wideNet > 0 ) {
+		var net = wideNetArc(), radius = MyGravitron.radius + width + 2;
+		ctx.strokeStyle = 'rgba(220,230,255,0.7)';
+		ctx.lineWidth = 1.5;
+		ctx.setLineDash([2,3]);
+		ctx.beginPath();
+		ctx.arc(MyPlanet.x,MyPlanet.y,radius,net.angle,MyGravitron.angle,false);
+		ctx.moveTo(MyPlanet.x + radius * Math.cos(MyGravitron.angle + MyGravitron.wideness), MyPlanet.y + radius * Math.sin(MyGravitron.angle + MyGravitron.wideness));
+		ctx.arc(MyPlanet.x,MyPlanet.y,radius,MyGravitron.angle + MyGravitron.wideness,net.angle + net.wideness,false);
+		ctx.stroke();
+		ctx.setLineDash([]);
+	}
 }
 
 // where the game area's sky is : the size of its picture's pixels in game units, and its corner from the game area's (placeSky)
@@ -447,6 +466,18 @@ function gravitronAcceleration(angle,mass) {
 		return gravSuction * Math.pow(MyGravitron.sort, MyGravitron.power) / mass;
 	}
 	return 0;
+}
+
+// Function to get the Wide Net : the GRAVITRON's field widened on each side, for the debris only (researches.js)
+function wideNetArc() {
+	var wideness = Math.min ( MyGravitron.wideness + 2 * wideNetMargin, gravMaxSize );
+	var angle = MyGravitron.angle - ( wideness - MyGravitron.wideness ) / 2;
+	return { angle : ( ( angle + 3 * Math.PI ) % ( 2 * Math.PI ) ) - Math.PI, wideness : wideness };
+}
+
+// Function to get how hard an asteroid hits another one : harder once the GRAVITRON has turned its way, with the Slingshot (researches.js)
+function slung(asteroid) {
+	return ( MyGravitron.slingshot > 0 && asteroid.turned >= bankShotTurn ) ? slingshotHit : 1;
 }
 
 // Function to show the limits of the GRAVITRON's field (Field Scanner level 1) : the field has no end, so they go to the edge of the game area

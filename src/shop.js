@@ -35,6 +35,10 @@ var upgrades = {
 	gravScanner			: { name : "Field Scanner", tip : "Field Scanner - Level 1 shows the limits of the Gravitron's field. Level 2 colors the asteroids it pulls in red, and the ones it pushes away in green.",
 							max : 2, price : "plus1times50",
 							level : function () { return MyGravitron.scanner; }, raise : function () { MyGravitron.scanner++; } },
+	// brought by its research (researches.js)
+	compactor			: { name : "Compactor", tip : "Compactor - Each level makes 10% more mat from the debris your Gravitron gathers.",
+							max : 5, price : "plus1times100", appears : function () { return research.done.compactor ? true : false; },
+							level : function () { return MyGravitron.compactor; }, raise : function () { MyGravitron.compactor++; } },
 
 	// MAIN STRUCTURE
 	mCMSpeed			: { name : "Main Structure Move Speed", tip : "Main Structure Move Speed - Making the Main Structure to move faster.",
@@ -185,7 +189,7 @@ var upgrades = {
 // (a weapon's upgrades are shown once it is bought, and a tab with appears() stays hidden until then :
 // each weapon comes once the one before is bought, a secondary weapon once its research is validated)
 var shopLayout = [
-	{ title : "Upgrade Your Gravitron", upgrades : ["gravSort","gravPower","repulsion","gravShield","gravPulse","gravScanner"] },
+	{ title : "Upgrade Your Gravitron", upgrades : ["gravSort","gravPower","repulsion","gravShield","gravPulse","gravScanner","compactor"] },
 	{ title : "Build or upgrade your Weapons", panels : [
 		{ tab : "Structure", title : "Main Structure", upgrades : ["mCMSpeed","SMART","MaxWAtATime"] },
 		{ tab : "Basic", title : "Basic Weapon", weapon : "basicW",
@@ -534,6 +538,9 @@ function calculate(type,ref) {
 			break;
 		case "times150" :
 			ref *= 150;
+			break;
+		case "plus1times100" :
+			ref = ( ref + 1 ) * 100;
 			break;
 		case "times600" :
 			ref = Math.round ( ref * 600 );
