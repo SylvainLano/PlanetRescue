@@ -1092,6 +1092,9 @@ function drawGame ( blend ) {
 	ctx.setTransform(scale,0,0,scale,0,0);
 	ctx.clearRect(0,0,gameSize,gameSize);
 
+	// the background's stars twinkling, under everything
+	drawStars ( ctx );
+
 	blendPlaces ( blend );
 	try {
 		if ( state == "tutorialSteps" ) {

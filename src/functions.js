@@ -224,6 +224,87 @@ function drawGravitron (ctx,width) {
 	ctx.stroke();
 }
 
+// where the game area's sky is : the size of its picture's pixels in game units, and its corner from the game area's (placeSky)
+var sky = { scale : 1, x : 0, y : 0 };
+
+// Function to get where a point of the game area's sky is, in game units
+function backgroundPlace(x,y) {
+	return [ sky.x + x * sky.scale, sky.y + y * sky.scale ];
+}
+
+// the twinkles of the sky's stars, made at their first drawing, and again when the sky moves
+var starTwinkles = false;
+
+// Function to make a twinkle for each star of the game area's background (img/stars.js), with its own pace
+function makeTwinkles(ctx) {
+	var twinkles = [];
+	for ( var i in backgroundStars ) {
+		var star = backgroundStars[i];
+		var place = backgroundPlace ( star[0], star[1] );
+		var radius = [0, 6, 14, 24][star[2]] * sky.scale;	// its light, as wide as the star in the picture
+		if ( place[0] < -radius || place[0] > gameSize + radius || place[1] < -radius || place[1] > gameSize + radius ) {
+			continue;	// out of the game area
+		}
+		var rgb = parseInt ( star[3].slice(1), 16 );
+		var color = ( rgb >> 16 ) + "," + ( ( rgb >> 8 ) & 255 ) + "," + ( rgb & 255 );
+		// its light, one unit wide around its center, stretched to its size when drawn
+		var glow = ctx.createRadialGradient ( 0, 0, 0, 0, 0, 1 );
+		glow.addColorStop ( 0, "rgba(" + color + ",1)" );
+		glow.addColorStop ( 0.3, "rgba(" + color + ",0.35)" );
+		glow.addColorStop ( 1, "rgba(" + color + ",0)" );
+		twinkles.push ( {
+			x : place[0],
+			y : place[1],
+			cross : star[2] > 1,					// the big ones shine with a cross, like in the picture
+			radius : radius,
+			strength : [0, 0.7, 0.8, 0.6][star[2]],
+			glow : glow,
+			// two waves at their own paces, in radians a second
+			pace1 : 2 * Math.PI / ( 1.5 + Math.random() * 2.5 ),
+			pace2 : 2 * Math.PI / ( 2.3 + Math.random() * 3.8 ),
+			phase1 : Math.random() * 2 * Math.PI,
+			phase2 : Math.random() * 2 * Math.PI
+		} );
+	}
+	return twinkles;
+}
+
+// Function to make the stars of the game area's background twinkle : each one stays as the picture shows it most of the time,
+// and shines now and then, when its two waves meet (it goes on in the menus and the pause, with the time of the clock)
+function drawStars(ctx) {
+	if ( starTwinkles == false ) {
+		starTwinkles = makeTwinkles ( ctx );
+	}
+	var time = performance.now() / 1000;
+	for ( var i in starTwinkles ) {
+		var star = starTwinkles[i];
+		var wave = 0.5 + 0.3 * Math.sin ( time * star.pace1 + star.phase1 ) + 0.2 * Math.sin ( time * star.pace2 + star.phase2 );
+		var shine = wave * wave * wave;
+		if ( shine < 0.02 ) {
+			continue;
+		}
+		ctx.save();
+		ctx.translate ( star.x, star.y );
+		ctx.globalAlpha = shine * star.strength;
+		ctx.fillStyle = star.glow;
+		ctx.save();
+		ctx.scale ( star.radius, star.radius );
+		ctx.fillRect ( -1, -1, 2, 2 );
+		ctx.restore();
+		if ( star.cross ) {
+			// its cross grows as it shines
+			var length = star.radius * ( 1.5 + 1.5 * shine );
+			ctx.save();
+			ctx.scale ( length, star.radius * 0.12 );
+			ctx.fillRect ( -1, -1, 2, 2 );
+			ctx.restore();
+			ctx.scale ( star.radius * 0.12, length );
+			ctx.fillRect ( -1, -1, 2, 2 );
+		}
+		ctx.restore();
+	}
+}
+
 // The moving parts of the objects : what changes from one turn of the engine to the next
 // (the objects are drawn in between, so that they move at each refresh of the screen)
 function movingParts() {
@@ -703,6 +784,24 @@ function fitGameArea() {
 	var pixels = Math.round(gameSize * zoom * (window.devicePixelRatio || 1));
 	main.width = pixels;
 	main.height = pixels;
+	placeSky(main);
+}
+
+// function to place the game area's sky in line with the page's : the same picture, darker, as if the game area were a window on it
+// (both pictures cover the whole window, centered : css/main.css ; until 2026, the zoom made the game area show a smaller copy of it)
+function placeSky(main) {
+	var width = document.documentElement.clientWidth;
+	var height = document.documentElement.clientHeight;
+	var scale = Math.max ( width / backgroundWidth, height / backgroundHeight );	// the size of the picture's pixels on the screen
+	var area = main.getBoundingClientRect();
+	var zoom = area.width / gameSize;
+	// the picture's pixels in game units, and its corner from the game area's corner
+	sky.scale = scale / zoom;
+	sky.x = ( ( width - backgroundWidth * scale ) / 2 - area.left ) / zoom;
+	sky.y = ( ( height - backgroundHeight * scale ) / 2 - area.top ) / zoom;
+	main.style.backgroundSize = ( backgroundWidth * sky.scale ) + "px " + ( backgroundHeight * sky.scale ) + "px";
+	main.style.backgroundPosition = sky.x + "px " + sky.y + "px";
+	starTwinkles = false;	// its stars move with it
 }
 
 // function to display status as bars or digits

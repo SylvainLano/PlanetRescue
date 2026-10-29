@@ -80,7 +80,7 @@ body {
 	background-image: url("../img/background1.jpg");
     background-size: cover;
     background-position: center;
-    background-attachment: fixed;
+    background-attachment: scroll;		/* sized and placed by placeSky() in line with the page's sky, as "fixed" did before the zoom */
 	position : absolute;
 	margin: auto;
 	width: 600px;		/* fixed display size, while the drawing resolution follows the zoom */
