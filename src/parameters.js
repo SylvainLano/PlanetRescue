@@ -56,6 +56,12 @@
 		normal	: {},
 		hard	: { spawnStart : 5, spawnMin : 1, spawnSlowness : 150, speedGrowth : 300 }
 	};
+	// what each difficulty level changes, as the start menu tells it
+	var levelTexts = {
+		easy	: "More life and mat for your planet, slower asteroids, and a cannon aiming ahead from the start.",
+		normal	: "The game as it is balanced.",
+		hard	: "The asteroids come sooner, and faster and faster."
+	};
 	// difficulty level chosen by the player, remembered by the browser
 	var difficulty = localStorage["difficulty"];
 	if ( !difficultyLevels.hasOwnProperty(difficulty) ) {

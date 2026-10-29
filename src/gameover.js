@@ -101,6 +101,9 @@ function showHiScores ( holder, level ) {
 			+ "</div>";
 	}
 	html += "<div class='buttons'><a href='#' class='button' onClick='state=\"menu\";'>Main Menu</a></div></div>";
+	if ( record ( "playedGames" ) != "-" ) {
+		html += "<div class='reset'><a href='#' onClick='resetHS(\"" + level + "\");'>reset hi-scores</a></div>";
+	}
 	holder.innerHTML = html;
 }
 

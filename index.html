@@ -12,7 +12,7 @@
 <html>
 <head>
 	<meta charset="utf-8">
-	<title>Planet Rescue v0.19.0</title>
+	<title>Planet Rescue v0.20.0</title>
 
 	<link rel="stylesheet" type="text/css" href="css/main.css">
 
@@ -56,23 +56,21 @@
 	</div>
 	<div id="startMenu" class="ui">
 		<div class="title">
-			Planet Rescue <span class="version">v0.19.0</span>
+			Planet Rescue <span class="version">v0.20.0</span>
 		</div>
-		<div id="mainMenu" class="title">
-			<br /><a href="#" onClick='state="init";'>Start</a><br />
+		<div id="mainMenu">
+			<a href="#" class="button primary" onClick='state="init";'>Start</a>
 			<div id="levels">
-				<a href="#" id="level_easy" onClick='chooseLevel("easy");'>Easy</a>
-				&middot;
-				<a href="#" id="level_normal" onClick='chooseLevel("normal");'>Normal</a>
-				&middot;
-				<a href="#" id="level_hard" onClick='chooseLevel("hard");'>Hard</a>
+				<a href="#" id="level_easy" class="level" onClick='chooseLevel("easy");'>Easy</a>
+				<a href="#" id="level_normal" class="level" onClick='chooseLevel("normal");'>Normal</a>
+				<a href="#" id="level_hard" class="level" onClick='chooseLevel("hard");'>Hard</a>
 			</div>
+			<div id="levelText"></div><!-- what the chosen level changes, written by showLevel() -->
 			<div id="moreLinks">
-				<a href="#" onClick='state="tutorial";'>Tutorial</a>
-				-
-				<a href="#" onClick='state="infos";'>Infos</a>
-				-
-				<a href="#" onClick='state="achievements";'>Achievements</a>
+				<a href="#" class="button" onClick='state="tutorial";'>Tutorial</a>
+				<a href="#" class="button" onClick='state="infos";'>Infos</a>
+				<a href="#" class="button" onClick='state="achievements";'>Achievements <span id="achievementCount"></span></a>
+				<a href="#" class="button" onClick='state="hiscores";'>Hi-Scores</a>
 			</div>
 		</div>
 		<div id="infoText">
@@ -100,9 +98,6 @@
 			</div>
 		</div>
 		<div id="achievementsText"></div><!-- built by src/achievements.js -->
-		<div id="resetHS">
-			<a href="#" onClick='state="hiscores";'>see hi-scores</a> - <a href="#" onClick="resetHS()">reset hi-scores</a>
-		</div>
 	</div>
 	<canvas id="mainArea" width="600" height="600">
 		Sorry, you're browser is not able to display HTML5 elements and Canvas.<br /><br />

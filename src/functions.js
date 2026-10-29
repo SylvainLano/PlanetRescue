@@ -724,24 +724,18 @@ function displayWeapon(ctx,weapon) {
 	}
 }
 
-// function to reset Hi-Scores of the chosen difficulty level
-function resetHS() {
+// function to reset the Hi-Scores of a difficulty level, from the hi-scores page, once the player confirms it
+function resetHS(level) {
+	if ( !confirm ( "Erase the hi-scores of the " + levelName(level) + " level?" ) ) {
+		return;
+	}
 	// erasing only the scores : localStorage is shared with every page of the same site
 	// ('score' is the record of the 2010 score, still erased with the others)
 	var scoreKeys = ["survival","totalMat","accuracy","nbrCrashes","nbrDamage","nbrUpgrades","nbrCost","bestScore","score","playedGames"];
 	for ( var k in scoreKeys ) {
-		localStorage.removeItem(scoreKey(scoreKeys[k]));
+		localStorage.removeItem(scoreKey(scoreKeys[k],level));
 	}
-	document.getElementById("resetHS").style.display = "none";
-}
-
-// function to make the reset Hi-Scores button appear or not (if there is no data to erase)
-function enableResetHS(resetHS) {
-	if( localStorage[scoreKey("totalMat")] === undefined ){
-		resetHS.style.display = "none";
-	}else{
-		resetHS.style.display = "block";
-	}
+	showHiScores(document.getElementById("gameOver"),level);
 }
 
 // function to choose the difficulty level, remembered by the browser
@@ -751,11 +745,12 @@ function chooseLevel(level) {
 	showLevel();
 }
 
-// function to highlight the chosen difficulty level in the start menu
+// function to highlight the chosen difficulty level in the start menu, and to tell what it changes
 function showLevel() {
 	for ( var level in difficultyLevels ) {
-		document.getElementById("level_" + level).className = ( level == difficulty ) ? "chosen" : "";
+		document.getElementById("level_" + level).classList.toggle("current", level == difficulty);
 	}
+	document.getElementById("levelText").textContent = levelTexts[difficulty];
 }
 
 // function to get the name of the chosen difficulty level, as shown to the player

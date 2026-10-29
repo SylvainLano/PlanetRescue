@@ -153,6 +153,18 @@ function checkAchievements () {
 	}
 }
 
+// function to tell on the start menu's button how many achievements are obtained
+function showAchievementCount () {
+	var count = 0, total = 0;
+	for ( var id in achievements ) {
+		total++;
+		if ( achieved[id] ) {
+			count++;
+		}
+	}
+	document.getElementById ( "achievementCount" ).textContent = count + "/" + total;
+}
+
 // function to erase the achievements obtained
 function resetAchievements () {
 	if ( !confirm ( "Erase all your achievements?" ) ) {
@@ -220,7 +232,7 @@ function showAchievements ( holder ) {
 	}
 	holder.innerHTML = "<div class='subtitle'>Achievements <span class='green'>" + count + " / " + total + "</span></div>"
 		+ "<div class='medals'>" + medals + "</div>"
-		+ "<div class='title'><a href='#' onClick='state=\"menu\";'>Back to Menu</a></div>"
+		+ "<div class='buttons'><a href='#' class='button' onClick='state=\"menu\";'>Main Menu</a></div>"
 		+ ( count > 0 ? "<div class='reset'><a href='#' onClick='resetAchievements();'>reset achievements</a></div>" : "" );
 	// the names too long for their place get smaller
 	var names = holder.querySelectorAll ( ".name" );

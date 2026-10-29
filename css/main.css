@@ -278,28 +278,6 @@ body {
 	margin: 10px 0 4px;
 }
 
-#gameOver .over .level {
-	display: inline-block;
-	margin: 0 4px;
-	padding: 3px 16px;
-	font-family: 'MirageRegular';
-	font-size: 22px;
-	color: #bbb;
-	border: 1px solid rgba(255,255,255,0.2);
-	border-radius: 14px;
-}
-
-#gameOver .over .level:hover {
-	color: #fff;
-	border-color: rgb(255, 71, 71);
-}
-
-#gameOver .over .level.current {
-	color: #fff;
-	background: rgba(255,71,71,0.35);
-	border-color: rgb(255, 71, 71);
-}
-
 #gameOver .over .empty {
 	margin: 60px 0;
 	font-size: 14px;
@@ -308,22 +286,6 @@ body {
 
 #gameOver .over .buttons {
 	margin-top: 16px;
-}
-
-#gameOver .over .button {
-	display: inline-block;
-	margin: 0 8px;
-	padding: 6px 26px;
-	font-family: 'MirageRegular';
-	font-size: 28px;
-	color: #fff;
-	background: rgba(255,71,71,0.2);
-	border: 1px solid rgb(255, 71, 71);
-	border-radius: 6px;
-}
-
-#gameOver .over .button:hover {
-	background: rgb(255, 71, 71);
 }
 
 #achievementsText {
@@ -385,38 +347,113 @@ body {
 	font-style: italic;
 }
 
-#achievementsText .title {
-	font-size: 35px;
-	margin: 14px;
+#achievementsText .buttons {
+	margin-top: 18px;
+	text-align: center;
 }
 
-#achievementsText .reset {
+/* the links erasing the achievements or the hi-scores, in the corner of their page */
+.reset {
 	position: absolute;
 	bottom: 5px;
 	right: 5px;
 }
 
-#resetHS {
-	position : absolute;
-	bottom : 5px;
-	right : 5px;
+/* THE BUTTONS AND THE PILLS, shared by every screen */
+
+.button {
+	display: inline-block;
+	margin: 0 8px;
+	padding: 6px 26px;
+	font-family: 'MirageRegular';
+	font-size: 28px;
+	color: #fff;
+	background: rgba(255,71,71,0.2);
+	border: 1px solid rgb(255, 71, 71);
+	border-radius: 6px;
+}
+
+a.button:link, a.button:visited {
+	color: #fff;
+}
+
+.button:hover {
+	background: rgb(255, 71, 71);
+}
+
+.button.primary {
+	padding: 6px 70px;
+	font-size: 52px;
+	background: rgba(255,71,71,0.35);
+	box-shadow: 0 0 24px rgba(255,71,71,0.25);
+}
+
+.level {
+	display: inline-block;
+	margin: 0 4px;
+	padding: 3px 16px;
+	font-family: 'MirageRegular';
+	font-size: 22px;
+	border: 1px solid rgba(255,255,255,0.2);
+	border-radius: 14px;
+}
+
+a.level:link, a.level:visited {
+	color: #bbb;
+}
+
+a.level:hover {
+	color: #fff;
+	border-color: rgb(255, 71, 71);
+}
+
+a.level.current {
+	color: #fff;
+	background: rgba(255,71,71,0.35);
+	border-color: rgb(255, 71, 71);
+}
+
+/* THE START MENU */
+
+#startMenu > .title {
+	text-shadow: 0 0 22px rgba(255,71,71,0.35);
 }
 
 #mainMenu {
-	margin-top: 50px;
+	margin-top: 95px;
+	text-align: center;
 }
 
 #levels {
-	font-size: 35px;
-	margin: 10px 0px 40px 0px;
+	margin-top: 26px;
+}
+
+#levelText {
+	height: 18px;
+	margin-top: 8px;
+	font-size: 12px;
+	color: #aaa;
 }
 
 #moreLinks {
-	font-size: 50px;		/* Tutorial - Infos - Achievements, on one line */
+	margin-top: 40px;
 }
 
-#levels a.chosen {
-	color: #fff;
+#moreLinks .button {
+	margin: 0 3px;
+	padding: 4px 12px;
+	font-size: 20px;
+	background: rgba(255,71,71,0.1);
+}
+
+#moreLinks .button:hover {
+	background: rgb(255, 71, 71);
+}
+
+#achievementCount {
+	font-family: Arial, sans-serif;
+	font-size: 12px;
+	color: #5df45d;
 }
 
 .title {

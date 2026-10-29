@@ -24,7 +24,6 @@ function engine() {
 	var loader = document.getElementById("loader");
 	var pauseScreen = document.getElementById("pause");
 	var countdown = document.getElementById("countdown");
-	var resetHS = document.getElementById("resetHS");
 	
 	if(state == "menu") {
 		
@@ -39,7 +38,7 @@ function engine() {
 		loader.style.display = "none";
 		instructions.style.display = "none";
 		countdown.style.display = "none";
-		enableResetHS(resetHS);
+		showAchievementCount();
 
 	} else if(state == "infos") {
 
@@ -54,7 +53,6 @@ function engine() {
 		loader.style.display = "none";
 		instructions.style.display = "none";
 		countdown.style.display = "none";
-		enableResetHS(resetHS);
 
 	} else if(state == "achievements") {
 
@@ -63,7 +61,6 @@ function engine() {
 		mainMenu.style.display = "none";
 		infoText.style.display = "none";
 		achievementsText.style.display = "block";
-		resetHS.style.display = "none";
 		showAchievements(achievementsText);
 		state = "stand";
 
