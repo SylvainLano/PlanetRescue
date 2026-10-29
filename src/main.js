@@ -33,6 +33,7 @@ window.addEventListener('load', function () {
 	// Highlighting the difficulty level chosen last time, and reading the achievements obtained
 	showLevel();
 	loadAchievements();
+	showSoundState();	// the sounds are off until the player turns them on (sound.js)
 
 	// Building the pause menu with its upgrades
 	buildShop();

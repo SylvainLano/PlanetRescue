@@ -171,6 +171,7 @@ function checkAchievements () {
 			localStorage["achievements"] = JSON.stringify ( achieved );
 			newAchievements.push ( id );
 			achievementQueue.push ( id );
+			playSound ( "achievement" );
 		}
 	}
 }

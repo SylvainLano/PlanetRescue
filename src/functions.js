@@ -404,6 +404,8 @@ function changeKey(e, to){
 		key[5]=to;		// delete, or T (Target), for the keyboards without these keys
 	} else if ( name == "End" || place == "KeyR" ) {
 		key[6]=to;		// end, or R (Reset)
+	} else if ( ( name == "m" || name == "M" ) && to == 1 && !e.repeat ) {
+		toggleSound();	// M as Music, wherever it is on the keyboard (sound.js)
 	}
 }
 
@@ -630,6 +632,9 @@ function shoot(ctx,weapon){
 			break;
 	}
 	nbrShots += shotList.length - shotsBefore;
+	if ( shotList.length > shotsBefore ) {
+		playSound ( "shot" );
+	}
 }
 
 // function to display the current weapon

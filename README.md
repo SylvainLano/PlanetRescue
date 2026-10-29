@@ -28,6 +28,7 @@ The asteroids get tougher as time passes, one more point of life each minute. Af
 | Space | pause and open the upgrade menu |
 | Delete (or T, for Target) | change the cannon's target |
 | End (or R, for Reset) | clear the target selection |
+| M | sound on or off (off at first) |
 
 Click the status bar at the top to switch between bars and digits. The letters are read by their place on the keyboard: W A S D on a QWERTY keyboard are Z Q S D on an AZERTY one, and the Infos page shows the letters of your own keyboard.
 
@@ -79,6 +80,7 @@ In **2026** the game came back to life. The goals are to keep its spirit, make i
 | 0.28.0 | The second research of the Explosives branch, the Chain Reaction, after the Nitroglycerine: the asteroids a bomb's blast doesn't destroy become bombs too, with half its power, and so on until it is too weak to go on (12, 6, 3, 1). These weaker bombs glow less. The launcher fires again once they are all gone. Also, a bomb now explodes as soon as the planet comes into its blast (its dashed circle), which spares the planet, instead of crashing on it with more damage. The Nitroglycerine becomes an advantage even without steering it: 118 seconds of survival on average without playing, against 96 without it. |
 | 0.29.0 | Four more achievements, for the research tree and its weapons: Lab Rat (validate your first research, bronze), Fireworks (destroy 3 asteroids with a single bomb, its Chain Reaction included, silver), Giant Slayer (finish a giant asteroid with your laser, silver) and Scholar (complete every research in a game, gold), each with its own medal. There are 22 of them now. |
 | 0.30.0 | The second research of the Lasers branch, the Piercing Beam, after the Laser: the beam goes through its target and spreads behind it in a cone of light, 20 degrees on each side, to the edge of space; every other asteroid it reaches, on its way or in the cone, burns at half power. Each branch of the research tree now has two researches. |
+| 0.31.0 | Sounds, a first for the game: shots, asteroids crumbling (lower for a giant), the planet hit, the shield, missiles and their blasts, the nitroglycerine's capsules and bombs, the laser's hum while it fires, and chimes for the achievements and the researches validated. The browser makes them itself (Web Audio), with no file to load. They are off at first: the M key or the start menu turns them on or off, and the browser remembers it; the pause menu tells their state. |
 
 ## Roadmap (2026)
 
@@ -148,6 +150,7 @@ No build step and no dependencies to install: open `index.html` in a browser and
 | `src/menu.js` | the pause menu, built from the upgrades: sections, weapon tabs, tooltips |
 | `src/achievements.js` | the achievements, described as data (`achievements`), their medals, their saving, their announcement and their page |
 | `src/researches.js` | the research tree, described as data (`researchBranches`, `researches`): the research going on, its section of the pause menu, and its note at the bottom right |
+| `src/sound.js` | the sounds, made by the browser itself (Web Audio), with no file: off until the player turns them on |
 | `src/secondary.js` | the secondary weapons, which take no place among the active ones: the missile launcher, its missiles and their blasts; the nitroglycerine launcher, its capsules and its bombs; the laser and its beam |
 | `src/gameover.js` | the Game Over screen (the score, the game's numbers, the records saved and beaten, the achievements of the game) and the hi-scores page |
 | `src/objects.js`, `src/prototypes.js` | game objects and their drawing: the turning Earth and the asteroids' rocks |

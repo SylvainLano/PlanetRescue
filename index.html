@@ -12,7 +12,7 @@
 <html>
 <head>
 	<meta charset="utf-8">
-	<title>Planet Rescue v0.30.0</title>
+	<title>Planet Rescue v0.31.0</title>
 
 	<link rel="stylesheet" type="text/css" href="css/main.css">
 
@@ -20,6 +20,7 @@
 	<script type="text/javascript" src="img/stars.js"></script>
 	<script type="text/javascript" src="src/objects.js"></script>
 	<script type="text/javascript" src="src/functions.js"></script>
+	<script type="text/javascript" src="src/sound.js"></script>
 	<script type="text/javascript" src="src/shop.js"></script>
 	<script type="text/javascript" src="src/menu.js"></script>
 	<script type="text/javascript" src="src/achievements.js"></script>
@@ -47,7 +48,7 @@
 		<div class="title">Pause</div>
 		<div class="paused">
 			<div class="pauseBar">
-				<span>press <kbd>Space</kbd> to resume</span>
+				<span>press <kbd>Space</kbd> to resume &middot; <kbd>M</kbd> sound <span class="soundState">off</span></span>
 				<span class="matDisplay"><span id="matNbr"></span> mat</span>
 			</div>
 			<div id="shop"></div><!-- built by src/menu.js -->
@@ -55,7 +56,7 @@
 	</div>
 	<div id="startMenu" class="ui">
 		<div class="title">
-			Planet Rescue <span class="version">v0.30.0</span>
+			Planet Rescue <span class="version">v0.31.0</span>
 		</div>
 		<div id="mainMenu">
 			<a href="#" class="button primary" onClick='state="init";'>Start</a>
@@ -71,6 +72,7 @@
 				<a href="#" class="button" onClick='state="achievements";'>Achievements <span id="achievementCount"></span></a>
 				<a href="#" class="button" onClick='state="hiscores";'>Hi-Scores</a>
 			</div>
+			<div id="soundToggle"><a href="#" onClick='toggleSound();'>Sound <span class="soundState">off</span></a> &middot; or press <kbd>M</kbd></div>
 		</div>
 		<div id="infoText">
 			<div class="columns">
@@ -93,6 +95,7 @@
 					<div class="control"><span class="keys"><kbd>Space</kbd></span>pause, and upgrades</div>
 					<div class="control"><span class="keys"><kbd>Delete</kbd><em>or</em><kbd data-code="KeyT">T</kbd></span>change the cannon's target</div>
 					<div class="control"><span class="keys"><kbd>End</kbd><em>or</em><kbd data-code="KeyR">R</kbd></span>let the cannon choose again</div>
+					<div class="control"><span class="keys"><kbd>M</kbd></span>sound on or off</div>
 					<div class="control"><span class="keys"><kbd>click</kbd></span>the status bar: bars or digits</div>
 					<div id="keysNote">The letters are keys by their place: Z Q S D on an AZERTY keyboard.</div>
 				</div>

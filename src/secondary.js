@@ -40,6 +40,7 @@ function launchMissile ( target ) {
 		blast : missileLauncher.blast,
 		target : target
 	} );
+	playSound ( "missile" );
 }
 
 // function to get the asteroid nearest to a point, still in game
@@ -118,6 +119,7 @@ function explodeMissile ( ctx, missile, touched ) {
 		}
 	}
 	blastList.push ( { x : missile.x, y : missile.y, size : 0, age : 0, blast : missile.blast } );
+	playSound ( "blast" );
 }
 
 // function to make the blasts spread, then fade
@@ -201,6 +203,7 @@ function fireCapsules () {
 				power : nitroLauncher.power,
 				blast : nitroLauncher.blast
 			} );
+			playSound ( "capsule" );
 		}
 	}
 }
@@ -297,6 +300,7 @@ function explodeBomb ( ctx, bomb ) {
 	}
 	bestBomb = Math.max ( bestBomb, family.destroyed );
 	blastList.push ( { x : bomb.x, y : bomb.y, size : 0, age : 0, blast : blast } );
+	playSound ( "bomb" );
 }
 
 // function to draw the bombs' glow under their rock, with the reach of their blast

@@ -597,6 +597,31 @@ a.level.current {
 	background: rgb(255, 71, 71);
 }
 
+/* the sounds' switch, under the start menu's buttons, and its state on the pause menu too */
+#soundToggle {
+	margin-top: 22px;
+	font-size: 12px;
+	color: #888;
+}
+
+#soundToggle a {
+	color: #ccc;
+	text-decoration: none;
+}
+
+#soundToggle a:hover {
+	color: #fff;
+}
+
+.soundState {
+	font-weight: bold;
+	color: #ff4747;
+}
+
+.soundState.on {
+	color: #5df45d;
+}
+
 #achievementCount {
 	font-family: Arial, sans-serif;
 	font-size: 12px;

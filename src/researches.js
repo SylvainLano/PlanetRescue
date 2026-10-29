@@ -146,6 +146,7 @@ function validateResearch () {
 	researches[research.current].apply();
 	research.complete = false;
 	research.current = false;
+	playSound ( "research" );
 }
 
 // function to start a research, or to stop it (its time spent is kept), or to validate it once complete, from the pause menu

@@ -24,7 +24,10 @@ function engine() {
 	var loader = document.getElementById("loader");
 	var pauseScreen = document.getElementById("pause");
 	var countdown = document.getElementById("countdown");
-	
+
+	// the laser hums while it fires, and only then (sound.js)
+	laserHum ( state == "playing" && pause == 0 && laserCannon && laserCannon.firing > 0 );
+
 	if(state == "menu") {
 		
 		// Displaying start menu
@@ -498,6 +501,7 @@ function engine() {
 			if ( asteroidList[i].giant ) {
 				nbrGiants++;
 			}
+			playSound ( asteroidList[i].giant ? "giant" : "destroy" );
 		} else if (pause == 0) {
 		
 		// Calculating distance to the player's planet
@@ -549,6 +553,7 @@ function engine() {
 							MyGravitron.charge = 0;
 						}
 						MyGravitron.counter = 0;
+						playSound ( "shield" );
 						shieldHit[0] = 1;
 						shieldHit[1] = gravRadius;
 						shieldHit[2] = MyGravitron.angle;
@@ -603,6 +608,7 @@ function engine() {
 				MyPlanet.totalMat += temp;
 			}
 			nbrCrashes++;
+			playSound ( "crash" );
 			calmSince = gameTime;
 			keepit = 0;
 			redEffect = 256;
