@@ -84,6 +84,8 @@ function Asteroid(context,life,r,m,x,y,vx,vy,giant) {
 	this.pass = 0;			// for the main structure to ignore this asteroid
 	this.turned = 0;		// how much the GRAVITRON has turned its way, in radians (Bank Shot achievement)
 	this.giant = giant || false;	// a giant asteroid : rarer, much stronger, and darker
+	this.burnt = false;		// burnt by the planet's Thick Atmosphere on this way, and the turns its flames still show (researches.js)
+	this.burning = 0;
 	shapeRock(this);		// its own rock, drawn by the game (prototypes.js)
 
 // object definition

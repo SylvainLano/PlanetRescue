@@ -480,6 +480,91 @@ function slung(asteroid) {
 	return ( MyGravitron.slingshot > 0 && asteroid.turned >= bankShotTurn ) ? slingshotHit : 1;
 }
 
+// Function to burn an asteroid coming into the planet's Thick Atmosphere, once on its way : its life burnt falls as debris (researches.js)
+function burnInAtmosphere(ctx,asteroid) {
+	var burnt = Math.min ( atmosphereBurn, asteroid.life );
+	addDebris(ctx,burnt,asteroid.x,asteroid.y,asteroid.vx,asteroid.vy,debrisList);
+	asteroid.life -= burnt;
+	asteroid.burnt = true;
+	asteroid.burning = 12;
+	if ( asteroid.life <= 0 ) {
+		allPassed = 1;
+	}
+}
+
+// Function to get the inhabitants an asteroid's crash takes away : as many millions as its life left,
+// but the Early Warning evacuates a part of them, kept until it makes a whole million (researches.js)
+function crashDamage(life) {
+	MyPlanet.spared += life * MyPlanet.warning * warningShare;
+	var spared = Math.min ( life, Math.floor ( MyPlanet.spared + 1e-9 ) );
+	MyPlanet.spared -= spared;
+	return life - spared;
+}
+
+// Function to open the planet's Shelters, once in a game, when a crash should end it : they save a part of its inhabitants (researches.js)
+function openShelters() {
+	MyPlanet.life = Math.max ( 1, Math.ceil ( MyPlanet.maxLife * shelterShare ) );
+	MyPlanet.shelters = 2;
+	shelterNote = gameTime + 4 * framesPerSecond;
+	playSound ( "shelters" );
+}
+
+// Function to draw the Thick Atmosphere, a blue glow around the planet, under everything else (researches.js)
+function drawAtmosphere(ctx) {
+	if ( MyPlanet.atmosphere < 1 ) {
+		return;
+	}
+	var glow = ctx.createRadialGradient(MyPlanet.x,MyPlanet.y,MyPlanet.radius,MyPlanet.x,MyPlanet.y,MyPlanet.radius + atmosphereDepth);
+	glow.addColorStop(0,'rgba(120,180,255,0.3)');
+	glow.addColorStop(1,'rgba(120,180,255,0)');
+	ctx.fillStyle = glow;
+	ctx.beginPath();
+	ctx.arc(MyPlanet.x,MyPlanet.y,MyPlanet.radius + atmosphereDepth,0,2*Math.PI);
+	ctx.fill();
+}
+
+// Function to draw the flames of the asteroids burning in the Thick Atmosphere, under their rock
+function drawBurning(ctx) {
+	ctx.save();
+	for ( var i in asteroidList ) {
+		var asteroid = asteroidList[i];
+		if ( asteroid.burning > 0 ) {
+			var fade = asteroid.burning / 12, reach = asteroid.radius * 2.2;
+			var flame = ctx.createRadialGradient(asteroid.x,asteroid.y,asteroid.radius * 0.5,asteroid.x,asteroid.y,reach);
+			flame.addColorStop(0,'rgba(255,190,80,' + ( 0.85 * fade ) + ')');
+			flame.addColorStop(1,'rgba(255,90,20,0)');
+			ctx.fillStyle = flame;
+			ctx.beginPath();
+			ctx.arc(asteroid.x,asteroid.y,reach,0,2*Math.PI);
+			ctx.fill();
+		}
+	}
+	ctx.restore();
+}
+
+// Function to tell for a few seconds, at the top of the game area, that the Shelters have saved the planet
+function drawShelterNote(ctx) {
+	if ( gameTime >= shelterNote ) {
+		return;
+	}
+	var width = 260, height = 44, x = ( gameSize - width ) / 2, y = 60;
+	ctx.save();
+	ctx.fillStyle = 'rgba(30,30,30,0.85)';
+	ctx.fillRect(x,y,width,height);
+	ctx.strokeStyle = 'rgb(242,201,76)';
+	ctx.lineWidth = 2;
+	ctx.strokeRect(x + 1,y + 1,width - 2,height - 2);
+	ctx.textAlign = 'center';
+	ctx.textBaseline = 'alphabetic';
+	ctx.fillStyle = 'rgb(242,201,76)';
+	ctx.font = 'bold 12px Arial';
+	ctx.fillText('THE SHELTERS SAVED YOUR PLANET',gameSize / 2,y + 18);
+	ctx.fillStyle = '#ddd';
+	ctx.font = '11px Arial';
+	ctx.fillText(MyPlanet.life + ' million inhabitants left : heal them!',gameSize / 2,y + 34);
+	ctx.restore();
+}
+
 // Function to show the limits of the GRAVITRON's field (Field Scanner level 1) : the field has no end, so they go to the edge of the game area
 function drawFieldLimits(ctx) {
 	var limits = [MyGravitron.angle, MyGravitron.angle + MyGravitron.wideness];

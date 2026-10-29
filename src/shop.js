@@ -178,6 +178,10 @@ var upgrades = {
 	recovery			: { name : "Recovery", tip : "Recovery - With this upgrade, your citizens will be able to get mat from the asteroids crashing on their planet.",
 							max : 5, price : "plus1times50",
 							level : function () { return planetRecovery; }, raise : function () { planetRecovery++; } },
+	// brought by its research (researches.js)
+	earlyWarning		: { name : "Early Warning", tip : "Early Warning - Each level evacuates 5% of the inhabitants an asteroid's crash would take away.",
+							max : 5, price : "plus1times100", appears : function () { return research.done.earlyWarning ? true : false; },
+							level : function () { return MyPlanet.warning; }, raise : function () { MyPlanet.warning++; } },
 	// the planet's lab, needed for any research (researches.js) : it comes once an achievement has opened a branch of the research tree,
 	// and its level 2, the Automation, does the researches one after the other by itself
 	lab					: { name : "Research Lab", tip : "",
@@ -224,7 +228,7 @@ var shopLayout = [
 			statusTip : "A secondary weapon, always active : it takes no place among your active weapons.",
 			upgrades : ["reboundReload","reboundPow","reboundBounces"] }
 	] },
-	{ title : "Heal or upgrade your Planet", upgrades : ["healing","healFact","maxHealth","maxMat","autoHeal","recovery","lab"] },
+	{ title : "Heal or upgrade your Planet", upgrades : ["healing","healFact","maxHealth","maxMat","autoHeal","recovery","earlyWarning","lab"] },
 	{ title : "Researches", researches : true }		// filled by refreshResearches() (researches.js)
 ];
 

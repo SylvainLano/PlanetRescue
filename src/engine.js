@@ -379,6 +379,10 @@ function engine() {
 		planetHealTimer = 0;
 		MyPlanet.life++;
 	}
+	// the Shelters save the planet, once in a game (researches.js)
+	if ( MyPlanet.life <= 0 && MyPlanet.shelters == 1 ) {
+		openShelters();
+	}
 	if ( MyPlanet.life <= 0 ){
 		MyPlanet.life = 0;
 		planetHealPend = 0;
@@ -527,6 +531,13 @@ function engine() {
 				asteroidList[i].vx *= brake;
 				asteroidList[i].vy *= brake;
 			}
+			// coming into the planet's Thick Atmosphere, it burns, once on its way (researches.js)
+			if ( MyPlanet.atmosphere > 0 && !asteroidList[i].burnt && distance < MyPlanet.radius + atmosphereDepth ) {
+				burnInAtmosphere(ctx,asteroidList[i]);
+			}
+			if ( asteroidList[i].burning > 0 ) {
+				asteroidList[i].burning--;
+			}
 
 			// Testing if asteroid is out of the gravitron's field
 			if (intoArcField(angle,MyGravitron) == false) {
@@ -592,6 +603,7 @@ function engine() {
 			asteroidList[i].vx = - velocity * Math.cos(angle);
 			asteroidList[i].vy = - velocity * Math.sin(angle);
 			asteroidList[i].turned = 0;		// a new way, which the GRAVITRON has not turned yet
+			asteroidList[i].burnt = false;	// and where the atmosphere has not burnt it yet
 
 
 		// a bomb explodes as soon as the planet comes into its blast, which spares the planet (secondary.js)
@@ -600,9 +612,10 @@ function engine() {
 
 		// Testing if asteroid is in collision with the planet
 		} else if ( distance < (MyPlanet.radius + asteroidList[i].radius) ){
-			// Yes it is ! Decreasing life and destroying asteroid
-			MyPlanet.life -= asteroidList[i].life;
-			nbrDamage += asteroidList[i].life;
+			// Yes it is ! Decreasing life (less with the Early Warning) and destroying asteroid
+			var damage = crashDamage(asteroidList[i].life);
+			MyPlanet.life -= damage;
+			nbrDamage += damage;
 			if( MyPlanet.life < 0 ){
 				nbrDamage += MyPlanet.life;
 			}
@@ -1075,6 +1088,7 @@ function drawGame ( blend ) {
 			// what the player should know about the researches, while playing (researches.js)
 			if ( pause == 0 ) {
 				drawResearchCorner ( ctx );
+				drawShelterNote ( ctx );	// and the Shelters that have just saved the planet (functions.js)
 			}
 		}
 		// an achievement just obtained, over everything
@@ -1096,9 +1110,12 @@ function drawPlaying ( ctx ) {
 	if ( MyGravitron.scanner > 0 && pause == 0 ) {
 		drawFieldLimits(ctx);
 	}
+	// the planet's Thick Atmosphere, under everything (functions.js)
+	drawAtmosphere(ctx);
 	drawDebris(ctx);
-	// the bombs' glow, under their rock (secondary.js)
+	// the bombs' glow and the flames of the asteroids burning in the atmosphere, under their rock (secondary.js, functions.js)
 	drawBombs(ctx);
+	drawBurning(ctx);
 	// the asteroids, tinted with the GRAVITRON's effect at Field Scanner level 2
 	for ( var i in asteroidList ) {
 		asteroidList[i].Draw();

@@ -18,7 +18,8 @@ var researchBranches = {
 	explosives	: { name : "Explosives", opener : "demolisher" },
 	lasers		: { name : "Lasers", opener : "sharpshooter" },
 	ricochets	: { name : "Ricochets", opener : "bankShot" },
-	gravitron	: { name : "Gravitron", opener : "collector" }
+	gravitron	: { name : "Gravitron", opener : "collector" },
+	planet		: { name : "Planet", opener : "untouchable" }
 };
 
 // each research : its name, its tooltip, its branch, its time (in seconds of play), the researches it needs first, and what it brings
@@ -59,7 +60,16 @@ var researches = {
 					apply : function () { MyGravitron.brake = 1; } },
 	slingshot	: { name : "Slingshot", branch : "gravitron", time : 60, needs : [], opener : "bankShot",
 					tip : "Slingshot - An asteroid your Gravitron has turned from its way hits twice as hard the asteroids it runs into.",
-					apply : function () { MyGravitron.slingshot = 1; } }
+					apply : function () { MyGravitron.slingshot = 1; } },
+	atmosphere	: { name : "Thick Atmosphere", branch : "planet", time : 60, needs : [], opener : "untouchable",
+					tip : "Thick Atmosphere - Your planet's atmosphere thickens : every asteroid coming into it burns, losing 2 points of life, and the weakest ones burn up before they crash.",
+					apply : function () { MyPlanet.atmosphere = 1; } },
+	earlyWarning: { name : "Early Warning", branch : "planet", time : 45, needs : [], opener : "veteran",
+					tip : "Early Warning - Brings the Early Warning upgrade of your planet : each of its levels evacuates more inhabitants before the asteroids crash.",
+					apply : function () {} },
+	shelters	: { name : "Shelters", branch : "planet", time : 60, needs : [], opener : "legend",
+					tip : "Shelters - Once in a game, when an asteroid's crash should end it, the shelters save 10% of your planet's inhabitants.",
+					apply : function () { MyPlanet.shelters = 1; } }
 };
 
 // the researches of the current game : the planet's lab (an upgrade to buy, its level 2 being the Automation), the one going on,

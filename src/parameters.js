@@ -128,6 +128,11 @@
 	var planetMass		= 150;
 	var planetX			= 300;
 	var planetY			= 300;
+	var atmosphereDepth	= 25;		// how far the Thick Atmosphere goes above the planet's ground
+	var atmosphereBurn	= 2;		// and the life an asteroid loses coming into it
+	var warningShare	= 0.05;		// the part of the inhabitants each level of the Early Warning evacuates before a crash
+	var shelterShare	= 0.1;		// the part of the inhabitants the Shelters save, once in a game
+	var shelterNote		= 0;		// the turn until which the game tells the Shelters saved the planet
 	
 	// player's weapons parameters
 	var shotList		= new Array();
@@ -234,7 +239,12 @@ function initDefault(context,level) {
 	planetHealTimer		= 0;
 	planetHealPend		= 0;
 	planetRecovery		= gameValues.planetRecovery;
-	
+	MyPlanet.atmosphere	= 0;		// what its researches bring (researches.js)
+	MyPlanet.shelters	= 0;		// 1 once they are built, 2 once they have saved the planet
+	MyPlanet.warning	= 0;		// and the levels of its Early Warning, an upgrade its research brings,
+	MyPlanet.spared		= 0;		// with the part of an inhabitant it has evacuated
+	shelterNote			= 0;
+
 	// player's weapons parameters
 	// Weapon ( context, type, color, angle, delay, power, speed, smart, cNbr )
 	shotList		= [];

@@ -31,7 +31,8 @@ var sounds = {
 	rebound		: { gap : 80, play : function ( t ) { tone ( "triangle", 500, 1100, 0.08, 0.06, t ); } },
 	ricochet	: { gap : 40, play : function ( t ) { tone ( "triangle", 2200, 1500, 0.07, 0.05, t ); } },
 	achievement	: { gap : 0, play : function ( t ) { notes ( [1047, 1319, 1568], 0.12, t ); } },
-	research	: { gap : 0, play : function ( t ) { notes ( [784, 1175], 0.14, t ); } }
+	research	: { gap : 0, play : function ( t ) { notes ( [784, 1175], 0.14, t ); } },
+	shelters	: { gap : 0, play : function ( t ) { notes ( [523, 659, 392], 0.2, t ); } }
 };
 
 // function to turn the sounds on or off, from the start menu or with the M key
