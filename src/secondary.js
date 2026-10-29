@@ -388,6 +388,37 @@ function fireLaser ( ctx ) {
 			giantSlain = giantSlain || target.giant;
 		}
 	}
+	// once the Piercing Beam is researched, every other asteroid on its way burns at half power, before and behind its target
+	if ( laserCannon.smart >= 1 ) {
+		laserCannon.pierceHeat += laserCannon.power / 2 / framesPerSecond;
+		while ( laserCannon.pierceHeat >= 1 ) {
+			laserCannon.pierceHeat--;
+			for ( var a in asteroidList ) {
+				var asteroid = asteroidList[a];
+				if ( asteroid.life > 0 && beamCrosses ( asteroid ) ) {
+					addDebris ( ctx, 1, asteroid.x, asteroid.y, asteroid.vx, asteroid.vy, debrisList );
+					asteroid.life--;
+					if ( asteroid.life <= 0 ) {
+						allPassed = 1;
+						giantSlain = giantSlain || asteroid.giant;
+					}
+				}
+			}
+		}
+	}
+}
+
+// function to know if the Piercing Beam reaches an asteroid other than the laser's target :
+// the beam goes from the planet to its target, then spreads behind it in a cone, to the edge of space
+function beamCrosses ( asteroid ) {
+	var target = laserCannon.target;
+	var dx = target.x - MyPlanet.x, dy = target.y - MyPlanet.y;
+	var length = Math.sqrt ( dx * dx + dy * dy ) || 1;
+	var ax = asteroid.x - MyPlanet.x, ay = asteroid.y - MyPlanet.y;
+	var along = ( ax * dx + ay * dy ) / length;
+	var across = Math.abs ( ax * dy - ay * dx ) / length;
+	var reach = asteroid.radius + ( along > length ? ( along - length ) * Math.tan ( pierceCone ) : 0 );
+	return asteroid != target && along > MyPlanet.radius && across < reach;
 }
 
 // function to choose the laser's target among the asteroids in view : the giants first, the closest one, then the asteroids
@@ -419,7 +450,8 @@ function laserTarget () {
 	return best;
 }
 
-// function to draw the laser's beam, flickering, from the planet to the asteroid it burns
+// function to draw the laser's beam, flickering, from the planet to the asteroid it burns,
+// and on to the edge of space, fainter and spreading in a cone, once the Piercing Beam is researched
 function drawLaser ( ctx ) {
 	var target = laserCannon.target;
 	if ( laserCannon.firing <= 0 || !target || target.life <= 0 ) {
@@ -431,26 +463,53 @@ function drawLaser ( ctx ) {
 	var flicker = 0.75 + 0.25 * Math.sin ( performance.now() / 25 );
 	ctx.save();
 	ctx.lineCap = 'round';
-	// its glow, then its core
-	ctx.strokeStyle = 'rgba(255,51,85,' + ( 0.3 * flicker ) + ')';
+	drawBeam ( ctx, x0, y0, target.x, target.y, flicker );
+	burnMark ( ctx, target, flicker );
+	if ( laserCannon.smart >= 1 ) {
+		// the cone of light, fading away from its target
+		var cone = ctx.createRadialGradient ( target.x, target.y, 0, target.x, target.y, gameSize / 2 );
+		cone.addColorStop ( 0, 'rgba(255,51,85,' + ( 0.3 * flicker ) + ')' );
+		cone.addColorStop ( 1, 'rgba(255,51,85,0)' );
+		ctx.fillStyle = cone;
+		ctx.beginPath();
+		ctx.moveTo ( target.x, target.y );
+		ctx.lineTo ( target.x + gameSize * Math.cos ( angle + pierceCone ), target.y + gameSize * Math.sin ( angle + pierceCone ) );
+		ctx.lineTo ( target.x + gameSize * Math.cos ( angle - pierceCone ), target.y + gameSize * Math.sin ( angle - pierceCone ) );
+		ctx.closePath();
+		ctx.fill();
+		drawBeam ( ctx, target.x, target.y, MyPlanet.x + gameSize * Math.cos ( angle ), MyPlanet.y + gameSize * Math.sin ( angle ), flicker / 2 );
+		for ( var a in asteroidList ) {
+			if ( asteroidList[a].life > 0 && beamCrosses ( asteroidList[a] ) ) {
+				burnMark ( ctx, asteroidList[a], flicker / 2 );
+			}
+		}
+	}
+	ctx.restore();
+}
+
+// function to draw a part of the laser's beam : its glow, then its core
+function drawBeam ( ctx, x0, y0, x1, y1, strength ) {
+	ctx.strokeStyle = 'rgba(255,51,85,' + ( 0.3 * strength ) + ')';
 	ctx.lineWidth = 6;
 	ctx.beginPath();
 	ctx.moveTo ( x0, y0 );
-	ctx.lineTo ( target.x, target.y );
+	ctx.lineTo ( x1, y1 );
 	ctx.stroke();
-	ctx.strokeStyle = 'rgba(255,190,200,' + flicker + ')';
+	ctx.strokeStyle = 'rgba(255,190,200,' + strength + ')';
 	ctx.lineWidth = 1.5;
 	ctx.beginPath();
 	ctx.moveTo ( x0, y0 );
-	ctx.lineTo ( target.x, target.y );
+	ctx.lineTo ( x1, y1 );
 	ctx.stroke();
-	// the burn on the asteroid
-	var burn = ctx.createRadialGradient ( target.x, target.y, 0, target.x, target.y, target.radius + 5 );
-	burn.addColorStop ( 0, 'rgba(255,230,230,' + ( 0.9 * flicker ) + ')' );
+}
+
+// function to draw the burn of the laser on an asteroid
+function burnMark ( ctx, asteroid, strength ) {
+	var burn = ctx.createRadialGradient ( asteroid.x, asteroid.y, 0, asteroid.x, asteroid.y, asteroid.radius + 5 );
+	burn.addColorStop ( 0, 'rgba(255,230,230,' + ( 0.9 * strength ) + ')' );
 	burn.addColorStop ( 1, 'rgba(255,51,85,0)' );
 	ctx.fillStyle = burn;
 	ctx.beginPath();
-	ctx.arc ( target.x, target.y, target.radius + 5, 0, 2 * Math.PI );
+	ctx.arc ( asteroid.x, asteroid.y, asteroid.radius + 5, 0, 2 * Math.PI );
 	ctx.fill();
-	ctx.restore();
 }

@@ -35,7 +35,10 @@ var researches = {
 					apply : function () { nitroLauncher.smart = 1; } },
 	laser		: { name : "Laser", branch : "lasers", time : 90, needs : [],
 					tip : "Laser - A secondary weapon, whose beam burns an asteroid for a while, then cools down. It aims first at the giants, then at the asteroids going to crash on your planet, the soonest first.",
-					apply : function () { laserCannon.cannonNbr = 1; } }
+					apply : function () { laserCannon.cannonNbr = 1; } },
+	piercing	: { name : "Piercing Beam", branch : "lasers", time : 90, needs : ["laser"],
+					tip : "Piercing Beam - Your laser's beam goes through its target, and spreads behind it in a cone of light to the edge of space : every other asteroid it reaches, on its way or in the cone, burns at half power.",
+					apply : function () { laserCannon.smart = 1; } }
 };
 
 // the researches of the current game : the planet's lab (an upgrade to buy, its level 2 being the Automation), the one going on,

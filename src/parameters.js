@@ -143,6 +143,7 @@
 	var nitroLauncher	= false;			// the other one, whose capsules turn an asteroid into a bomb (secondary.js)
 	var capsuleList		= new Array();
 	var laserCannon		= false;			// and the laser, burning its target for a while before it cools down (secondary.js)
+	var pierceCone		= 20 * Math.PI / 180;	// how much its Piercing Beam spreads behind its target, on each side
 
 	// player's GRAVITRON parameters
 	var key				= [0,0,0,0,0,0,0];		// counterclockwise, clockwise, close, open, pause, change target, erase target choice
@@ -244,6 +245,7 @@ function initDefault(context,level) {
 	laserCannon.duration = gameValues.laserW.duration;
 	laserCannon.firing = 0;		// the turns its beam still burns
 	laserCannon.heat = 0;		// the part of a point of damage it has done
+	laserCannon.pierceHeat = 0;	// the same, for the asteroids its Piercing Beam goes through
 	newResearches();
 	
 	// player's GRAVITRON parameters
