@@ -27,12 +27,13 @@ var researches = {
 					apply : function () { missileLauncher.smart = 1; } }
 };
 
-// the researches of the current game : the one going on, if it is complete, the time spent on each one (in turns), and the ones validated
-var research = { current : false, complete : false, spent : {}, done : {} };
+// the researches of the current game : the planet's lab (an upgrade to buy), the one going on, if it is complete,
+// the time spent on each one (in turns), and the ones validated
+var research = { lab : 0, current : false, complete : false, spent : {}, done : {} };
 
-// function to start a game with no research done
+// function to start a game with no lab and no research done
 function newResearches () {
-	research = { current : false, complete : false, spent : {}, done : {} };
+	research = { lab : 0, current : false, complete : false, spent : {}, done : {} };
 }
 
 // function to know if a branch is open, by its achievement
@@ -40,10 +41,20 @@ function branchOpen ( branch ) {
 	return achieved[researchBranches[branch].opener] ? true : false;
 }
 
-// function to know if a research can be done : its branch open, not done yet, and the researches it needs done
+// function to know if a branch at least is open, for the lab to be worth building
+function anyBranchOpen () {
+	for ( var branch in researchBranches ) {
+		if ( branchOpen ( branch ) ) {
+			return true;
+		}
+	}
+	return false;
+}
+
+// function to know if a research can be done : the lab built, its branch open, not done yet, and the researches it needs done
 function researchOpen ( id ) {
 	var item = researches[id];
-	if ( research.done[id] || !branchOpen ( item.branch ) ) {
+	if ( !research.lab || research.done[id] || !branchOpen ( item.branch ) ) {
 		return false;
 	}
 	for ( var n in item.needs ) {
@@ -101,11 +112,16 @@ function researchAction ( id ) {
 	refresh();
 }
 
-// function to fill the Researches section of the pause menu, at each refresh() : the open branches with their researches,
-// and the closed ones, whose achievement stays secret
+// function to fill the Researches section of the pause menu, at each refresh() : the lab to build first, the open branches
+// with their researches, and the closed ones, whose achievement stays secret
 function refreshResearches () {
 	var holder = document.getElementById ( "researchList" );
 	holder.innerHTML = "";
+	if ( !research.lab && anyBranchOpen() ) {
+		// a click opens the planet's upgrades, where the lab is bought
+		var lab = addLine ( holder, upgrades.lab.name, "", upgrades.lab.tip, function () { openSection ( document.getElementById ( "lab" ).closest ( ".section" ) ); } );
+		lab.querySelector ( "a" ).innerHTML = "<span class='upred'>build it first, with your planet's upgrades</span>";
+	}
 	for ( var branch in researchBranches ) {
 		if ( !branchOpen ( branch ) ) {
 			var closed = addLine ( holder, "???", "", "Closed branch - An achievement will open this branch of the research tree, for good.", function () {} );
@@ -119,8 +135,6 @@ function refreshResearches () {
 			}
 		}
 	}
-	// the secondary weapons' tabs, shown once their research is validated
-	showSecondaryTab ( "missileW", missileLauncher && missileLauncher.cannonNbr > 0 );
 }
 
 // function to add the line of a research, telling what a click on it does
@@ -136,7 +150,7 @@ function addResearchLine ( holder, id ) {
 		var done = Math.floor ( 100 * research.spent[id] / ( item.time * framesPerSecond ) );
 		link.innerHTML = "<span><span class='blue'>" + done + "% done, " + researchLeft ( id ) + " s left</span> <span class='upred'>STOP</span></span>";
 	} else if ( !researchOpen ( id ) ) {
-		var needs = [];
+		var needs = research.lab ? [] : [ upgrades.lab.name ];
 		for ( var n in item.needs ) {
 			needs.push ( researches[item.needs[n]].name );
 		}

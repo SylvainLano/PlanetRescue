@@ -15,6 +15,7 @@
 var shopTooltip = false;
 var researchSection = false;	// the Researches section, opened with the pause when a research waits for the player
 var menuBadges = [];			// the counters of the titles and weapon tabs : what can be bought there (refreshBadges)
+var menuAppearing = [];			// the weapon tabs and upgrade lines hidden until they are worth buying (refreshAppearing)
 
 // function to build the pause menu
 function buildShop() {
@@ -81,12 +82,14 @@ function addPanel ( tabs, holder, panel ) {
 	var tab = newElement ( "a", "tab", tabs );
 	addBadge ( tab, panel.tab, panelThings ( panel ) );
 	tab.addEventListener ( "click", function () { showPanel ( index, tabs, holder ); } );
+	if ( panel.appears ) {
+		menuAppearing.push ( { element : tab, appears : panel.appears } );
+	}
 	var box = newElement ( "div", "panel lines", holder );
 	newElement ( "h2", "", box ).textContent = panel.title;
 	var list = box;
 	if ( panel.secondary ) {
-		// a secondary weapon, always active once researched : its tab stays hidden until then
-		tab.id = panel.secondary + "Tab";
+		// a secondary weapon, always active once researched
 		var status = addLine ( box, "Status", panel.secondary, panel.statusTip, function () {} );
 		status.querySelector ( "a" ).innerHTML = "<span class='green'>active</span>";
 	} else if ( panel.weapon ) {
@@ -109,12 +112,16 @@ function showPanel ( index, tabs, holder ) {
 	}
 }
 
-// function to show the tab of a secondary weapon once researched, or to hide it (back to the first tab if it was the one shown)
-function showSecondaryTab ( weapon, shown ) {
-	var tab = document.getElementById ( weapon + "Tab" );
-	tab.style.display = shown ? "" : "none";
-	if ( !shown && tab.classList.contains ( "current" ) ) {
-		tab.parentNode.firstChild.click();
+// function to show the weapon tabs and upgrade lines once they are worth buying, at each refresh()
+// (they are hidden again at a new game : back to the first tab if the one shown goes)
+function refreshAppearing () {
+	for ( var n in menuAppearing ) {
+		var item = menuAppearing[n];
+		var shown = item.appears();
+		item.element.style.display = shown ? "" : "none";
+		if ( !shown && item.element.classList.contains ( "current" ) ) {
+			item.element.parentNode.firstChild.click();
+		}
 	}
 }
 
@@ -138,13 +145,14 @@ function sectionThings ( section ) {
 }
 
 // function to list what a weapon panel sells : the weapon itself while it is not bought, and its upgrades once it is there
+// (nothing while its tab is hidden)
 function panelThings ( panel ) {
 	var things = [];
 	if ( panel.weapon ) {
-		things.push ( { weapon : panel.weapon } );
+		things.push ( { weapon : panel.weapon, appears : panel.appears } );
 	}
 	for ( var u in panel.upgrades ) {
-		things.push ( { upgrade : panel.upgrades[u], owner : panel.weapon || panel.secondary } );
+		things.push ( { upgrade : panel.upgrades[u], owner : panel.weapon || panel.secondary, appears : panel.appears } );
 	}
 	return things;
 }
@@ -198,6 +206,9 @@ function addUpgrades ( parent, list ) {
 function addUpgrade ( parent, thing ) {
 	var line = addLine ( parent, upgrades[thing].name, thing, false, function () { upgrade ( thing ); } );
 	line.setAttribute ( "data-upgrade", thing );
+	if ( upgrades[thing].appears ) {
+		menuAppearing.push ( { element : line.parentNode, appears : upgrades[thing].appears } );
+	}
 }
 
 // function to add a line of the menu : its label, the link that refresh() fills, and its tooltip

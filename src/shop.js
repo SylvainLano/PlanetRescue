@@ -14,6 +14,7 @@
 //	- name and tip are shown in the menu (the tip is split by " - " into a title and a text)
 //	- max is the maximum level, price the name of its formula in calculate()
 //	- level() reads the current level, raise() buys the next one
+//	- appears(), if any, tells when it is worth buying : its line stays hidden until then
 var upgrades = {
 	// GRAVITRON
 	gravSort			: { name : "Sorting", tip : "Sorting the asteroids - This means your Gravitron will attract asteroids less and debris more.",
@@ -23,13 +24,13 @@ var upgrades = {
 							max : 5, price : "5powtimes4",
 							level : function () { return MyGravitron.power; }, raise : function () { MyGravitron.power++; } },
 	repulsion			: { name : "Repulsion", tip : "Repulsion - This represent the repulsion power of the closed part of the Gravitron. It uses the Gravity Generator power and the Gravitron's sorting effect to perform.",
-							max : 1, price : "plus250",
+							max : 1, price : "plus250", appears : function () { return MyGravitron.power > 1; },
 							level : function () { return MyGravitron.repulsion; }, raise : function () { MyGravitron.repulsion++; } },
 	gravShield			: { name : "Gravitron Shield", tip : "Gravitron Shield - With a shielding effect, your Gravitron will protect your planet (a few). It loads over time and then unloads on asteroids, thus damaging them.",
 							max : 5, price : "times10plus50",
 							level : function () { return MyGravitron.shield; }, raise : function () { MyGravitron.shield++; } },
 	gravPulse			: { name : "Gravitron Pulse", tip : "Gravitron Pulse - When the shield is hit by an asteroid, it will emit a pulse that causes damages to the nearby asteroids. At level 2 it will also pulse when shield is fully loaded.",
-							max : 2, price : "plus1times500",
+							max : 2, price : "plus1times500", appears : function () { return MyGravitron.shield > 0; },
 							level : function () { return MyGravitron.pulse; }, raise : function () { MyGravitron.pulse++; } },
 	gravScanner			: { name : "Field Scanner", tip : "Field Scanner - Level 1 shows the limits of the Gravitron's field. Level 2 colors the asteroids it pulls in red, and the ones it pushes away in green.",
 							max : 2, price : "plus1times50",
@@ -43,7 +44,7 @@ var upgrades = {
 							max : 5, price : "times250",
 							level : function () { return mainCannon.smart; }, raise : function () { mainCannon.smart++; } },
 	MaxWAtATime			: { name : "Multiple weapon", tip : "Multiple weapon structure - Each level gives you one more weapon to activate at the same time.",
-							max : 2, price : "times250",
+							max : 2, price : "times250", appears : function () { return ownedWeapons() > 1; },
 							level : function () { return maxWAtATime; }, raise : function () { maxWAtATime++; } },
 
 	// BASIC CANNON
@@ -135,11 +136,16 @@ var upgrades = {
 							level : function () { return planetAutoHeal; }, raise : function () { planetAutoHeal++; } },
 	recovery			: { name : "Recovery", tip : "Recovery - With this upgrade, your citizens will be able to get mat from the asteroids crashing on their planet.",
 							max : 5, price : "plus1times50",
-							level : function () { return planetRecovery; }, raise : function () { planetRecovery++; } }
+							level : function () { return planetRecovery; }, raise : function () { planetRecovery++; } },
+	// the planet's lab, needed for any research (researches.js) : it comes once an achievement has opened a branch of the research tree
+	lab					: { name : "Research Lab", tip : "Research Lab - Your planet needs it to do any research. Then the researches of the branches your achievements opened can be started from the Researches section.",
+							max : 1, price : "plus100", appears : function () { return anyBranchOpen(); },
+							level : function () { return research.lab; }, raise : function () { research.lab++; } }
 };
 
 // The layout of the pause menu, built by menu.js : its sections, the weapons' one being split into tabs
-// (a weapon's upgrades are shown once it is bought, a secondary weapon's tab once its research is validated)
+// (a weapon's upgrades are shown once it is bought, and a tab with appears() stays hidden until then :
+// each weapon comes once the one before is bought, a secondary weapon once its research is validated)
 var shopLayout = [
 	{ title : "Upgrade Your Gravitron", upgrades : ["gravSort","gravPower","repulsion","gravShield","gravPulse","gravScanner"] },
 	{ title : "Build or upgrade your Weapons", panels : [
@@ -151,17 +157,20 @@ var shopLayout = [
 			statusTip : "By making this weapon active, you could disactivate one of the current one.",
 			upgrades : ["SaOCNumber","SaOCFireRate","SaOPow","SaOSpeed"] },
 		{ tab : "Magnet", title : "Magnetic Weapon", weapon : "magneticW", modes : true,
+			appears : function () { return spiralCannon.cannonNbr > 0; },
 			statusTip : "By making this weapon active, you could disactivate one of the current one.",
 			upgrades : ["magneticCNumber","magneticCFireRate","magneticPow","magneticSpeed"] },
 		{ tab : "Hammer", title : "Hammer and Broom Weapon", weapon : "HaBW", modes : true,
+			appears : function () { return magneticCannon.cannonNbr > 0; },
 			statusTip : "By making this weapon active, you could disactivate one of the current one.",
 			upgrades : ["HaBCNumber","HaBCFireRate","HaBPow","HaBSpeed"] },
 		// a secondary weapon : its tab is shown once its research is validated
 		{ tab : "Missile", title : "Missile Launcher", secondary : "missileW",
+			appears : function () { return missileLauncher.cannonNbr > 0; },
 			statusTip : "A secondary weapon, always active : it takes no place among your active weapons.",
 			upgrades : ["missileFireRate","missilePow","missileBlast"] }
 	] },
-	{ title : "Heal or upgrade your Planet", upgrades : ["healing","healFact","maxHealth","maxMat","autoHeal","recovery"] },
+	{ title : "Heal or upgrade your Planet", upgrades : ["healing","healFact","maxHealth","maxMat","autoHeal","recovery","lab"] },
 	{ title : "Researches", researches : true }		// filled by refreshResearches() (researches.js)
 ];
 
@@ -313,6 +322,7 @@ function refresh() {
 		modeUpdate ( weaponList[iw-1] );
 	}
 	refreshResearches();
+	refreshAppearing();
 	refreshBadges();
 }
 
@@ -328,10 +338,19 @@ function weaponOfType ( type ) {
 	}
 }
 
+// function to know if something of the menu is shown : its weapon tab and its line, which may wait for something else (appears)
+function thingAppears ( thing ) {
+	var upgrade = upgrades[thing.upgrade];
+	return ( !thing.appears || thing.appears() ) && ( !upgrade || !upgrade.appears || upgrade.appears() );
+}
+
 // function to get the price of something of the menu, or false when it can't be bought now :
-// a weapon already bought, an upgrade at its maximum, or the upgrade of a weapon not there yet
+// something still hidden, a weapon already bought, an upgrade at its maximum, or the upgrade of a weapon not there yet
 // (healing can be bought for a single inhabitant)
 function thingPrice ( thing ) {
+	if ( !thingAppears ( thing ) ) {
+		return false;
+	}
 	if ( thing.weapon ) {
 		return ( weaponOfType ( thing.weapon ).cannonNbr == 0 ) ? weaponCost[thing.weapon] : false;
 	}
@@ -347,9 +366,9 @@ function thingPrice ( thing ) {
 	return priceToPay ( thing.upgrade );
 }
 
-// function to know if something of the menu is an upgrade at its maximum (not one of a weapon still to buy)
+// function to know if something of the menu is an upgrade at its maximum (not one of a weapon still to buy, nor a hidden one)
 function thingMaxed ( thing ) {
-	if ( !thing.upgrade || ( thing.owner && weaponOfType ( thing.owner ).cannonNbr < 1 ) ) {
+	if ( !thing.upgrade || !thingAppears ( thing ) || ( thing.owner && weaponOfType ( thing.owner ).cannonNbr < 1 ) ) {
 		return false;
 	}
 	return maxReached ( thing.upgrade );
@@ -466,6 +485,9 @@ function calculate(type,ref) {
 			break;
 		case "times-healFact" :
 			ref *= ( maxUpgrade("healFact") - planetHealFact + 1 );
+			break;
+		case "plus100" :
+			ref += 100;
 			break;
 		case "plus250" :
 			ref += 250;
