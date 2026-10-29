@@ -12,7 +12,7 @@
 <html>
 <head>
 	<meta charset="utf-8">
-	<title>Planet Rescue v0.21.0</title>
+	<title>Planet Rescue v0.22.0</title>
 
 	<link rel="stylesheet" type="text/css" href="css/main.css">
 
@@ -44,19 +44,18 @@
 		</div>
 	</div>
 	<div id="pause" class="ui">
-		<div class='title'>
-			PAUSE
-		</div>
+		<div class="title">Pause</div>
 		<div class="paused">
-			<div class="matDisplay">You have<br /><span id="matNbr" class="mat"></span><br />mat</div>
-			<div class="center">&lt; press space to resume &gt;</div>
-			<br />
+			<div class="pauseBar">
+				<span>press <kbd>Space</kbd> to resume</span>
+				<span class="matDisplay"><span id="matNbr"></span> mat</span>
+			</div>
 			<div id="shop"></div><!-- built by src/menu.js -->
 		</div>
 	</div>
 	<div id="startMenu" class="ui">
 		<div class="title">
-			Planet Rescue <span class="version">v0.21.0</span>
+			Planet Rescue <span class="version">v0.22.0</span>
 		</div>
 		<div id="mainMenu">
 			<a href="#" class="button primary" onClick='state="init";'>Start</a>

@@ -297,7 +297,8 @@ function refresh() {
 				}
 			}
 		} else {
-			item.innerHTML = " MAX";
+			// its level, then MAX in the prices' column (healing has no level to show)
+			item.innerHTML = ( thing == "healing" ? "" : "<b>" + translate(thing) + "</b>" ) + "<span class='max'>MAX</span>";
 		}
 	}
 	upgrades.SMART.tip = "Main Structure SMART AI - " + smartNextLevel[translate("SMART")];
@@ -307,7 +308,7 @@ function refresh() {
 			item.style.display = "none";
 			document.getElementById(weaponList[iw-1].type).innerHTML = purchaseStatus ( weaponList[iw-1] );
 		} else {
-			item.style.display = "block";
+			item.style.display = "";		// its lines join the panel's columns (css/main.css)
 		}
 		modeUpdate ( weaponList[iw-1] );
 	}

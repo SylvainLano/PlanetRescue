@@ -44,12 +44,13 @@ function addSection ( shop, section ) {
 	head.addEventListener ( "click", function () { openSection ( block ); } );
 	var content = newElement ( "div", "content", block );
 	if ( section.upgrades ) {
+		content.classList.add ( "lines" );		// names, levels and prices in three aligned columns (css/main.css)
 		addUpgrades ( content, section.upgrades );
 	} else if ( section.panels ) {
 		addPanels ( content, section.panels );
 	} else if ( section.researches ) {
 		// filled at each refresh (researches.js)
-		newElement ( "div", "", content ).id = "researchList";
+		newElement ( "div", "lines", content ).id = "researchList";
 		researchSection = block;
 	} else {
 		content.textContent = section.text;
@@ -80,7 +81,7 @@ function addPanel ( tabs, holder, panel ) {
 	var tab = newElement ( "a", "tab", tabs );
 	addBadge ( tab, panel.tab, panelThings ( panel ) );
 	tab.addEventListener ( "click", function () { showPanel ( index, tabs, holder ); } );
-	var box = newElement ( "div", "panel", holder );
+	var box = newElement ( "div", "panel lines", holder );
 	newElement ( "h2", "", box ).textContent = panel.title;
 	var list = box;
 	if ( panel.secondary ) {
@@ -91,7 +92,7 @@ function addPanel ( tabs, holder, panel ) {
 	} else if ( panel.weapon ) {
 		addLine ( box, "Status", panel.weapon, panel.statusTip, function () { activate ( panel.weapon ); } );
 		// the weapon's upgrades, shown by refresh() once it is bought
-		list = newElement ( "div", "", box );
+		list = newElement ( "div", "more", box );
 		list.id = panel.weapon + "Upgrades";
 		if ( panel.modes ) {
 			addLine ( list, "Mode", panel.weapon + "Mode", "Change the mode to trigger alternative fire.", function () { modeChange ( panel.weapon ); } );
@@ -103,7 +104,7 @@ function addPanel ( tabs, holder, panel ) {
 // function to show a weapon panel, hiding the others
 function showPanel ( index, tabs, holder ) {
 	for ( var n = 0; n < holder.children.length; n++ ) {
-		holder.children[n].style.display = ( n == index ) ? "block" : "none";
+		holder.children[n].style.display = ( n == index ) ? "" : "none";	// (shown as its columns ask, css/main.css)
 		tabs.children[n].classList.toggle ( "current", n == index );
 	}
 }
@@ -202,7 +203,7 @@ function addUpgrade ( parent, thing ) {
 // function to add a line of the menu : its label, the link that refresh() fills, and its tooltip
 function addLine ( parent, label, id, tip, onClick ) {
 	var line = newElement ( "span", "tip", newElement ( "p", "", parent ) );
-	line.appendChild ( document.createTextNode ( label + " : " ) );
+	newElement ( "span", "label", line ).textContent = label;
 	var link = newElement ( "a", "", line );
 	link.id = id;
 	link.addEventListener ( "click", onClick );

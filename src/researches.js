@@ -134,7 +134,7 @@ function addResearchLine ( holder, id ) {
 		link.innerHTML = "<span class='upgreen'>COMPLETE : VALIDATE</span>";
 	} else if ( research.current == id ) {
 		var done = Math.floor ( 100 * research.spent[id] / ( item.time * framesPerSecond ) );
-		link.innerHTML = "<span class='blue'>" + done + "% done, " + researchLeft ( id ) + " s left</span> <span class='upred'>STOP</span>";
+		link.innerHTML = "<span><span class='blue'>" + done + "% done, " + researchLeft ( id ) + " s left</span> <span class='upred'>STOP</span></span>";
 	} else if ( !researchOpen ( id ) ) {
 		var needs = [];
 		for ( var n in item.needs ) {
