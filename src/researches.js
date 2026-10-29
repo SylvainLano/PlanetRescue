@@ -35,13 +35,13 @@ var researches = {
 					apply : function () { laserCannon.cannonNbr = 1; } }
 };
 
-// the researches of the current game : the planet's lab (an upgrade to buy), the one going on, if it is complete,
-// the time spent on each one (in turns), and the ones validated
-var research = { lab : 0, current : false, complete : false, spent : {}, done : {} };
+// the researches of the current game : the planet's lab (an upgrade to buy, its level 2 being the Automation), the one going on,
+// if it is complete, the time spent on each one (in turns), the ones validated, and the last one the Automation validated
+var research = { lab : 0, current : false, complete : false, spent : {}, done : {}, validated : false };
 
 // function to start a game with no lab and no research done
 function newResearches () {
-	research = { lab : 0, current : false, complete : false, spent : {}, done : {} };
+	research = { lab : 0, current : false, complete : false, spent : {}, done : {}, validated : false };
 }
 
 // function to know if a branch is open, by its achievement
@@ -94,7 +94,8 @@ function researchLeft ( id ) {
 	return Math.max ( 0, Math.ceil ( researches[id].time - ( research.spent[id] || 0 ) / framesPerSecond ) );
 }
 
-// function to make the research going on advance, at each turn of the game (not during the pause)
+// function to make the research going on advance, at each turn of the game (not during the pause) ;
+// with the lab's Automation, a research complete is validated at once, and the next one starts by itself
 function advanceResearch () {
 	if ( research.current && !research.complete ) {
 		research.spent[research.current]++;
@@ -102,20 +103,54 @@ function advanceResearch () {
 			research.complete = true;
 		}
 	}
+	if ( research.lab >= 2 ) {
+		if ( research.complete ) {
+			// told for a few seconds at the bottom right (drawResearchCorner)
+			research.validated = { id : research.current, until : gameTime + 4 * framesPerSecond };
+			validateResearch();
+		}
+		if ( !research.current ) {
+			startResearch ( nextResearch() );
+		}
+	}
+}
+
+// function to choose the research the Automation starts : the one to be done the soonest, among the ones that can be done
+function nextResearch () {
+	var next = false;
+	for ( var id in researches ) {
+		if ( researchOpen ( id ) && ( !next || researchLeft ( id ) < researchLeft ( next ) ) ) {
+			next = id;
+		}
+	}
+	return next;
+}
+
+// function to start a research, keeping the time already spent on it
+function startResearch ( id ) {
+	if ( id ) {
+		research.current = id;
+		research.spent[id] = research.spent[id] || 0;
+	}
+}
+
+// function to validate the research complete, which brings its bonus
+function validateResearch () {
+	research.done[research.current] = true;
+	researches[research.current].apply();
+	research.complete = false;
+	research.current = false;
 }
 
 // function to start a research, or to stop it (its time spent is kept), or to validate it once complete, from the pause menu
 function researchAction ( id ) {
 	if ( research.current == id ) {
 		if ( research.complete ) {
-			research.done[id] = true;
-			researches[id].apply();
-			research.complete = false;
+			validateResearch();
 		}
 		research.current = false;
 	} else if ( !research.current && researchOpen ( id ) ) {
-		research.current = id;
-		research.spent[id] = research.spent[id] || 0;
+		startResearch ( id );
 	}
 	refresh();
 }
@@ -171,10 +206,12 @@ function addResearchLine ( holder, id ) {
 }
 
 // function to tell the player about the researches, at the bottom right of the game area (above an achievement's banner) :
-// a research complete or one to start are shown until the player acts, the one going on more quietly
+// a research complete or one to start are shown until the player acts, the one going on more quietly,
+// and the one the Automation has just validated for a few seconds
 function drawResearchCorner ( ctx ) {
 	var news = researchNews();
-	if ( news == false ) {
+	var validated = research.validated && gameTime < research.validated.until;
+	if ( news == false && !validated ) {
 		return;
 	}
 	var width = 200, height = 44;
@@ -183,7 +220,19 @@ function drawResearchCorner ( ctx ) {
 	ctx.save();
 	ctx.textAlign = 'left';
 	ctx.textBaseline = 'alphabetic';
-	if ( news == "running" ) {
+	if ( validated ) {
+		ctx.fillStyle = 'rgba(30,30,30,0.85)';
+		ctx.fillRect ( x, y, width, height );
+		ctx.strokeStyle = 'rgb(242,201,76)';
+		ctx.lineWidth = 2;
+		ctx.strokeRect ( x + 1, y + 1, width - 2, height - 2 );
+		ctx.fillStyle = 'rgb(242,201,76)';
+		ctx.font = 'bold 12px Arial';
+		ctx.fillText ( 'RESEARCH VALIDATED', x + 10, y + 18 );
+		ctx.fillStyle = '#ddd';
+		ctx.font = '11px Arial';
+		ctx.fillText ( researches[research.validated.id].name, x + 10, y + 34 );
+	} else if ( news == "running" ) {
 		var item = researches[research.current];
 		ctx.fillStyle = 'rgba(30,30,30,0.6)';
 		ctx.fillRect ( x, y, width, height );
