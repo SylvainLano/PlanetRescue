@@ -270,10 +270,12 @@ function drawFieldTint(ctx,asteroid) {
 		return;
 	}
 	ctx.fillStyle = ( pull < 0 ) ? 'rgba(255,40,40,0.3)' : 'rgba(60,255,60,0.3)';
-	ctx.beginPath();
-	ctx.arc(asteroid.x,asteroid.y,asteroid.radius,0,2*Math.PI,true);
-	ctx.closePath();
-	ctx.fill();
+	// following the rock's outline
+	ctx.save();
+	ctx.translate(asteroid.x,asteroid.y);
+	ctx.rotate(asteroid.spin);
+	ctx.fill(asteroid.outline);
+	ctx.restore();
 }
 
 // Function to get the number of turns to wait before the next asteroid : the interval shrinks as time passes

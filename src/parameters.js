@@ -127,7 +127,6 @@
 	
 	// asteroids parameters
 	var asteroidList	= new Array();
-	var asteroid1Skin	= 'img/asteroid1.png';
 	var asteroidBS		= startValues.asteroidSpeed;	// Base speed for the asteroids
 	var asteroidBR		= 8;		// Base radius for the asteroids
 	var asteroidBM		= 8;		// Base mass for the asteroids
@@ -215,7 +214,6 @@ function initDefault(context,level) {
 	
 	// asteroids parameters
 	asteroidList	= [];
-	asteroid1Skin	= 'img/asteroid1.png';
 	asteroidBS		= gameValues.asteroidSpeed;	// Base speed for the asteroids
 	asteroidBR		= 8;		// Base radius for the asteroids
 	asteroidBM		= 8;		// Base mass for the asteroids

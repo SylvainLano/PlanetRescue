@@ -65,11 +65,10 @@ function Pulse(context,angle,wideness,charge,gravRadius) {
 }
 
 // asteroids  pseudo-class
-function Asteroid(context,life,skin,r,m,x,y,vx,vy) {
+function Asteroid(context,life,r,m,x,y,vx,vy) {
 // elements from the function call
 	this.life=life;
 	this.context=context;
-	this.skin=skin;
 	this.radius=r;
 	this.mass=m;
 	this.x=x;
@@ -79,7 +78,8 @@ function Asteroid(context,life,skin,r,m,x,y,vx,vy) {
 
 // element to set up
 	this.pass = 0;			// for the main structure to ignore this asteroid
-	
+	shapeRock(this);		// its own rock, drawn by the game (prototypes.js)
+
 // object definition
 	this.type="Asteroid";
 }

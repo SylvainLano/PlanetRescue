@@ -54,6 +54,7 @@ In **2026** the game came back to life. The goals are to keep its spirit, make i
 | 0.9.0 | SMART AI levels 3 to 5, as designed in 2010: no wasted shots, then the target the cannon can hit the soonest, then the asteroids about to crash on the planet first. The End key now releases the target at once. |
 | 0.10.0 | A new score: 10 points per asteroid destroyed, plus the mat gathered, plus the seconds survived (the 2010 score rewarded the inhabitants lost). Longest survival is a new record. Recovery, stuck at its maximum since 2010, now starts at 0 and can be bought. |
 | 0.10.1 | Modernization, with no change in the game: the upgrades are described as data in one table, the pause menu is built from it without jQuery and its plugins (356 KB less), and the background images went from 8.9 MB of PNG to 350 KB of JPEG. |
+| 0.11.0 | The asteroids are now rocks drawn by the game: each one has its own shape, color, grain and craters, spins slowly, and is lit from the top left like the planet. The Field Scanner tints their exact shape. The images are loaded once instead of at every frame. The tutorial no longer crashes when "Space" is pressed at the very moment a step begins. |
 
 ## Roadmap (2026)
 
@@ -61,7 +62,7 @@ The order may change as we go.
 
 1. **Fairer difficulty:** difficulty levels (done in 0.7.0), the Field Scanner (done in 0.8.0), and SMART AI levels 3 to 5 as designed in 2010 (done in 0.9.0).
 2. **Modernization:** upgrades described as data, a pause menu without jQuery (ready for the research tree), lighter assets (all done in 0.10.1).
-3. **Graphics:** the Earth as your planet, real rock textures for the asteroids, high-resolution images, a hand-made animated background.
+3. **Graphics:** rocky asteroids (done in 0.11.0), the Earth as your planet, high-resolution images, a hand-made animated background.
 4. **Touch screens.**
 5. **The 2010 ideas:** achievements, then the research tree, then the free-play mode, new secondary weapons, and maybe one day the story mode.
 
@@ -121,7 +122,7 @@ No build step and no dependencies to install: open `index.html` in a browser and
 | `src/functions.js` | debris, pulses, Gravitron, weapons, SMART AI, interception |
 | `src/shop.js` | the upgrades, described as data (`upgrades`, `shopLayout`), and the shop |
 | `src/menu.js` | the pause menu, built from the upgrades: sections, weapon tabs, tooltips |
-| `src/objects.js`, `src/prototypes.js` | game objects and their drawing |
+| `src/objects.js`, `src/prototypes.js` | game objects and their drawing, including the asteroids' rocks |
 | `src/parameters.js` | settings, the starting values that tune the difficulty (`startValues`), and what each difficulty level changes (`difficultyLevels`) |
 
 Adding an upgrade only takes a line in `upgrades` and its place in `shopLayout`. The game uses no library: the pause menu used jQuery 1.4.3, jQuery UI 1.8.5 and three plugins until 0.10.1.

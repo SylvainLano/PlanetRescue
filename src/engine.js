@@ -128,16 +128,8 @@ function engine() {
 			}
 			resolveGravitron (ctx,pause,MyGravitron,gravFriction,keys,gravMinSize,gravMaxSize,gravColor,gravWidth,MyPlanet,gravRadius);
 		}
-		if ( key[4] == 1 ) {
-			pauseStep++;
-			if(pauseStep==1){
-				countdownValue++;
-			}
-		}
-		if ( key[4] == 0 ) {
-			pauseStep=0;
-		}
-		
+
+		var step = countdownValue;
 		if ( countdownValue < 10 ) {
 			countdown.innerHTML = "Tutorial";
 			countdown.style.background = 'rgba(60,60,60,'+(countdownValue/20)+')';
@@ -174,8 +166,10 @@ function engine() {
 			var angle = Math.PI / 4;
 			var AsterX = MyPlanet.x + (radius * Math.cos(angle));
 			var AsterY = MyPlanet.y + (radius * Math.sin(angle));
-			item = new Asteroid(ctx,10,asteroid1Skin,asteroidBR,asteroidBM,AsterX,AsterY,-0.25,-0.25);
-			asteroidList.push(item);
+			if ( asteroidList.length == 0 ) {
+				item = new Asteroid(ctx,10,asteroidBR,asteroidBM,AsterX,AsterY,-0.25,-0.25);
+				asteroidList.push(item);
+			}
 		} else if ( countdownValue < 77 ) {
 			var string = "Look, an asteroid !";
 			countdown.innerHTML = string.substr(0,(countdownValue-57));
@@ -221,8 +215,10 @@ function engine() {
 			var y = MyPlanet.y + (MyPlanet.radius+5) * Math.sin(mainCannon.angle);
 			var vx = mainCannon.speed * Math.cos(mainCannon.angle);
 			var vy = mainCannon.speed * Math.sin(mainCannon.angle);
-			item = new Shot1(ctx,mainCannon.power,mainCannon.color,x,y,vx,vy);
-			shotList.push(item);
+			if ( shotList.length == 0 ) {
+				item = new Shot1(ctx,mainCannon.power,mainCannon.color,x,y,vx,vy);
+				shotList.push(item);
+			}
 		} else if ( countdownValue < 213 )  {
 			var string = "It shoots by itself";
 			countdown.innerHTML = string.substr(0,(countdownValue-193));
@@ -319,7 +315,19 @@ function engine() {
 		} else if ( countdownValue > 345 )  {
 			state="menu";
 		}
-		
+
+		// "Space" only moves on from a step waiting for it, once that step has been played
+		// (until 2026, a press at the very frame a step began could skip what it creates and crash the tutorial)
+		if ( key[4] == 1 ) {
+			pauseStep++;
+			if(pauseStep==1 && countdownValue == step){
+				countdownValue++;
+			}
+		}
+		if ( key[4] == 0 ) {
+			pauseStep=0;
+		}
+
 	} else if (state == "init"){
 	
 		startMenu.style.display = "none";
@@ -480,7 +488,7 @@ function engine() {
 				var vx = - velocity * Math.cos(angle);
 				var vy = - velocity * Math.sin(angle);
 			
-			item = new Asteroid(ctx,gameValues.asteroidLife,asteroid1Skin,asteroidBR,asteroidBM,AsterX,AsterY,vx,vy);
+			item = new Asteroid(ctx,gameValues.asteroidLife,asteroidBR,asteroidBM,AsterX,AsterY,vx,vy);
 			asteroidList.push(item);
 		}
 	}	// this is the pause bracket
@@ -660,7 +668,8 @@ function engine() {
 		// Calculating positions
 		asteroidList[i].x += asteroidList[i].vx;
 		asteroidList[i].y += asteroidList[i].vy;
-		
+		asteroidList[i].spin += asteroidList[i].spinSpeed;
+
 		// Testing if asteroid is the closest to the player's planet
 		if( distance < closestD && asteroidList[i].pass == 0){
 			closestA = asteroidList[i];
