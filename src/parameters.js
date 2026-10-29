@@ -110,6 +110,9 @@
 	var bankShot		= false;	// an asteroid destroyed by another one the GRAVITRON deflected (Bank Shot achievement)
 	var bestBomb		= 0;		// the most asteroids destroyed by a bomb and the ones of its Chain Reaction (Fireworks achievement)
 	var giantSlain		= false;	// a giant asteroid finished by the laser (Giant Slayer achievement)
+	var boomerang		= false;	// an asteroid destroyed by a rebound shot the planet sent back (Boomerang achievement)
+	var bestPinball		= 0;		// the most asteroids hit by a single rebound shot (Pinball achievement)
+	var goliath			= false;	// a giant asteroid finished by a rebound shot after a ricochet (David and Goliath achievement)
 
 	// player's planet parameters
 	var planetSkin		= earthMap;		// the map wrapped around the planet (img/earth.js)
@@ -206,6 +209,9 @@ function initDefault(context,level) {
 	bankShot		= false;
 	bestBomb		= 0;
 	giantSlain		= false;
+	boomerang		= false;
+	bestPinball		= 0;
+	goliath			= false;
 	newAchievements	= [];		// the achievements obtained in this game (achievements.js)
 
 	// player's planet parameters

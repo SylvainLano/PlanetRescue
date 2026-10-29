@@ -61,6 +61,12 @@ var achievements = {
 						test : function () { return state == "playing" && bestBomb >= 3; } },
 	giantSlayer		: { name : "Giant Slayer", text : "Finish a giant asteroid with your laser.", picture : "sword", metal : "silver",
 						test : function () { return state == "playing" && giantSlain; } },
+	boomerang		: { name : "Boomerang", text : "Destroy an asteroid with a rebound shot sent back by your planet.", picture : "boomerang", metal : "bronze",
+						test : function () { return state == "playing" && boomerang; } },
+	pinball			: { name : "Pinball", text : "Hit 3 different asteroids with a single rebound shot.", picture : "pinball", metal : "silver",
+						test : function () { return state == "playing" && bestPinball >= 3; } },
+	goliath			: { name : "David and Goliath", text : "Finish a giant asteroid with a rebound shot, after a ricochet.", picture : "sling", metal : "gold",
+						test : function () { return state == "playing" && goliath; } },
 	scholar			: { name : "Scholar", text : "Complete every research in a game.", picture : "book", metal : "gold",
 						test : function () { return state == "playing" && researchesDone() == Object.keys ( researches ).length; } }
 };
@@ -84,7 +90,10 @@ var medalPictures = {
 	flask		: '<path d="M27 15h10M29 15v12L18 46c-1 2 0 4 2 4h24c2 0 3-2 2-4L35 27V15"/><path d="M22 40h20" stroke-width="2"/><circle fill="INK" stroke="none" cx="30" cy="45" r="2"/><circle fill="INK" stroke="none" cx="36" cy="44" r="1.5"/>',
 	fireworks	: '<circle fill="INK" stroke="none" cx="32" cy="32" r="3"/><path d="M32 25v-7M37 27l5-5M39 32h7M37 37l5 5M32 39v7M27 37l-5 5M25 32h-7M27 27l-5-5" stroke-width="2.5"/><g fill="INK" stroke="none"><circle cx="32" cy="13" r="2"/><circle cx="45.4" cy="18.6" r="2"/><circle cx="51" cy="32" r="2"/><circle cx="45.4" cy="45.4" r="2"/><circle cx="32" cy="51" r="2"/><circle cx="18.6" cy="45.4" r="2"/><circle cx="13" cy="32" r="2"/><circle cx="18.6" cy="18.6" r="2"/></g>',
 	sword		: '<path d="M46 16L25 37" stroke-width="4"/><path d="M46 16l2-4-4 2M19 33l12 12M24 40l-8 8" stroke-width="3"/><circle fill="INK" stroke="none" cx="15" cy="49" r="2.5"/>',
-	book		: '<path d="M32 21c-5-4-12-5-18-4v26c6-1 13 0 18 4 5-4 12-5 18-4V17c-6-1-13 0-18 4zM32 21v26"/><path d="M19 25c3 0 6 1 8 2M19 31c3 0 6 1 8 2M37 27c2-1 5-2 8-2M37 33c2-1 5-2 8-2" stroke-width="1.5"/>'
+	book		: '<path d="M32 21c-5-4-12-5-18-4v26c6-1 13 0 18 4 5-4 12-5 18-4V17c-6-1-13 0-18 4zM32 21v26"/><path d="M19 25c3 0 6 1 8 2M19 31c3 0 6 1 8 2M37 27c2-1 5-2 8-2M37 33c2-1 5-2 8-2" stroke-width="1.5"/>',
+	boomerang	: '<path fill="INK" stroke="none" d="M20 17Q36 14 50 22Q53 26 49 29Q36 24 27 27Q24 36 29 49Q26 53 22 50Q14 36 20 17z"/><path d="M38 44q6-2 8-8M42 50q8-3 11-11" stroke-width="2"/>',
+	pinball		: '<path d="M45 47L19 37L43 25L21 17" stroke-dasharray="3 4" stroke-width="2"/><circle cx="19" cy="37" r="5"/><circle cx="43" cy="25" r="5"/><circle cx="21" cy="17" r="5"/><circle fill="INK" stroke="none" cx="45" cy="47" r="4"/>',
+	sling		: '<g transform="translate(12 -2) scale(0.8)"><path d="M18 31l7-12 12-2 9 8-1 13-9 8-12-1-6-8z"/><path d="M34 18l-3 10 6 5-5 8" stroke-width="2"/></g><path d="M15 20v26" stroke-width="2.5"/><path d="M27 49L16 38L26 31" stroke-dasharray="3 4" stroke-width="2"/><circle fill="INK" stroke="none" cx="27" cy="49" r="3.5"/>'
 };
 
 // the colors of the medals : their metal's rim, their disk and their picture ; the ones not obtained yet are dark silhouettes

@@ -540,7 +540,9 @@ function fireRebounds ( target ) {
 			vy : speed * Math.sin ( angle ),
 			power : reboundCannon.power,
 			rebounds : reboundCannon.rebounds,		// the rebounds it can still make
-			trail : []								// its last places, and the points where it ricocheted
+			trail : [],								// its last places, and the points where it ricocheted
+			hit : [],								// the asteroids it has hit (Pinball achievement)
+			last : null								// what it ricocheted on last : an asteroid, the planet or an edge
 		} );
 		playSound ( "rebound" );
 	}
@@ -580,10 +582,18 @@ function ricochet ( ctx, shot ) {
 	if ( rock ) {
 		addDebris ( ctx, shot.power, touched.x, touched.y, touched.vx, touched.vy, debrisList );
 		touched.life -= shot.power;
+		if ( shot.hit.indexOf ( touched ) < 0 ) {
+			shot.hit.push ( touched );
+			bestPinball = Math.max ( bestPinball, shot.hit.length );
+		}
 		if ( touched.life <= 0 ) {
 			allPassed = 1;
+			// (once the shot has ricocheted : sent back by the planet for Boomerang, on a giant for David and Goliath)
+			boomerang = boomerang || shot.last == MyPlanet;
+			goliath = goliath || ( touched.giant && shot.last !== null );
 		}
 	}
+	shot.last = touched || "edge";
 	shot.trail.push ( { x : shot.x, y : shot.y } );
 	sparkList.push ( { x : shot.x, y : shot.y, age : 0 } );
 	playSound ( "ricochet" );
