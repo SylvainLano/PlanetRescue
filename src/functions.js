@@ -35,7 +35,7 @@ function addDebris(ctx,nb,x,y,vx,vy,debrisList,metal) {
 		var tempVelocity = Math.random() * velocity / 2;
 		var vx = velocity * Math.cos(tempAngle);
 		var vy = velocity * Math.sin(tempAngle);
-		var item = new Debris(ctx,x,y,vx,vy,( metal && Math.random() < metalShare ) ? metal : false);
+		var item = new Debris(ctx,x,y,vx,vy,( metal && Math.random() < ( metals[metal].share || metalShare ) ) ? metal : false);
 		debrisList.push(item);
 	}
 	return debrisList;
@@ -653,7 +653,7 @@ function spawnInterval() {
 
 // Function to send an asteroid toward the planet from the edge of the game area, at an angle around the planet (in radians) :
 // its speed and its life grow as time passes, and a giant is stronger, bigger, heavier and slower
-// (speed, if any, changes its speed : the Adventure's waves, adventure.js)
+// (speed, if any, changes its speed : the Adventure's waves, adventure.js) ; it gives the asteroid, for a threat to change it (threats.js)
 function launchAsteroid(ctx,angle,giant,speed) {
 	var radius = gameSize / 2;
 	var x = MyPlanet.x + (radius * Math.cos(angle));
@@ -665,7 +665,9 @@ function launchAsteroid(ctx,angle,giant,speed) {
 	var velocity = (Math.random() * 2 + 1) * asteroidSpeedFactor() * asteroidBS * ( giant ? giantSpeed : 1 ) * ( speed || 1 );
 	var life = ( giant ? gameValues.giantLife : gameValues.asteroidLife ) + asteroidExtraLife();
 	// and some have a metal in their rock (bonuses.js)
-	asteroidList.push(new Asteroid(ctx,life,asteroidBR * ( giant ? giantSize : 1 ),asteroidBM * ( giant ? giantMass : 1 ),x,y,- velocity * Math.cos(angle),- velocity * Math.sin(angle),giant,asteroidMetal()));
+	var asteroid = new Asteroid(ctx,life,asteroidBR * ( giant ? giantSize : 1 ),asteroidBM * ( giant ? giantMass : 1 ),x,y,- velocity * Math.cos(angle),- velocity * Math.sin(angle),giant,asteroidMetal());
+	asteroidList.push(asteroid);
+	return asteroid;
 }
 
 // Function to get the asteroids' speed factor, which grows as time passes

@@ -19,6 +19,7 @@ Asteroid.prototype.ShowLife=ShowLife;
 
 // the images already loaded, by file (until 2026, every drawing loaded its image again)
 var skins = {};
+var globeMapMost = 2048;	// the widest map a planet's globe uses, in pixels (the Earth's picture is 1536 wide)
 
 // function to get the image of a skin, loaded the first time only
 function skinImage ( file ) {
@@ -38,13 +39,21 @@ function TurnPlanet() {
 
 // function to draw the planet : its map (its skin) wrapped around a sphere turning on itself, lit from the top left
 function DrawPlanet() {
-	var globe = planetGlobe ( this );
+	var globe = paintGlobe ( this, planetGlobe ( this ) );
+	if ( globe ) {
+		this.context.drawImage ( globe.canvas, this.x - this.radius, this.y - this.radius, this.radius * 2, this.radius * 2 );
+	}
+}
+
+// function to paint a planet's globe on its own canvas, turned as the planet is ; false while its map is still loading
+// (the start menu's scenes paint their Earths with it too : menuscenes.js)
+function paintGlobe ( planet, globe ) {
 	if ( globe == false ) {
-		return;		// its map is still loading
+		return false;
 	}
 	// each pixel of the globe takes its color on the map, shifted by the spin
 	// (the shift falls between two columns of the map : both are mixed, so that the Earth glides instead of jumping a pixel at a time)
-	var turn = this.spin / ( 2 * Math.PI ) * globe.width;
+	var turn = planet.spin / ( 2 * Math.PI ) * globe.width;
 	var shift = Math.floor ( turn );
 	var next = Math.round ( ( turn - shift ) * 256 );	// the share of the next column, out of 256
 	var left = 256 - next;
@@ -74,25 +83,27 @@ function DrawPlanet() {
 	ctx.fillStyle = globe.shade;
 	ctx.fillRect ( 0, 0, globe.size, globe.size );
 	ctx.globalCompositeOperation = "source-over";
-	this.context.drawImage ( globe.canvas, this.x - this.radius, this.y - this.radius, this.radius * 2, this.radius * 2 );
+	return globe;
 }
 
-// function to get the planet's globe at the canvas' resolution : where each of its pixels takes its color on the map
-// (computed once, then again only when the zoom changes)
-function planetGlobe ( planet ) {
-	var size = Math.ceil ( planet.radius * 2 * planet.context.canvas.width / gameSize );
-	if ( planet.globe && planet.globe.size == size && planet.globe.skin == planet.skin ) {
+// function to get the planet's globe at the canvas' resolution, or at the size given : where each of its pixels takes its color on the map
+// (computed once, then again only when the zoom changes) ; a globe partly out of sight may have its top lines only
+function planetGlobe ( planet, size, lines ) {
+	size = size || Math.ceil ( planet.radius * 2 * planet.context.canvas.width / gameSize );
+	lines = Math.min ( lines || size, size );
+	if ( planet.globe && planet.globe.size == size && planet.globe.lines == lines && planet.globe.skin == planet.skin ) {
 		return planet.globe;
 	}
 	var skin = skinImage ( planet.skin );
 	if ( !skin.complete || skin.naturalWidth == 0 || size < 2 ) {
 		return false;
 	}
-	var globe = { size : size, skin : planet.skin };
+	var globe = { size : size, lines : lines, skin : planet.skin };
 	var radius = size / 2;
 
 	// the map, with about one of its pixels for one of the screen's at the globe's center
-	globe.width = Math.round ( 2 * Math.PI * radius );
+	// (no wider than globeMapMost : the Earth's picture has no more to show, and a big globe's would cost much memory)
+	globe.width = Math.min ( Math.round ( 2 * Math.PI * radius ), globeMapMost );
 	var height = Math.round ( globe.width / 2 );
 	var texture = document.createElement ( "canvas" );
 	texture.width = globe.width;
@@ -104,7 +115,7 @@ function planetGlobe ( planet ) {
 
 	// for each pixel of the globe : its place, the row and column of its color on the map, and its opacity at the edge
 	var places = [], rows = [], columns = [], alphas = [];
-	for ( var py = 0; py < size; py++ ) {
+	for ( var py = 0; py < lines; py++ ) {
 		for ( var px = 0; px < size; px++ ) {
 			// the pixel's center, from the globe's center, in radii
 			var sx = ( px + 0.5 - radius ) / radius;
@@ -140,9 +151,10 @@ function planetGlobe ( planet ) {
 
 	// the globe's own canvas, with its atmosphere and its shading
 	globe.canvas = document.createElement ( "canvas" );
-	globe.canvas.width = globe.canvas.height = size;
+	globe.canvas.width = size;
+	globe.canvas.height = lines;
 	globe.context = globe.canvas.getContext ( "2d" );
-	globe.image = globe.context.createImageData ( size, size );
+	globe.image = globe.context.createImageData ( size, lines );
 	globe.pixels = new Uint32Array ( globe.image.data.buffer );
 	globe.air = globe.context.createRadialGradient ( radius, radius, radius * 0.8, radius, radius, radius );
 	globe.air.addColorStop ( 0, "rgba(120,170,255,0)" );
@@ -186,7 +198,7 @@ function shapeRock ( asteroid ) {
 	var r = asteroid.radius;
 	asteroid.rockHalf = r * 1.2;
 	asteroid.outline = rockOutline ( r );
-	asteroid.rock = rockTexture ( asteroid.outline, asteroid.rockHalf, r, asteroid.context, asteroid.giant, asteroid.metal );
+	asteroid.rock = rockTexture ( asteroid.outline, asteroid.rockHalf, r, asteroid.context, asteroid.giant, asteroid.metal, asteroid.splitter );
 	asteroid.spin = Math.random() * 2 * Math.PI;
 	asteroid.spinSpeed = ( 0.01 + Math.random() * 0.03 ) * ( Math.random() < 0.5 ? -1 : 1 );
 	asteroid.shade = rockShade ( r, asteroid.context );
@@ -224,7 +236,7 @@ function rockOutline ( r ) {
 }
 
 // function to draw the rock once, at the resolution of the game's canvas : its color, its grain, its craters, and the veins of its metal
-function rockTexture ( outline, half, r, context, giant, metal ) {
+function rockTexture ( outline, half, r, context, giant, metal, cracked ) {
 	var rock = document.createElement ( "canvas" );
 	rock.width = rock.height = Math.ceil ( half * 2 * Math.max ( 2, context.canvas.width / gameSize ) );
 	var ctx = rock.getContext ( "2d" );
@@ -276,6 +288,10 @@ function rockTexture ( outline, half, r, context, giant, metal ) {
 	// the veins of its metal, if it has one (bonuses.js)
 	if ( metal ) {
 		drawVeins ( ctx, r, metal );
+	}
+	// and the glowing cracks of a splitting asteroid (threats.js)
+	if ( cracked ) {
+		drawCracks ( ctx, r );
 	}
 
 	// darker toward the edges, to give it some volume whatever its spin

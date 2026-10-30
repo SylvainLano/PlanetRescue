@@ -20,7 +20,11 @@
 		asteroidLife	: 10,
 		lifeGrowth		: 60,		// seconds for the asteroids to get one more point of life
 		asteroidSpeed	: 0.25,		// base speed for the asteroids, each one being 1 to 3 times faster
-		giantFrom		: 120,		// seconds before the first giant asteroid may come
+		cometFrom		: 60,		// seconds before the first comet comes in the Arcade (threats.js),
+		splitFrom		: 120,		// and before the first splitting asteroid,
+		splitChance		: 0.15,		// part of the asteroids splitting after that
+		swarmFrom		: 240,		// seconds before the first swarm comes in the Arcade
+		giantFrom		: 180,		// seconds before the first giant asteroid may come
 		giantChance		: 0.1,		// part of the asteroids coming as giants after that
 		giantLife		: 40,		// a giant's life, growing with time as the others'
 
@@ -201,9 +205,10 @@
 	var metals = {
 		copper	: { chance : 0.08, value : 2, color : "#5fd3a8" },		// green, as verdigris
 		silver	: { chance : 0.04, value : 3, color : "#dfe6f0" },
-		gold	: { chance : 0.015, value : 5, color : "#f5c842" }
+		gold	: { chance : 0.015, value : 5, color : "#f5c842" },
+		ice		: { chance : 0, value : 4, color : "#a8e4ff", share : 1 }		// the comets' (threats.js) : no asteroid gets it, all their debris are made of it
 	};
-	var metalShare		= 0.5;		// the part of the debris of an asteroid with a metal that are made of it
+	var metalShare		= 0.5;		// the part of the debris of an asteroid with a metal that are made of it, unless its metal tells its own
 	var prospectorBonus	= 0.5;		// how much each level of the Prospector raises the metals' chances
 	var targetedA		= false;
 	var aimedA			= false;	// the asteroid the main cannon aims at, circled on screen
@@ -305,6 +310,9 @@ function initDefault(context,level) {
 	critChance		= gameValues.critChance;
 	critDamage		= gameValues.critDamage;
 	flashList		= [];
+	announces		= [];		// the NAZA's announces, the comets' timer and the next swarm (threats.js)
+	cometTimer		= 0;
+	swarmAt			= 0;
 	newResearches();
 	
 	// player's GRAVITRON parameters

@@ -605,13 +605,31 @@ a.level.current {
 	text-align: center;
 }
 
-/* closer to the title, to make room for the Adventure's levels once they are shown (src/adventure.js) */
-#mainMenu.adventure {
-	margin-top: 60px;
+/* the start menu's two pages side by side, the Adventure's then the Arcade's : the track slides to the one shown,
+   and the Arcade's is alone until the Adventure is ready (the Start button's glow may go over and under them) */
+#menuPages {
+	overflow-x: clip;
 }
 
-#mainMenu.adventure #moreLinks {
-	margin-top: 28px;
+#menuTrack {
+	display: flex;
+	transition: transform 0.45s ease;
+}
+
+#menuTrack .page {
+	flex: 0 0 100%;
+}
+
+#adventurePage {
+	display: none;
+}
+
+#mainMenu.adventure #adventurePage {
+	display: block;
+}
+
+#mainMenu.adventure.arcade #menuTrack {
+	transform: translateX(-100%);
 }
 
 #levels {
@@ -625,50 +643,321 @@ a.level.current {
 	color: #aaa;
 }
 
-/* the levels of the Adventure, with their stars (src/adventure.js) */
-#adventureList {
-	margin-top: 22px;
+/* the Adventure's button, in green once it is started : Continue */
+#adventureStart.continue {
+	background: rgba(93,244,93,0.22);
+	border-color: #5df45d;
+	box-shadow: 0 0 24px rgba(93,244,93,0.25);
 }
 
-#adventureList .label {
-	margin-bottom: 6px;
+#adventureStart.continue:hover {
+	background: #3b9c3b;
+}
+
+/* under the Adventure's button, the next level to win and the stars won so far */
+#adventureText {
+	margin-top: 22px;
+	font-size: 13px;
+	color: #ddd;
+}
+
+#adventureText span {
+	display: block;
+}
+
+#adventureStars {
+	margin-top: 6px;
+	font-size: 14px;
+	color: rgb(242,201,76);
+}
+
+/* THE MAP OF THE ADVENTURE (built by src/adventure.js) : a bar, the road with a spot for each level, and the level chosen under it */
+#adventureMap {
+	display: none;
+}
+
+/* (the bar is shared with the bonuses' screen : the button back, the title, the stars) */
+#adventureMap .bar, #starShop .bar {
+	display: flex;
+	justify-content: space-between;
+	align-items: center;
+	margin: 0 0 4px;
+}
+
+#adventureMap .bar .level, #starShop .bar .level {
+	margin: 0;
+	font-size: 18px;
+}
+
+#adventureMap .world, #starShop .world {
+	font-family: 'MirageRegular';
+	font-size: 28px;
+	color: rgb(255, 71, 71);
+}
+
+#adventureMap .count, #starShop .count {
+	font-size: 15px;
+	color: rgb(242,201,76);
+}
+
+/* the map's button to the bonuses, in green when stars are left to spend */
+#adventureMap .count .level {
+	margin-left: 10px;
+	font-size: 16px;
+}
+
+#adventureMap .count a.level.spend {
+	color: #c9f7c9;
+	background: rgba(93,244,93,0.15);
+	border-color: rgba(93,244,93,0.6);
+}
+
+/* THE BONUSES BOUGHT WITH THE STARS (built by src/starshop.js) : their tiles, as the pause menu's, a level's pips under each name */
+#starShop {
+	display: none;
+}
+
+#starShop .intro {
+	margin: 26px 40px 30px;
+	text-align: center;
+	font-size: 13px;
+	line-height: 1.5;
+	color: #bbb;
+}
+
+#starShop .tileGrid {
+	gap: 12px 26px;
+}
+
+#starShop .pips {
+	display: block;
+	margin-top: 2px;
+	font-size: 11px;
+	letter-spacing: 2px;
+	color: rgb(242,201,76);
+}
+
+#starShop .buttons {
+	margin-top: 40px;
+	text-align: center;
+}
+
+/* under the Adventure's button on the start menu, the bonuses bought : small pictures, with their level */
+#adventureBonuses {
+	margin-top: 8px;
+}
+
+#adventureBonuses .bonusIcon {
+	position: relative;
+	display: inline-block;
+	width: 30px;
+	height: 30px;
+	margin: 0 3px;
+	border: 1px solid rgba(242,201,76,0.5);
+	border-radius: 6px;
+	background: rgba(22,26,34,0.9);
+}
+
+#adventureBonuses .bonusIcon svg {
+	width: 26px;
+	height: 26px;
+	margin: 2px;
+}
+
+#adventureBonuses .bonusIcon b {
+	position: absolute;
+	right: -5px;
+	bottom: -5px;
+	min-width: 13px;
+	font-size: 10px;
+	line-height: 13px;
+	color: #000;
+	background: rgb(242,201,76);
+	border-radius: 7px;
+}
+
+#adventureMap .road {
+	position: relative;
+	height: 340px;
+}
+
+#adventureMap .road svg {
+	position: absolute;
+	left: 0;
+	top: 0;
+	width: 566px;
+	height: 340px;
+	fill: none;
+	stroke-linecap: round;
+}
+
+#adventureMap .way {
+	stroke: rgba(255,255,255,0.25);
+	stroke-width: 3;
+	stroke-dasharray: 2 9;
+}
+
+#adventureMap .lit {
+	stroke: rgba(242,201,76,0.8);
+	stroke-width: 4;
+}
+
+/* a level's spot, centered on its place : its number, and its stars under it */
+#adventureMap .spot {
+	position: absolute;
+	width: 50px;
+	height: 50px;
+	margin: -27px 0 0 -27px;
+	border: 2px solid #fff;
+	border-radius: 50%;
+	background: rgba(20,24,32,0.95);
+	text-align: center;
+	color: #fff;
+}
+
+#adventureMap .spot .number {
+	display: block;
+	line-height: 50px;
+	font-family: 'MirageRegular';
+	font-size: 24px;
+}
+
+#adventureMap .spot .stars {
+	position: absolute;
+	left: -20px;
+	right: -20px;
+	top: 52px;
+	font-size: 13px;
+	letter-spacing: 1px;
+	color: rgb(242,201,76);
+	white-space: nowrap;
+}
+
+#adventureMap .spot:hover {
+	background: rgba(60,30,30,0.95);
+}
+
+#adventureMap .spot.won {
+	border-color: rgb(242,201,76);
+}
+
+#adventureMap .spot.locked, #adventureMap .spot.soon {
+	border-color: #555;
+	color: #666;
+	background: rgba(14,16,22,0.9);
+}
+
+#adventureMap .spot.soon {
+	border-style: dashed;
+}
+
+#adventureMap .spot.boss {
+	width: 72px;
+	height: 72px;
+	margin: -38px 0 0 -38px;
+	border-width: 3px;
+}
+
+#adventureMap .spot.boss .number {
+	line-height: 72px;
+	font-size: 32px;
+}
+
+#adventureMap .spot.boss .stars {
+	top: 74px;
 	font-size: 11px;
 	text-transform: uppercase;
-	letter-spacing: 1px;
-	color: #999;
+	letter-spacing: 2px;
+	color: #777;
 }
 
-#adventureList .stage {
-	display: inline-block;
-	margin: 0 4px;
-	padding: 4px 14px;
-	font-family: 'MirageRegular';
-	font-size: 20px;
-	color: #fff;
-	background: rgba(242,201,76,0.1);
-	border: 1px solid rgba(242,201,76,0.6);
+#adventureMap .spot.chosen {
+	border-color: rgb(255, 71, 71);
+	box-shadow: 0 0 16px rgba(255,71,71,0.6);
+}
+
+/* the level chosen, with its challenge and the button to play it */
+#adventureMap .spotInfo {
+	position: relative;
+	height: 68px;
+	padding: 8px 140px 0 14px;
+	background: rgba(14,16,22,0.85);
+	border: 1px solid rgba(255,255,255,0.14);
 	border-radius: 6px;
 }
 
-#adventureList .stage:hover {
-	background: rgba(242,201,76,0.35);
+#adventureMap .spotInfo .name {
+	font-family: 'MirageRegular';
+	font-size: 22px;
+	color: #fff;
 }
 
-#adventureList .stage.locked {
-	opacity: 0.35;
-	cursor: default;
-}
-
-#adventureList .stage.locked:hover {
-	background: rgba(242,201,76,0.1);
-}
-
-#adventureList .stars {
-	display: block;
+#adventureMap .spotInfo .name .stars {
 	font-family: Arial, Helvetica, sans-serif;
-	font-size: 14px;
-	letter-spacing: 2px;
+	font-size: 15px;
 	color: rgb(242,201,76);
+}
+
+#adventureMap .spotInfo .text {
+	margin-top: 4px;
+	font-size: 13px;
+	color: #bbb;
+}
+
+#adventureMap .spotInfo .button {
+	position: absolute;
+	right: 12px;
+	top: 14px;
+	margin: 0;
+}
+
+/* the big arrows on the sides of the start menu, turning to the other page once the Adventure is shown (src/adventure.js) */
+.sideArrow {
+	display: none;
+	position: absolute;
+	top: 200px;
+	width: 74px;
+	text-align: center;
+}
+
+a.sideArrow:link, a.sideArrow:visited {
+	color: #bbb;
+}
+
+a.sideArrow:hover {
+	color: rgb(255, 71, 71);
+}
+
+.sideArrow svg {
+	display: block;
+	width: 40px;
+	height: 90px;
+	margin: auto;
+	fill: none;
+	stroke: currentColor;
+	stroke-width: 6;
+	stroke-linecap: round;
+	stroke-linejoin: round;
+}
+
+.sideArrow span {
+	display: block;
+	margin-top: 12px;
+	font-size: 9px;
+	text-transform: uppercase;
+	letter-spacing: 1px;
+}
+
+#toArcade {
+	right: 8px;
+}
+
+#toAdventure {
+	left: 8px;
+}
+
+#mainMenu.adventure:not(.arcade) #toArcade, #mainMenu.adventure.arcade #toAdventure {
+	display: block;
 }
 
 #moreLinks {
@@ -1082,20 +1371,21 @@ a.level.current {
 
 /* the upgrades shown as tiles (src/tiles.js) : a darkened picture with the value written over it, and a frame telling if one more
    can be bought (green), not (red) or no more (gold) ; their tooltip tells what a click buys */
-#shop .tiles {
+.tileGrid {
 	display: grid;
 	grid-template-columns: repeat(5, 76px);
 	gap: 8px 16px;
 	justify-content: center;
 }
 
-#shop .tile {
+.tileGrid .tile {
+	position: relative;
 	text-align: center;
 	cursor: pointer;
 	user-select: none;
 }
 
-#shop .tile .square {
+.tileGrid .tile .square {
 	position: relative;
 	height: 72px;
 	background: rgba(22,26,34,0.95);
@@ -1105,15 +1395,15 @@ a.level.current {
 	transition: transform 0.08s;
 }
 
-#shop .tile:hover .square {
+.tileGrid .tile:hover .square {
 	background: rgba(36,42,54,0.95);
 }
 
-#shop .tile:active .square {
+.tileGrid .tile:active .square {
 	transform: scale(0.95);
 }
 
-#shop .tile svg {
+.tileGrid .tile svg {
 	position: absolute;
 	left: 8px;
 	top: 2px;
@@ -1123,7 +1413,7 @@ a.level.current {
 }
 
 /* (a value too wide for the square is written smaller by src/tiles.js, centered all the same) */
-#shop .tile .value {
+.tileGrid .tile .value {
 	position: absolute;
 	left: 0;
 	right: 0;
@@ -1138,7 +1428,7 @@ a.level.current {
 	color: #fff;
 }
 
-#shop .tile .unit {
+.tileGrid .tile .unit {
 	position: absolute;
 	left: 0;
 	right: 0;
@@ -1147,31 +1437,52 @@ a.level.current {
 	color: #aaa;
 }
 
-#shop .tile .name {
+.tileGrid .tile .name {
 	margin-top: 3px;
 	font-size: 10px;
 	line-height: 1.2;
 	color: #bbb;
 }
 
-#shop .tile.ok .square {
+.tileGrid .tile.ok .square {
 	border-color: #5df45d;
 }
 
-#shop .tile.no .square {
+.tileGrid .tile.no .square {
 	border-color: rgb(255, 71, 71);
 }
 
-#shop .tile.max .square {
+.tileGrid .tile.max .square {
 	border-color: rgb(242,201,76);
 }
 
-#shop .tile.max .value, #tooltip .gold {
+/* the price of one more, in a pill over the tile's corner : gold for stars (starshop.js), green for mat (tiles.js) */
+.tileGrid .tile .price {
+	position: absolute;
+	top: -7px;
+	right: -7px;
+	padding: 0 5px;
+	font-family: Arial, Helvetica, sans-serif;
+	font-size: 10px;
+	font-weight: bold;
+	line-height: 15px;
+	color: #1a1400;
+	background: rgb(242,201,76);
+	border-radius: 8px;
+	box-shadow: 0 1px 3px rgba(0,0,0,0.7);
+}
+
+.tileGrid .tile .price.mat {
+	color: #0b2a0b;
+	background: #5df45d;
+}
+
+.tileGrid .tile.max .value, #tooltip .gold {
 	color: rgb(242,201,76);
 }
 
 /* in a weapon's panel, the tiles come under the lines of its status and mode, across its columns */
-#shop .lines .tiles {
+#shop .lines .tileGrid {
 	grid-column: 1 / -1;
 	margin-top: 6px;
 }

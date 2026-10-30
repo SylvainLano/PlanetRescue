@@ -20,6 +20,8 @@ function engine() {
 	var mainMenu = document.getElementById("mainMenu");
 	var infoText = document.getElementById("infoText");
 	var achievementsText = document.getElementById("achievementsText");
+	var adventureMap = document.getElementById("adventureMap");
+	var starShop = document.getElementById("starShop");
 	var gameOver = document.getElementById("gameOver");
 	var loader = document.getElementById("loader");
 	var pauseScreen = document.getElementById("pause");
@@ -35,6 +37,8 @@ function engine() {
 		mainMenu.style.display = "block";
 		infoText.style.display = "none";
 		achievementsText.style.display = "none";
+		adventureMap.style.display = "none";
+		starShop.style.display = "none";
 		gameOver.style.display = "none";
 		pauseScreen.style.display = "none";
 		status.style.display = "none";
@@ -42,7 +46,7 @@ function engine() {
 		instructions.style.display = "none";
 		countdown.style.display = "none";
 		showAchievementCount();
-		showAdventureList();	// the levels of the Adventure, with their stars (adventure.js)
+		showMenuPages();		// the Adventure's page, with its levels, and the Arcade's (adventure.js)
 
 	} else if(state == "infos") {
 
@@ -51,6 +55,8 @@ function engine() {
 		mainMenu.style.display = "none";
 		infoText.style.display = "block";
 		achievementsText.style.display = "none";
+		adventureMap.style.display = "none";
+		starShop.style.display = "none";
 		gameOver.style.display = "none";
 		pauseScreen.style.display = "none";
 		status.style.display = "none";
@@ -65,7 +71,39 @@ function engine() {
 		mainMenu.style.display = "none";
 		infoText.style.display = "none";
 		achievementsText.style.display = "block";
+		adventureMap.style.display = "none";
+		starShop.style.display = "none";
 		showAchievements(achievementsText);
+		state = "stand";
+
+	} else if(state == "map") {
+
+		// Displaying the map of the Adventure's levels, from the start menu or a level's end (adventure.js)
+		startMenu.style.display = "block";
+		mainMenu.style.display = "none";
+		infoText.style.display = "none";
+		achievementsText.style.display = "none";
+		gameOver.style.display = "none";
+		pauseScreen.style.display = "none";
+		status.style.display = "none";
+		adventureMap.style.display = "block";
+		starShop.style.display = "none";
+		showMap(adventureMap);
+		state = "stand";
+
+	} else if(state == "upgrades") {
+
+		// Displaying the bonuses bought with the Adventure's stars, from its map (starshop.js)
+		startMenu.style.display = "block";
+		mainMenu.style.display = "none";
+		infoText.style.display = "none";
+		achievementsText.style.display = "none";
+		gameOver.style.display = "none";
+		pauseScreen.style.display = "none";
+		status.style.display = "none";
+		adventureMap.style.display = "none";
+		starShop.style.display = "block";
+		showStarShop(starShop);
 		state = "stand";
 
 	} else if (state == "tutorial"){
@@ -296,6 +334,9 @@ function engine() {
 		pauseScreen.style.display = "none";
 		// a level of the Adventure starts with its own values, the Arcade with the difficulty level's (adventure.js)
 		initDefault(ctx,inAdventure() ? adventureLevels[adventure.level].values : difficulty);
+		if ( inAdventure() ) {
+			applyStarBonuses();		// and the bonuses bought with its stars (starshop.js)
+		}
 		// the countdown's banner is drawn on the game, at the top, and hidden until the countdown begins
 		// (the "countdown" element of the page only writes the tutorial's texts)
 		countdown.style.display = "none";
@@ -432,9 +473,13 @@ function engine() {
 				spawnTimer = spawnInterval();
 				// a giant now and then, after a while : much stronger, bigger, heavier and slower, a threat to destroy first
 				var giant = gameTime >= gameValues.giantFrom * framesPerSecond && Math.random() < gameValues.giantChance;
-				launchAsteroid(ctx,Math.random() * Math.PI * 2,giant);
+				arcadeKind(launchAsteroid(ctx,Math.random() * Math.PI * 2,giant));	// (or another threat now and then : threats.js)
 			}
+			// and the other threats, one more each minute (threats.js)
+			arcadeThreats(ctx);
 		}
+		// the NAZA's announces count down to what they announce (threats.js)
+		advanceAnnounces(ctx);
 	}	// this is the pause bracket
 
 	
@@ -488,6 +533,10 @@ function engine() {
 			// a bomb destroyed explodes (secondary.js)
 			if ( asteroidList[i].bomb ) {
 				explodeBomb(ctx,asteroidList[i]);
+			}
+			// a splitting one bursts into its parts, kept for the next turn (threats.js)
+			if ( asteroidList[i].splitter && pause == 0 ) {
+				splitRock(ctx,asteroidList[i],tempList);
 			}
 			keepit = 0;
 			nbrDestroyed++;
@@ -583,12 +632,19 @@ function engine() {
 		}
 		
 		// Testing if asteroid still in game
-		if ( distance > gameSize ){
-		
+		if ( distance > gameSize && ( inAdventure() || asteroidList[i].flyBy ) ){
+
+		// in the Adventure, an asteroid gone so far is gone for good, for the waves to stay as written (adventure.js),
+		// and a comet or a swarm's pebble flies by for good (threats.js)
+			keepit = 0;
+			asteroidList[i].life = 0;
+
+		} else if ( distance > gameSize ){
+
 		// Asteroid outta game, relaunching it toward player's planet
-			
+
 			// angle has already been calculated before
-			
+
 			// lauching asteroid right through
  			var velocity = (Math.random() * 4 + 1) * asteroidSpeedFactor() * asteroidBS * ( asteroidList[i].giant ? giantSpeed : 1 );
 			asteroidList[i].vx = - velocity * Math.cos(angle);
@@ -604,7 +660,7 @@ function engine() {
 		// Testing if asteroid is in collision with the planet
 		} else if ( distance < (MyPlanet.radius + asteroidList[i].radius) ){
 			// Yes it is ! Decreasing life (less with the Early Warning) and destroying asteroid
-			var damage = crashDamage(asteroidList[i].life);
+			var damage = crashDamage(crashLife(asteroidList[i]));	// (a comet takes few : threats.js)
 			MyPlanet.life -= damage;
 			nbrDamage += damage;
 			if( MyPlanet.life < 0 ){
@@ -1070,6 +1126,10 @@ function drawGame ( blend ) {
 
 	// the background's stars twinkling, under everything
 	drawStars ( ctx );
+	// behind the start menu, the scenes of its two pages (menuscenes.js)
+	if ( state == "menu" ) {
+		drawMenuScenes ( ctx );
+	}
 
 	blendPlaces ( blend );
 	try {
@@ -1082,6 +1142,7 @@ function drawGame ( blend ) {
 			drawPlaying ( ctx );
 			drawBanner ( ctx );
 			drawWaveBanner ( ctx );		// the Adventure's waves (adventure.js)
+			drawAnnounce ( ctx );		// and the NAZA's announces of the threats coming (threats.js)
 			// what the player should know about the researches, while playing (researches.js)
 			if ( pause == 0 ) {
 				drawResearchCorner ( ctx );

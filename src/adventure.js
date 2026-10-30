@@ -22,25 +22,27 @@ var adventureLevels = [
 	{ name : "First Light", values : { planetMat : 20 },
 		brings : [ "gravPower", "gravSort", "mCMSpeed", "mainPow", "mainSpeed" ],
 		waves : [ { count : 2, gap : 4 }, { count : 3, gap : 4 }, { count : 4, gap : 3 } ],
-		challenge : { text : "Gather 65 mat", test : function () { return MyPlanet.totalMat >= 65; } } },
+		challenge : { text : "Gather 100 mat", test : function () { return MyPlanet.totalMat >= 100; } } },
 	{ name : "Crossfire", values : { planetMat : 40 },
 		brings : [ "gravShield", "gravScanner", "mCFireRate", "SMART" ],
 		waves : [ { count : 3, gap : 3 }, { count : 4, gap : 3 }, { count : 5, gap : 2.5, from : [0, 180] }, { count : 6, gap : 2, from : [90, 270] } ],
-		challenge : { text : "Win in less than 3 minutes", test : function () { return gameTime <= 180 * framesPerSecond; } } },
+		challenge : { text : "Win in less than 1 minute 45", test : function () { return gameTime <= 105 * framesPerSecond; } } },
 	{ name : "Heavy Metal", values : { planetMat : 80 },
 		brings : [ "SaOW", "SaOCNumber", "SaOCFireRate", "SaOPow", "SaOSpeed", "MaxWAtATime", "healing", "healFact", "autoHeal", "maxMat" ],
 		waves : [ { count : 3, gap : 3.5 }, { count : 4, gap : 3 }, { count : 5, gap : 3, from : [45, 225] }, { count : 5, gap : 2.5 }, { count : 3, gap : 3, giants : 1 } ],
-		challenge : { text : "Destroy the giant before it gets halfway to your planet", test : function () { return giantClosest > ( gameSize / 2 + MyPlanet.radius ) / 2; } } }
+		challenge : { text : "Destroy the giant before it travels a third of the way to your planet",
+			test : function () { return giantClosest > gameSize / 2 - ( gameSize / 2 - MyPlanet.radius ) / 3; } } }
 ];
-var adventureReady	= false;	// the Adventure is shown on the start menu once it is ready : set it to true to play it
+// the Adventure is shown on the start menu once it is ready ; until then, opening the game as index.html?adventure shows it, to test it
+var adventureReady	= /adventure/.test ( location.search );
 var sideSpread	= 25;		// how far from its side an asteroid of a wave may come, in degrees on each side
-var waveBreak	= 2;		// seconds between a wave destroyed and the next one,
+var waveBreak	= 2;		// seconds between a wave destroyed (or going away) and the next one,
 var waveWait	= 20;		// and at most since its last asteroid came, when some of them are still there
 var levelEnd	= 3;		// seconds of play once the last asteroid is gone, for its debris to be gathered
 
 // the level being played (its number in adventureLevels, null in the Arcade), its waves, and the banner telling them
 //	- wave : the waves come so far ; queue : the asteroids of the wave still to come (true for a giant) ; timer : the turns until the next one
-//	- calm : the turns since the last one came ; rest : the turns since the asteroids are all gone ; ending : the turns until the level's end
+//	- calm : the turns since the last one came ; rest : the turns since the asteroids are all gone or going away ; ending : the turns until the level's end
 var adventure = { level : null, wave : 0, queue : [], timer : 0, calm : 0, rest : 0, ending : 0, banner : false };
 
 // the stars won in each level, saved by the browser : three for each level, the ones won being true
@@ -72,12 +74,15 @@ function playLevel ( number ) {
 		return;
 	}
 	adventure.level = number;
+	menuPage = "adventure";		// (the start menu comes back to its page after the game,
+	mapChoice = false;			// and the map to the next level to play)
 	state = "init";
 }
 
 // function to play the Arcade, at the difficulty level chosen
 function playArcade () {
 	adventure.level = null;
+	menuPage = "arcade";
 	state = "init";
 }
 
@@ -107,7 +112,7 @@ function adventureAllows ( name ) {
 }
 
 // function to send the waves of the level, at each turn of the game (not during the pause) :
-// the asteroids of a wave come one after the other, and the next wave once they are all gone (or after a while),
+// the asteroids of a wave come one after the other, and the next wave once they are all gone or going away (or after a while),
 // until the level is won when the last one is gone
 function advanceWaves ( ctx ) {
 	var level = adventureLevels[adventure.level];
@@ -129,7 +134,7 @@ function advanceWaves ( ctx ) {
 		return;
 	}
 	adventure.calm++;
-	adventure.rest = ( asteroidList.length == 0 ) ? adventure.rest + 1 : 0;
+	adventure.rest = noThreatLeft() ? adventure.rest + 1 : 0;
 	if ( adventure.wave == level.waves.length ) {
 		if ( adventure.rest > 0 ) {
 			adventure.ending = levelEnd * framesPerSecond;
@@ -138,6 +143,19 @@ function advanceWaves ( ctx ) {
 	} else if ( adventure.rest >= waveBreak * framesPerSecond || adventure.calm >= waveWait * framesPerSecond ) {
 		startWave ( level );
 	}
+}
+
+// function to know if the asteroids left are no more a threat : all destroyed, or going away from the planet with no crash ahead
+// (as if the Gravitron stays where it is : crashTime, functions.js) ; the ones going away vanish far from the planet (engine.js)
+function noThreatLeft () {
+	for ( var a in asteroidList ) {
+		var asteroid = asteroidList[a];
+		var away = ( asteroid.x - MyPlanet.x ) * asteroid.vx + ( asteroid.y - MyPlanet.y ) * asteroid.vy > 0;
+		if ( !away || crashTime ( asteroid ) !== false ) {
+			return false;
+		}
+	}
+	return true;
 }
 
 // function to start the next wave of the level : its asteroids, then its giants
@@ -195,7 +213,7 @@ function showLevelEnd ( holder, won ) {
 	var seconds = Math.floor ( gameTime / framesPerSecond );
 	var reasons = [ "Win the level", "Save more than half of your inhabitants", level.challenge.text ];
 	var html = "<div class='over'><div class='title'>" + ( won ? "Level complete" : "Level failed" ) + "</div>"
-		+ "<div class='subtitle'>Level " + ( adventure.level + 1 ) + " &middot; <strong>" + level.name + "</strong>"
+		+ "<div class='subtitle'>Level " + levelLabel ( adventure.level ) + " &middot; <strong>" + level.name + "</strong>"
 		+ ( won ? "" : " &middot; your planet has been destroyed" ) + "</div>"
 		+ "<div class='stars'>";
 	for ( var s = 0; s < 3; s++ ) {
@@ -221,7 +239,7 @@ function showLevelEnd ( holder, won ) {
 	if ( won && adventure.level + 1 < adventureLevels.length ) {
 		html += "<a href='#' class='button' onClick='playLevel(" + ( adventure.level + 1 ) + ");'>Next Level</a>";
 	}
-	html += "<a href='#' class='button' onClick='state=\"menu\";'>Main Menu</a></div></div>";
+	html += "<a href='#' class='button' onClick='state=\"map\";'>Map</a></div></div>";
 	holder.innerHTML = html;
 	achievementQueue = [];		// their banners would go on behind this screen, which shows their medals
 }
@@ -235,25 +253,164 @@ function starsText ( stars ) {
 	return text;
 }
 
-// function to list the levels on the start menu, with their stars and their challenge
-// (written again only when it changes : the start menu calls it at each turn)
-var adventureListHTML = "";
-function showAdventureList () {
-	document.getElementById("mainMenu").classList.toggle ( "adventure", adventureReady );
-	if ( !adventureReady ) {
-		return;
+// the start menu's page shown : the Adventure's first, then the one of the mode last played ; the Arcade's alone until the Adventure is ready
+var menuPage = adventureReady ? "adventure" : "arcade";
+
+// function to show the start menu's pages, at each turn of the menu (engine.js) : the Adventure's and the Arcade's side by side,
+// sliding to the one shown (css/main.css), with a big arrow on the side turning to the other one ;
+// the Adventure's button starts it, or continues it once a level is won (in green), on the map, and tells the next level and the stars won
+function showMenuPages () {
+	var menu = document.getElementById("mainMenu");
+	menu.classList.toggle ( "adventure", adventureReady );
+	menu.classList.toggle ( "arcade", menuPage == "arcade" );
+	var started = adventureStarted();
+	var button = document.getElementById("adventureStart");
+	writeOnce ( button, started ? "Continue" : "Start" );
+	button.classList.toggle ( "continue", started );
+	var next = nextLevel();
+	var allWon = levelStars[next] && levelStars[next][0];		// (every level made so far is won)
+	writeOnce ( document.getElementById("adventureNext"), !started ? "Save the Earth, level after level"
+		: allWon ? "Every level won so far: more are coming" : "Next level: " + levelLabel ( next ) + " · " + adventureLevels[next].name );
+	writeOnce ( document.getElementById("adventureStars"), started ? "★ " + starsCount() + " / " + mapSpots.length * 3 : "" );
+	showBonusIcons();		// and the bonuses bought with the stars (starshop.js)
+}
+
+// function to name a level by its world and its place in it : 1-5 for the fifth level of the first world
+function levelLabel ( n ) {
+	return "1-" + ( n + 1 );
+}
+
+// function to write a text into an element, only when it changes (the start menu writes its texts at each turn)
+function writeOnce ( element, text ) {
+	if ( element.textContent != text ) {
+		element.textContent = text;
 	}
-	var html = "<div class='label'>Adventure</div>";
+}
+
+// function to know if the Adventure is started : a level won at least
+function adventureStarted () {
+	for ( var n in levelStars ) {
+		if ( levelStars[n] && levelStars[n][0] ) {
+			return true;
+		}
+	}
+	return false;
+}
+
+// function to count the stars won in the Adventure
+function starsCount () {
+	var count = 0;
+	for ( var n in levelStars ) {
+		for ( var s = 0; s < 3; s++ ) {
+			count += ( levelStars[n] && levelStars[n][s] ) ? 1 : 0;
+		}
+	}
+	return count;
+}
+
+// function to turn the start menu to a page, or else to the other one
+function turnMenuPage ( page ) {
+	if ( adventureReady ) {
+		menuPage = page || ( ( menuPage == "arcade" ) ? "adventure" : "arcade" );
+	}
+}
+
+// the keyboard's arrows turn the start menu's pages too
+document.addEventListener ( "keydown", function ( e ) {
+	if ( state == "menu" && e.key == "ArrowRight" ) {
+		turnMenuPage ( "arcade" );
+	} else if ( state == "menu" && e.key == "ArrowLeft" ) {
+		turnMenuPage ( "adventure" );
+	}
+} );
+
+// THE MAP : the first world's levels on a winding path, the boss last and bigger ; the levels not made yet are on it, coming soon
+// (the spots' centers, in the pixels of the map's road, under its bar)
+var mapSpots = [ [70, 270], [180, 290], [290, 262], [400, 282], [500, 222], [420, 150], [300, 166], [185, 142], [95, 84], [290, 50] ];
+var mapChoice = false;		// the level chosen on the map, told under it (false : the next one to play)
+
+// function to show the map : its bar, its road, a spot for each level with its stars, and the level chosen under it,
+// with its challenge and the button to play it
+function showMap ( holder ) {
+	if ( mapChoice === false ) {
+		mapChoice = nextLevel();
+	}
+	var open = 0;	// the last level open : the road is lit up to it
+	while ( open + 1 < adventureLevels.length && levelOpen ( open + 1 ) ) {
+		open++;
+	}
+	var html = "<div class='map'><div class='bar'><a href='#' class='level' onClick='state=\"menu\";'>&lsaquo; Menu</a>"
+		+ "<span class='world'>World 1</span><span class='count'>&#9733; " + starsCount() + " / " + mapSpots.length * 3
+		+ " <a href='#' class='level" + ( starsLeft() > 0 ? " spend" : "" ) + "' onClick='state=\"upgrades\";'>Upgrades" + ( starsLeft() > 0 ? " (" + starsLeft() + " &#9733;)" : "" ) + "</a></span></div>"
+		+ "<div class='road'><svg viewBox='0 0 566 340'><path class='way' d='" + mapRoad ( mapSpots ) + "'/>"
+		+ "<path class='lit' d='" + mapRoad ( mapSpots.slice ( 0, open + 1 ) ) + "'/></svg>";
+	for ( var n = 0; n < mapSpots.length; n++ ) {
+		html += "<a href='#' class='spot " + spotState ( n ) + ( n == mapSpots.length - 1 ? " boss" : "" ) + ( n == mapChoice ? " chosen" : "" ) + "'"
+			+ " style='left:" + mapSpots[n][0] + "px;top:" + mapSpots[n][1] + "px' onClick='chooseSpot(" + n + ");'>"
+			+ "<span class='number'>" + ( n + 1 ) + "</span>"
+			+ "<span class='stars'>" + ( n < adventureLevels.length ? starsText ( levelStars[n] ) : ( n == mapSpots.length - 1 ? "Boss" : "" ) ) + "</span></a>";
+	}
+	html += "</div><div class='spotInfo'>" + spotInfo ( mapChoice ) + "</div></div>";
+	holder.innerHTML = html;
+}
+
+// function to choose a level on the map, to read its challenge and play it
+function chooseSpot ( n ) {
+	mapChoice = n;
+	showMap ( document.getElementById("adventureMap") );
+}
+
+// function to know the level to play next : the first one open and not won, or else the last one open
+function nextLevel () {
 	for ( var n = 0; n < adventureLevels.length; n++ ) {
-		var open = levelOpen ( n );
-		html += "<a href='#' class='stage" + ( open ? "" : " locked" ) + "' title='" + ( open ? "Challenge : " + adventureLevels[n].challenge.text : "Win the level before to open this one" ) + "'"
-			+ " onClick='playLevel(" + n + ");'>" + ( n + 1 ) + " &middot; " + adventureLevels[n].name
-			+ "<span class='stars'>" + starsText ( levelStars[n] ) + "</span></a>";
+		if ( levelOpen ( n ) && !( levelStars[n] && levelStars[n][0] ) ) {
+			return n;
+		}
 	}
-	if ( html != adventureListHTML ) {
-		adventureListHTML = html;
-		document.getElementById("adventureList").innerHTML = html;
+	var last = 0;
+	while ( last + 1 < adventureLevels.length && levelOpen ( last + 1 ) ) {
+		last++;
 	}
+	return last;
+}
+
+// function to know how a level's spot looks : "soon" (not made yet), "locked", "won", or "open"
+function spotState ( n ) {
+	if ( n >= adventureLevels.length ) {
+		return "soon";
+	}
+	if ( !levelOpen ( n ) ) {
+		return "locked";
+	}
+	return ( levelStars[n] && levelStars[n][0] ) ? "won" : "open";
+}
+
+// function to tell about the level chosen on the map : its name and stars, its challenge and the button to play it,
+// or what opens it
+function spotInfo ( n ) {
+	var boss = ( n == mapSpots.length - 1 );
+	if ( n >= adventureLevels.length ) {
+		return "<div class='name'>Level " + levelLabel ( n ) + ( boss ? " &middot; Boss" : "" ) + "</div><div class='text'>Coming soon" + ( boss ? ": the first boss of the Adventure." : "." ) + "</div>";
+	}
+	var level = adventureLevels[n];
+	var html = "<div class='name'>Level " + levelLabel ( n ) + " &middot; " + level.name + " <span class='stars'>" + starsText ( levelStars[n] ) + "</span></div>";
+	if ( !levelOpen ( n ) ) {
+		return html + "<div class='text'>Win level " + levelLabel ( n - 1 ) + " to open it.</div>";
+	}
+	return html + "<div class='text'>Challenge: " + level.challenge.text + "</div>"
+		+ "<a href='#' class='button' onClick='playLevel(" + n + ");'>Play</a>";
+}
+
+// function to draw the road of the map, a smooth curve through the centers of its spots (a Catmull-Rom spline, as an SVG path)
+function mapRoad ( spots ) {
+	var road = "M" + spots[0][0] + " " + spots[0][1];
+	for ( var s = 0; s < spots.length - 1; s++ ) {
+		var before = spots[Math.max ( s - 1, 0 )], from = spots[s], to = spots[s + 1], after = spots[Math.min ( s + 2, spots.length - 1 )];
+		road += " C" + Math.round ( from[0] + ( to[0] - before[0] ) / 6 ) + " " + Math.round ( from[1] + ( to[1] - before[1] ) / 6 )
+			+ " " + Math.round ( to[0] - ( after[0] - from[0] ) / 6 ) + " " + Math.round ( to[1] - ( after[1] - from[1] ) / 6 )
+			+ " " + to[0] + " " + to[1];
+	}
+	return road;
 }
 
 // function to draw the banner of the waves, and the one of the level won, over the game for a few seconds

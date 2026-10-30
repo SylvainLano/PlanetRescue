@@ -62,9 +62,16 @@ var tileInk = "#9fb3cf";	// their color, darkened by the tile (css/main.css)
 var tileFont = { family : "Impact, Haettenschweiler, 'Arial Narrow Bold', sans-serif", size : 34, room : 64 };
 var tileMeasure = document.createElement ( "canvas" ).getContext ( "2d" );
 
+// function to draw a tile's picture, darkened behind its value (the Adventure's bonuses use it too : starshop.js)
+function tileSVG ( picture ) {
+	return '<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 64 64">'
+		+ '<g fill="none" stroke="' + tileInk + '" stroke-width="3" stroke-linecap="round" stroke-linejoin="round">'
+		+ tilePictures[picture].replace ( /INK/g, tileInk ) + '</g></svg>';
+}
+
 // function to add the tiles of a list of upgrades
 function addTiles ( parent, list ) {
-	var grid = newElement ( "div", "tiles", parent );
+	var grid = newElement ( "div", "tileGrid", parent );
 	for ( var u in list ) {
 		addTile ( grid, list[u] );
 	}
@@ -75,10 +82,9 @@ function addTile ( grid, thing ) {
 	var tile = newElement ( "div", "tile", grid );
 	tile.setAttribute ( "data-upgrade", thing );
 	var square = newElement ( "div", "square", tile );
-	square.innerHTML = '<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 64 64">'
-		+ '<g fill="none" stroke="' + tileInk + '" stroke-width="3" stroke-linecap="round" stroke-linejoin="round">'
-		+ tilePictures[upgrades[thing].picture].replace ( /INK/g, tileInk ) + '</g></svg>';
-	shopTiles.push ( { element : tile, thing : thing, value : newElement ( "div", "value", square ), unit : newElement ( "div", "unit", square ) } );
+	square.innerHTML = tileSVG ( upgrades[thing].picture );
+	shopTiles.push ( { element : tile, thing : thing, value : newElement ( "div", "value", square ), unit : newElement ( "div", "unit", square ),
+		price : newElement ( "div", "price mat", tile ) } );
 	newElement ( "div", "name", tile ).textContent = upgrades[thing].name;
 	tile.addEventListener ( "mouseenter", function ( e ) {
 		showTileTip ( thing );
@@ -102,6 +108,10 @@ function refreshTiles () {
 		tile.value.textContent = value;
 		tile.value.style.fontSize = tileFontSize ( value ) + "px";
 		tile.unit.textContent = ( typeof unit == "function" ) ? unit() : unit;
+		// the price of one more over its corner, none at the maximum (healing : the price of an inhabitant)
+		var price = thingPrice ( { upgrade : tile.thing } );
+		tile.price.textContent = ( price === false ) ? "" : price;
+		tile.price.style.display = ( price === false ) ? "none" : "";
 	}
 	if ( tipTile && shopTooltip.style.display == "block" ) {
 		showTileTip ( tipTile );

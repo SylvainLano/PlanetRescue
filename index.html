@@ -12,7 +12,7 @@
 <html>
 <head>
 	<meta charset="utf-8">
-	<title>Planet Rescue v0.40.0</title>
+	<title>Planet Rescue v0.41.0</title>
 
 	<link rel="stylesheet" type="text/css" href="css/main.css">
 
@@ -27,8 +27,11 @@
 <script type="text/javascript" src="src/tiles.js"></script>
 	<script type="text/javascript" src="src/researches.js"></script>
 	<script type="text/javascript" src="src/adventure.js"></script>
+<script type="text/javascript" src="src/starshop.js"></script>
+<script type="text/javascript" src="src/menuscenes.js"></script>
 	<script type="text/javascript" src="src/secondary.js"></script>
 	<script type="text/javascript" src="src/bonuses.js"></script>
+<script type="text/javascript" src="src/threats.js"></script>
 	<script type="text/javascript" src="src/gameover.js"></script>
 	<script type="text/javascript" src="src/prototypes.js"></script>
 	<script type="text/javascript" src="src/parameters.js"></script>
@@ -59,17 +62,31 @@
 	</div>
 	<div id="startMenu" class="ui">
 		<div class="title">
-			Planet Rescue <span class="version">v0.40.0</span>
+			Planet Rescue <span class="version">v0.41.0</span>
 		</div>
 		<div id="mainMenu">
-			<a href="#" class="button primary" onClick='playArcade();'>Start</a>
-			<div id="levels">
-				<a href="#" id="level_easy" class="level" onClick='chooseLevel("easy");'>Easy</a>
-				<a href="#" id="level_normal" class="level" onClick='chooseLevel("normal");'>Normal</a>
-				<a href="#" id="level_hard" class="level" onClick='chooseLevel("hard");'>Hard</a>
+			<!-- the two pages of the start menu, sliding one after the other : the Adventure's, then the Arcade's (src/adventure.js) -->
+			<div id="menuPages">
+				<div id="menuTrack">
+					<div id="adventurePage" class="page">
+						<a href="#" id="adventureStart" class="button primary" onClick='state="map";'>Start</a>
+						<div id="adventureText"><span id="adventureNext"></span><span id="adventureStars"></span></div><!-- the next level and the stars won, written by showMenuPages() -->
+						<div id="adventureBonuses"></div><!-- the bonuses bought, written by showBonusIcons() (src/starshop.js) -->
+					</div>
+					<div id="arcadePage" class="page">
+						<a href="#" class="button primary" onClick='playArcade();'>Start</a>
+						<div id="levels">
+							<a href="#" id="level_easy" class="level" onClick='chooseLevel("easy");'>Easy</a>
+							<a href="#" id="level_normal" class="level" onClick='chooseLevel("normal");'>Normal</a>
+							<a href="#" id="level_hard" class="level" onClick='chooseLevel("hard");'>Hard</a>
+						</div>
+						<div id="levelText"></div><!-- what the chosen level changes, written by showLevel() -->
+					</div>
+				</div>
 			</div>
-			<div id="levelText"></div><!-- what the chosen level changes, written by showLevel() -->
-			<div id="adventureList"></div><!-- the levels of the Adventure, written by showAdventureList() (src/adventure.js) -->
+			<!-- the big arrows on the sides, turning to the other page -->
+			<a href="#" id="toArcade" class="sideArrow" onClick='turnMenuPage("arcade");'><svg viewBox="0 0 40 90"><path d="M8 6l24 39-24 39"/></svg><span>Arcade</span></a>
+			<a href="#" id="toAdventure" class="sideArrow" onClick='turnMenuPage("adventure");'><svg viewBox="0 0 40 90"><path d="M32 6L8 45l24 39"/></svg><span>Adventure</span></a>
 			<div id="moreLinks">
 				<a href="#" class="button" onClick='state="tutorial";'>Tutorial</a>
 				<a href="#" class="button" onClick='state="infos";'>Infos</a>
@@ -87,7 +104,7 @@
 					<ul>
 						<li>The open part of the Gravitron pulls the debris in&hellip; and the asteroids too.</li>
 						<li>An asteroid crashing on the Earth takes away as many million inhabitants as it has life left.</li>
-						<li>After two minutes, rusty red giants come along: destroy them first.</li>
+						<li>A new threat each minute, announced by the NAZA: comets, splitting rocks, giants after three minutes (destroy them first), swarms.</li>
 						<li>Your achievements open the branches of the research tree: build a Research Lab, then start a research from the pause menu.</li>
 					</ul>
 				</div>
@@ -108,6 +125,8 @@
 			<div class="buttons"><a href="#" class="button" onClick='state="menu";'>Main Menu</a></div>
 		</div>
 		<div id="achievementsText"></div><!-- built by src/achievements.js -->
+		<div id="adventureMap"></div><!-- the map of the Adventure's levels, built by src/adventure.js -->
+		<div id="starShop"></div><!-- the bonuses bought with the Adventure's stars, built by src/starshop.js -->
 	</div>
 	<canvas id="mainArea" width="600" height="600">
 		Sorry, you're browser is not able to display HTML5 elements and Canvas.<br /><br />
