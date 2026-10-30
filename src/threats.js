@@ -52,28 +52,32 @@ function advanceAnnounces ( ctx ) {
 	announces = kept;
 }
 
-// function to draw the first announce at the top of the game : the whole message first, then its line, fading into each other
-// (and the marks of the sides the threats announced will come from, under it)
+// function to draw the announces at the top of the game : the newest one's whole message first, then its line, fading
+// into each other ; the lines of the others under it, one under the other (and the marks of the sides the threats will come from)
 function drawAnnounce ( ctx ) {
 	if ( announces.length == 0 ) {
 		return;
 	}
 	drawThreatSides ( ctx );
-	var news = announces[0];
-	var age = ( gameTime - news.from ) / framesPerSecond;
-	var appear = Math.min ( 1, age * 2 );
-	var fade = news.done ? Math.max ( 0, 1 - ( gameTime - news.at ) / ( announceStay * framesPerSecond ) ) : 1;
-	var shrink = Math.max ( 0, Math.min ( 1, ( age - announceRead ) * 2 ) );		// (from the whole message to its line, in half a second)
-	var countdown = news.done ? "Now!" : announceCountdown ( news );
 	ctx.save();
 	ctx.textBaseline = 'alphabetic';
-	if ( shrink < 1 ) {
-		ctx.globalAlpha = Math.min ( appear, fade ) * ( 1 - shrink );
-		drawAnnounceMessage ( ctx, news, countdown );
-	}
-	if ( shrink > 0 ) {
-		ctx.globalAlpha = fade * shrink;
-		drawAnnounceLine ( ctx, news, countdown );
+	var top = 34;		// where the next line goes, under the message shown
+	for ( var a = announces.length - 1; a >= 0; a-- ) {
+		var news = announces[a];
+		var age = ( gameTime - news.from ) / framesPerSecond;
+		var appear = Math.min ( 1, age * 2 );
+		var fade = news.done ? Math.max ( 0, 1 - ( gameTime - news.at ) / ( announceStay * framesPerSecond ) ) : 1;
+		var shrink = Math.max ( 0, Math.min ( 1, ( age - announceRead ) * 2 ) );		// (from the whole message to its line, in half a second)
+		var countdown = news.done ? "Now!" : announceCountdown ( news );
+		if ( shrink < 1 && top == 34 ) {
+			ctx.globalAlpha = Math.min ( appear, fade ) * ( 1 - shrink );
+			top = drawAnnounceMessage ( ctx, news, countdown ) + 6;
+		}
+		if ( shrink > 0 ) {
+			ctx.globalAlpha = fade * shrink;
+			drawAnnounceLine ( ctx, news, countdown, top );
+			top += 28;
+		}
 	}
 	ctx.restore();
 }
@@ -85,11 +89,13 @@ function announceCountdown ( news ) {
 }
 
 // function to draw an announce's whole message : the NAZA's name, the countdown, the message and the mat given, in a panel
+// (it gives the panel's bottom, for the other announces' lines to go under it)
 function drawAnnounceMessage ( ctx, news, countdown ) {
 	ctx.font = '12px Arial';
 	var lines = wrapText ( ctx, news.text, 396 );
 	var bottom = 72 + lines.length * 15;	// (the mat given under the message)
-	drawAnnouncePanel ( ctx, 90, 34, 420, bottom - 34 + ( news.gift > 0 ? 15 : 0 ) );
+	var height = bottom - 34 + ( news.gift > 0 ? 15 : 0 );
+	drawAnnouncePanel ( ctx, 90, 34, 420, height );
 	ctx.textAlign = 'left';
 	ctx.fillStyle = '#8fc4ff';
 	ctx.font = '20px MirageRegular';
@@ -106,20 +112,21 @@ function drawAnnounceMessage ( ctx, news, countdown ) {
 		ctx.fillStyle = '#5df45d';
 		ctx.fillText ( "+" + news.gift + " mat from your inhabitants", 498, bottom + 4 );
 	}
+	return 34 + height;
 }
 
-// function to draw an announce's line, once its message is read : the NAZA's name, its title and the countdown
-function drawAnnounceLine ( ctx, news, countdown ) {
-	drawAnnouncePanel ( ctx, 200, 34, 200, 24 );
+// function to draw an announce's line, once its message is read, at the height given : the NAZA's name, its title and the countdown
+function drawAnnounceLine ( ctx, news, countdown, top ) {
+	drawAnnouncePanel ( ctx, 165, top, 270, 24 );
 	ctx.textAlign = 'left';
 	ctx.fillStyle = '#8fc4ff';
 	ctx.font = '13px MirageRegular';
-	ctx.fillText ( "NAZA", 208, 51 );
+	ctx.fillText ( "NAZA", 173, top + 17 );
 	ctx.textAlign = 'center';
 	ctx.fillStyle = '#dde6f0';
 	ctx.font = '12px Arial';
-	ctx.fillText ( news.title, 300, 50 );
-	drawAnnounceCountdown ( ctx, news, countdown, 393, 51, 15 );
+	ctx.fillText ( news.title, 300, top + 16 );
+	drawAnnounceCountdown ( ctx, news, countdown, 428, top + 17, 15 );
 }
 
 // function to draw an announce's panel : dark, framed in the NAZA's blue
@@ -358,17 +365,104 @@ function launchSwarm ( ctx, side ) {
 	}
 }
 
+// THE ARMORED ASTEROIDS : plated with steel ; a hit weaker than armorMin bounces off with a spark, doing nothing (the main weapons'
+// shots, the missiles and the rebound shots : a critical shot counts with its power multiplied, the laser burns through, and the
+// nitroglycerine, the shield, the pulses, the collisions and the atmosphere are strong enough) ; in the Arcade, they come
+// in groups from one side, announced with that side and with mat given to raise the fire power
+var armorMin		= 3;		// the weakest hit an armored asteroid feels
+var armorGroup		= 3;		// the armored asteroids of a group,
+var armorGap		= 2;		// the seconds between two of them,
+var armorArc		= 25;		// how far from its side each one may come, in degrees on each side
+var armorGift		= 80;		// the mat given with its announce
+var armorEvery		= [60, 90];	// seconds between two groups in the Arcade, at least and at most
+var armorAt			= 0;		// the turn the next group comes in the Arcade (0 : not planned yet)
+
+// function to make an asteroid an armored one, its rock plated
+function makeArmored ( asteroid ) {
+	asteroid.armored = true;
+	shapeRock ( asteroid );		// (its rock again, with the plates : prototypes.js)
+}
+
+// function to get the damage of a hit on an asteroid : its power, or nothing on an armored one when it is too weak,
+// the hit then bouncing off with a white spark where it hit (the critical shots' flashes : bonuses.js) and a ricochet's sound
+function armorDamage ( asteroid, power, x, y ) {
+	if ( !asteroid.armored || power >= armorMin ) {
+		return power;
+	}
+	flashList.push ( { x : x, y : y, radius : 1, age : 0, color : "225,235,245" } );
+	playSound ( "ricochet" );
+	return 0;
+}
+
+// function to announce a group of armored asteroids, coming from a side chosen now, with the mat given
+function announceArmored ( seconds ) {
+	var side = Math.random() * 2 * Math.PI;
+	var news = announce ( "Armored from the " + compassSide ( side ), "Armored asteroids are coming from the " + compassSide ( side )
+		+ "! Their steel plates stop the shots under " + armorMin + " of power: raise your fire power; critical shots and the laser get through.",
+		seconds, armorGift, function ( ctx ) { launchArmored ( ctx, side ); } );
+	news.side = side;
+}
+
+// function to launch a group of armored asteroids from a side, one after the other (the next ones set back on their way)
+function launchArmored ( ctx, side ) {
+	for ( var n = 0; n < armorGroup; n++ ) {
+		var asteroid = launchAsteroid ( ctx, side + ( Math.random() * 2 - 1 ) * armorArc * Math.PI / 180, false );
+		makeArmored ( asteroid );
+		asteroid.x -= asteroid.vx * n * armorGap * framesPerSecond;
+		asteroid.y -= asteroid.vy * n * armorGap * framesPerSecond;
+	}
+}
+
+// function to draw the steel plates of an armored asteroid on its rock's texture (rockTexture, prototypes.js) :
+// a metal sheen, two seams across, and their rivets
+function drawPlates ( ctx, r ) {
+	ctx.save();
+	var steel = ctx.createLinearGradient ( - r, - r, r, r );
+	steel.addColorStop ( 0, "rgba(200,212,225,0.9)" );
+	steel.addColorStop ( 0.5, "rgba(125,138,152,0.9)" );
+	steel.addColorStop ( 1, "rgba(70,80,95,0.9)" );
+	ctx.fillStyle = steel;
+	ctx.fillRect ( - r * 1.3, - r * 1.3, r * 2.6, r * 2.6 );
+	var start = Math.random() * Math.PI;
+	for ( var s = 0; s < 2; s++ ) {
+		var angle = start + s * Math.PI / 2 + ( Math.random() - 0.5 ) * 0.4;
+		var cos = Math.cos ( angle ), sin = Math.sin ( angle );
+		ctx.strokeStyle = "rgba(25,30,40,0.9)";
+		ctx.lineWidth = r * 0.09;
+		ctx.beginPath();
+		ctx.moveTo ( - r * 1.3 * cos, - r * 1.3 * sin );
+		ctx.lineTo ( r * 1.3 * cos, r * 1.3 * sin );
+		ctx.stroke();
+		ctx.fillStyle = "rgba(235,242,250,0.95)";
+		for ( var k = -2; k <= 2; k++ ) {
+			if ( k == 0 ) {
+				continue;
+			}
+			ctx.beginPath();
+			ctx.arc ( k * r * 0.38 * cos - sin * r * 0.14, k * r * 0.38 * sin + cos * r * 0.14, r * 0.055, 0, 2 * Math.PI );
+			ctx.fill();
+		}
+	}
+	ctx.restore();
+}
+
 // THE ARCADE'S THREATS, one more each minute : at each turn of an Arcade game (engine.js), the ones whose time has come
 //	- the comets, from cometFrom, announced announceTime seconds before the first one
 //	- the splitting asteroids, from splitFrom, announced too (arcadeKind makes them)
 //	- the swarms, from swarmFrom, each one announced with its side and with mat given
+//	- the groups of armored asteroids, from armorFrom, announced in the same way
 function arcadeThreats ( ctx ) {
 	if ( swarmAt == 0 ) {
 		swarmAt = gameValues.swarmFrom * framesPerSecond;
+		armorAt = gameValues.armorFrom * framesPerSecond;
 	}
 	if ( gameTime == swarmAt - announceTime * framesPerSecond ) {
 		announceSwarm ( announceTime );
 		swarmAt += Math.round ( ( swarmGap[0] + Math.random() * ( swarmGap[1] - swarmGap[0] ) ) * framesPerSecond );
+	}
+	if ( gameTime == armorAt - announceTime * framesPerSecond ) {
+		announceArmored ( announceTime );
+		armorAt += Math.round ( ( armorEvery[0] + Math.random() * ( armorEvery[1] - armorEvery[0] ) ) * framesPerSecond );
 	}
 	if ( gameTime == ( gameValues.cometFrom - announceTime ) * framesPerSecond ) {
 		announce ( "Comets", "Comets ahead! Fast and fragile, they hit lightly, and their ice is worth a lot of mat.", announceTime, 0 );

@@ -111,7 +111,7 @@ function explodeMissile ( ctx, missile, touched ) {
 		var asteroid = asteroidList[a];
 		var distance = Math.sqrt ( Math.pow ( asteroid.x - missile.x, 2 ) + Math.pow ( asteroid.y - missile.y, 2 ) );
 		if ( asteroid.life > 0 && distance < missile.blast + asteroid.radius ) {
-			var damage = ( asteroid == touched ) ? missile.power : Math.ceil ( missile.power / 2 );
+			var damage = armorDamage ( asteroid, ( asteroid == touched ) ? missile.power : Math.ceil ( missile.power / 2 ), asteroid.x, asteroid.y );	// (threats.js)
 			addDebris ( ctx, damage, asteroid.x, asteroid.y, asteroid.vx, asteroid.vy, debrisList, asteroid.metal );
 			asteroid.life -= damage;
 			if ( asteroid.life <= 0 ) {
@@ -580,8 +580,9 @@ function ricochet ( ctx, shot ) {
 	var touched = contact.rock;
 	var rock = touched && touched != MyPlanet;
 	if ( rock ) {
-		addDebris ( ctx, shot.power, touched.x, touched.y, touched.vx, touched.vy, debrisList, touched.metal );
-		touched.life -= shot.power;
+		var damage = armorDamage ( touched, shot.power, shot.x, shot.y );		// (threats.js)
+		addDebris ( ctx, damage, touched.x, touched.y, touched.vx, touched.vy, debrisList, touched.metal );
+		touched.life -= damage;
 		if ( shot.hit.indexOf ( touched ) < 0 ) {
 			shot.hit.push ( touched );
 			bestPinball = Math.max ( bestPinball, shot.hit.length );

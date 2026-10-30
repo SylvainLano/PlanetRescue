@@ -62,7 +62,8 @@ function drawCriticals ( ctx ) {
 	}
 	for ( var f in flashList ) {
 		var flash = flashList[f];
-		ctx.strokeStyle = 'rgba(255,70,70,' + ( 1 - flash.age / 10 ) + ')';
+		// (red, or the color it tells : the white spark of a shot bouncing off an armored asteroid, threats.js)
+		ctx.strokeStyle = 'rgba(' + ( flash.color || '255,70,70' ) + ',' + ( 1 - flash.age / 10 ) + ')';
 		ctx.lineWidth = 2;
 		ctx.beginPath();
 		ctx.arc ( flash.x, flash.y, flash.radius + 2 + flash.age * 1.5, 0, 2 * Math.PI );

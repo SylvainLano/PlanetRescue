@@ -198,7 +198,7 @@ function shapeRock ( asteroid ) {
 	var r = asteroid.radius;
 	asteroid.rockHalf = r * 1.2;
 	asteroid.outline = rockOutline ( r );
-	asteroid.rock = rockTexture ( asteroid.outline, asteroid.rockHalf, r, asteroid.context, asteroid.giant, asteroid.metal, asteroid.splitter );
+	asteroid.rock = rockTexture ( asteroid.outline, asteroid.rockHalf, r, asteroid.context, asteroid.giant, asteroid.metal, asteroid.splitter, asteroid.armored );
 	asteroid.spin = Math.random() * 2 * Math.PI;
 	asteroid.spinSpeed = ( 0.01 + Math.random() * 0.03 ) * ( Math.random() < 0.5 ? -1 : 1 );
 	asteroid.shade = rockShade ( r, asteroid.context );
@@ -236,7 +236,7 @@ function rockOutline ( r ) {
 }
 
 // function to draw the rock once, at the resolution of the game's canvas : its color, its grain, its craters, and the veins of its metal
-function rockTexture ( outline, half, r, context, giant, metal, cracked ) {
+function rockTexture ( outline, half, r, context, giant, metal, cracked, plated ) {
 	var rock = document.createElement ( "canvas" );
 	rock.width = rock.height = Math.ceil ( half * 2 * Math.max ( 2, context.canvas.width / gameSize ) );
 	var ctx = rock.getContext ( "2d" );
@@ -289,9 +289,12 @@ function rockTexture ( outline, half, r, context, giant, metal, cracked ) {
 	if ( metal ) {
 		drawVeins ( ctx, r, metal );
 	}
-	// and the glowing cracks of a splitting asteroid (threats.js)
+	// and the glowing cracks of a splitting asteroid, or the steel plates of an armored one (threats.js)
 	if ( cracked ) {
 		drawCracks ( ctx, r );
+	}
+	if ( plated ) {
+		drawPlates ( ctx, r );
 	}
 
 	// darker toward the edges, to give it some volume whatever its spin

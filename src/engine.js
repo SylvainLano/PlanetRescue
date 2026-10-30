@@ -977,9 +977,10 @@ function engine() {
 							asteroidList[j].vx += tempVX * shotList[i].power / 15;
 							asteroidList[j].vy += tempVY * shotList[i].power / 15;
 						} else {
-							// debris creation from asteroids' life
-							addDebris(ctx,shotList[i].power,asteroidList[j].x,asteroidList[j].y,asteroidList[j].vx,asteroidList[j].vy,debrisList,asteroidList[j].metal);
-							asteroidList[j].life -= shotList[i].power;
+							// debris creation from asteroids' life (none from a shot too weak for an armored one : threats.js)
+							var damage = armorDamage(asteroidList[j],shotList[i].power,shotList[i].x,shotList[i].y);
+							addDebris(ctx,damage,asteroidList[j].x,asteroidList[j].y,asteroidList[j].vx,asteroidList[j].vy,debrisList,asteroidList[j].metal);
+							asteroidList[j].life -= damage;
 							if ( asteroidList[j].life <= 0 ) {
 								allPassed = 1;
 							}

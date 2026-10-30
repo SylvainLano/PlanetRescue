@@ -23,7 +23,8 @@
 		cometFrom		: 60,		// seconds before the first comet comes in the Arcade (threats.js),
 		splitFrom		: 120,		// and before the first splitting asteroid,
 		splitChance		: 0.15,		// part of the asteroids splitting after that
-		swarmFrom		: 240,		// seconds before the first swarm comes in the Arcade
+		swarmFrom		: 240,		// seconds before the first swarm comes in the Arcade,
+		armorFrom		: 300,		// and the first group of armored asteroids
 		giantFrom		: 180,		// seconds before the first giant asteroid may come
 		giantChance		: 0.1,		// part of the asteroids coming as giants after that
 		giantLife		: 40,		// a giant's life, growing with time as the others'
@@ -310,9 +311,10 @@ function initDefault(context,level) {
 	critChance		= gameValues.critChance;
 	critDamage		= gameValues.critDamage;
 	flashList		= [];
-	announces		= [];		// the NAZA's announces, the comets' timer and the next swarm (threats.js)
+	announces		= [];		// the NAZA's announces, the comets' timer, the next swarm and armored group (threats.js)
 	cometTimer		= 0;
 	swarmAt			= 0;
+	armorAt			= 0;
 	newResearches();
 	
 	// player's GRAVITRON parameters
