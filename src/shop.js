@@ -239,6 +239,10 @@ var upgrades = {
 							picture : "healFactor", unit : "mat / inhab.", value : function () { return healCost(); },
 							change : function () { return healCost() + " → " + ( healCost() - 1 ) + " mat per inhabitant healed, one every "
 								+ Math.round ( ( healTurns() - healFaster ) / framesPerSecond ) + " s instead of " + Math.round ( healTurns() / framesPerSecond ); } },
+	crews				: { name : "Rebuilding Crews", tip : "Rebuilding Crews - More crews rebuild your planet: each level heals one more inhabitant at a time, at the pace of the Healing Factor.",
+							max : 3, price : "times50",
+							level : function () { return planetCrews; }, raise : function () { planetCrews++; },
+							picture : "crews", unit : "at a time", what : "inhabitant healed at a time" },
 	maxHealth			: { name : "Maximum Health", tip : "Maximum Health - It's the maximum amount of inhabitants your planet can have on.",
 							max : 50, price : "times5",
 							level : function () { return MyPlanet.maxLife; }, raise : function () { MyPlanet.maxLife+=10; },
@@ -315,7 +319,7 @@ var shopLayout = [
 			statusTip : "A secondary weapon, always active : it takes no place among your active weapons.",
 			upgrades : ["reboundReload","reboundPow","reboundBounces"] }
 	] },
-	{ title : "Heal or upgrade your Planet", upgrades : ["healing","healFact","maxHealth","maxMat","autoHeal","recovery","earlyWarning","lab"] },
+	{ title : "Heal or upgrade your Planet", upgrades : ["healing","healFact","crews","maxHealth","maxMat","autoHeal","recovery","earlyWarning","lab"] },
 	{ title : "Researches", researches : true }		// filled by refreshResearches() (researches.js)
 ];
 
@@ -603,6 +607,9 @@ function calculate(type,ref) {
 			break;
 		case "times10" :
 			ref *= 10;
+			break;
+		case "times50" :
+			ref *= 50;
 			break;
 		case "minus2times100" :
 			ref = ( ref - 2 ) * 100;

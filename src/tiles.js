@@ -47,6 +47,7 @@ var tilePictures = {
 	// the planet
 	heal		: '<rect x="15" y="21" width="34" height="26" rx="4"/><path d="M26 21v-5h12v5"/><path d="M32 28v12M26 34h12" stroke-width="4"/>',
 	healFactor	: '<path d="M32 48C19 39 14 33 14 26a9 9 0 0 1 18-4 9 9 0 0 1 18 4c0 7-5 13-18 22z"/><path d="M32 28v10M27 33h10" stroke-width="2.5"/>',
+	crews		: '<path d="M10 34l14-12 14 12v14H10z"/><path d="M20 48v-8h8v8" stroke-width="2"/><path d="M36 32l14-14" stroke-width="3"/><path d="M45 13l9 9" stroke-width="6"/>',
 	people		: '<circle cx="25" cy="23" r="6"/><path d="M13 46c0-8 5-13 12-13s12 5 12 13"/><circle cx="42" cy="21" r="5"/><path d="M40 31c6 0 11 4 11 12"/>',
 	crate		: '<path d="M14 24l18-8 18 8v18l-18 8-18-8z"/><path d="M14 24l18 8 18-8M32 32v18" stroke-width="2"/>',
 	autoHeal	: '<path d="M44.7 26.1A14 14 0 0 0 19.3 26.1M19.3 37.9A14 14 0 0 0 44.7 37.9"/><path d="M15 23l4.3 3.1 2-5M49 41l-4.3-3.1-2 5"/><path d="M32 27v10M27 32h10" stroke-width="2.5"/>',

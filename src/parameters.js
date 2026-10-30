@@ -30,6 +30,7 @@
 		planetMaxMat	: 100,
 		planetAutoHeal	: 0,
 		planetHealFact	: 1,
+		planetCrews		: 1,		// the inhabitants healed at a time, more with the Rebuilding Crews
 		planetRecovery	: 0,		// mat recovered from the asteroids crashing on the planet, an upgrade to buy
 
 		// player's weapons
@@ -124,6 +125,7 @@
 	var planetView		= 15 * Math.PI / 180;	// and we see it from a bit above its equator
 	var planetAutoHeal	= startValues.planetAutoHeal;
 	var planetHealFact	= startValues.planetHealFact;
+	var planetCrews		= startValues.planetCrews;
 	var planetHealTimer	= 0;
 	var planetHealPend	= 0;
 	var planetHealGathered	= 0;	// the mat gathered toward the next inhabitant the Auto-Healing heals
@@ -257,6 +259,7 @@ function initDefault(context,level) {
 	MyPlanet.y			= planetY;
 	planetAutoHeal		= gameValues.planetAutoHeal;
 	planetHealFact		= gameValues.planetHealFact;
+	planetCrews			= gameValues.planetCrews;
 	planetHealTimer		= 0;
 	planetHealPend		= 0;
 	planetHealGathered	= 0;

@@ -374,9 +374,10 @@ function engine() {
 		planetHealTimer++;
 	}
 	if ( planetHealTimer >= healTurns() ) {
-		planetHealPend--;
+		var healed = Math.min ( planetCrews, planetHealPend );	// (the Rebuilding Crews heal several at a time)
+		planetHealPend -= healed;
 		planetHealTimer = 0;
-		MyPlanet.life++;
+		MyPlanet.life += healed;
 	}
 	// the Shelters save the planet, once in a game (researches.js)
 	if ( MyPlanet.life <= 0 && MyPlanet.shelters == 1 ) {

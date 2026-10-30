@@ -1041,8 +1041,8 @@ function displayStatus() {
 // function to show the planet's life, its mat and the shield's charge at the top of the game area, as gauges or as digits
 // (until 2026, the gauges were drawn with boxes of the page, and the digits written as a sentence)
 function showStatus(status) {
-	// the life counts the inhabitant being healed, and the ones waiting to be, lighter
-	var healing = planetHealTimer / healTurns();
+	// the life counts the inhabitants being healed (several with the Rebuilding Crews), and the ones waiting to be, lighter
+	var healing = planetHealTimer / healTurns() * Math.min ( planetCrews, planetHealPend );
 	var life = ( MyPlanet.life + healing ) / MyPlanet.maxLife;
 	var lifeColor = ( life <= 0.25 ) ? "#ff4747" : ( life <= 0.5 ) ? "#f2c94c" : "#5df45d";
 	// the mat turns yellow, then red, as the storage fills up
