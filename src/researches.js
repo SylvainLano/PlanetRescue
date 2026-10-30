@@ -211,7 +211,7 @@ function refreshResearches () {
 	holder.innerHTML = "";
 	if ( !research.lab && anyBranchOpen() ) {
 		// a click opens the planet's upgrades, where the lab is bought
-		var lab = addLine ( holder, upgrades.lab.name, "", upgrades.lab.tip, function () { openSection ( document.getElementById ( "lab" ).closest ( ".section" ) ); } );
+		var lab = addLine ( holder, upgrades.lab.name, "", upgrades.lab.tip, function () { openSection ( document.querySelector ( "[data-upgrade='lab']" ).closest ( ".section" ) ); } );
 		lab.querySelector ( "a" ).innerHTML = "<span class='upred'>build it first, with your planet's upgrades</span>";
 	}
 	for ( var branch in researchBranches ) {

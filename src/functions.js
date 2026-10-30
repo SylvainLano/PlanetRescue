@@ -484,6 +484,11 @@ function gravitronAcceleration(angle,mass) {
 	return 0;
 }
 
+// Function to get the turns the GRAVITRON's shield takes to charge a point, fewer at each of its levels
+function shieldTurns(level) {
+	return ( 30 / level ) + ( 21 - level );
+}
+
 // Function to get the Wide Net : the GRAVITRON's field widened on each side, for the debris only (researches.js)
 function wideNetArc() {
 	var wideness = Math.min ( MyGravitron.wideness + 2 * wideNetMargin, gravMaxSize );
@@ -533,6 +538,11 @@ function autoHealing(gathered) {
 // Function to get the mat the Auto-Healing needs to heal an inhabitant, fewer at each of its levels
 function autoHealMat() {
 	return autoHealStep * ( maxUpgrade("autoHeal") - planetAutoHeal + 1 );
+}
+
+// Function to get the mat it costs to heal an inhabitant, fewer at each level of the Healing Factor
+function healCost() {
+	return maxUpgrade("healFact") - planetHealFact + 1;
 }
 
 // Function to get the turns it takes to heal an inhabitant, fewer at each level of the Healing Factor

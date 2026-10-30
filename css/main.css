@@ -792,7 +792,8 @@ a.level.current {
 
 
 /* THE PAUSE MENU (its shop built by src/menu.js) : sections opening one at a time, red when open,
-   green or gold with their counters ; each line shows its name, then its level and what a click on it does */
+   green or gold with their counters ; the upgrades are tiles, and each line (a weapon's status or mode, a research)
+   shows its name, then what a click on it does */
 
 #pause {
 	background-color: rgba(0,0,0,0.72);
@@ -978,11 +979,6 @@ a.level.current {
 	justify-self: end;
 }
 
-#shop .max {
-	font-size: 10px;
-	color: #888;
-}
-
 #shop .upgreen, #shop .upred {
 	display: inline-block;
 	padding: 1px 7px;
@@ -1082,6 +1078,107 @@ a.level.current {
 	padding: 8px 14px;
 	background: rgba(255,255,255,0.04);
 	border: 1px solid rgba(255,255,255,0.1);
+}
+
+/* the upgrades shown as tiles (src/tiles.js) : a darkened picture with the value written over it, and a frame telling if one more
+   can be bought (green), not (red) or no more (gold) ; their tooltip tells what a click buys */
+#shop .tiles {
+	display: grid;
+	grid-template-columns: repeat(5, 76px);
+	gap: 8px 16px;
+	justify-content: center;
+}
+
+#shop .tile {
+	text-align: center;
+	cursor: pointer;
+	user-select: none;
+}
+
+#shop .tile .square {
+	position: relative;
+	height: 72px;
+	background: rgba(22,26,34,0.95);
+	border: 2px solid #555;
+	border-radius: 8px;
+	overflow: hidden;
+	transition: transform 0.08s;
+}
+
+#shop .tile:hover .square {
+	background: rgba(36,42,54,0.95);
+}
+
+#shop .tile:active .square {
+	transform: scale(0.95);
+}
+
+#shop .tile svg {
+	position: absolute;
+	left: 8px;
+	top: 2px;
+	width: 60px;
+	height: 60px;
+	opacity: 0.3;
+}
+
+/* (a value too wide for the square is written smaller by src/tiles.js, centered all the same) */
+#shop .tile .value {
+	position: absolute;
+	left: 0;
+	right: 0;
+	top: 8px;
+	height: 42px;
+	display: flex;
+	align-items: center;
+	justify-content: center;
+	font-family: Impact, Haettenschweiler, 'Arial Narrow Bold', sans-serif;
+	font-size: 34px;
+	line-height: 1;
+	color: #fff;
+}
+
+#shop .tile .unit {
+	position: absolute;
+	left: 0;
+	right: 0;
+	bottom: 5px;
+	font-size: 10px;
+	color: #aaa;
+}
+
+#shop .tile .name {
+	margin-top: 3px;
+	font-size: 10px;
+	line-height: 1.2;
+	color: #bbb;
+}
+
+#shop .tile.ok .square {
+	border-color: #5df45d;
+}
+
+#shop .tile.no .square {
+	border-color: rgb(255, 71, 71);
+}
+
+#shop .tile.max .square {
+	border-color: rgb(242,201,76);
+}
+
+#shop .tile.max .value, #tooltip .gold {
+	color: rgb(242,201,76);
+}
+
+/* in a weapon's panel, the tiles come under the lines of its status and mode, across its columns */
+#shop .lines .tiles {
+	grid-column: 1 / -1;
+	margin-top: 6px;
+}
+
+/* what a click on a tile buys, under its text in the tooltip */
+#tooltip .buys {
+	margin-top: 0.6em;
 }
 
 /* the tooltip of the menus */

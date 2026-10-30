@@ -982,7 +982,7 @@ function engine() {
 	var green = 66;
 	var blue = 66;
 	if ( MyGravitron.shield > 0 && pause == 0 ) {
-		var chargingValue = ( (30 / MyGravitron.shield) + (21 - MyGravitron.shield));
+		var chargingValue = shieldTurns ( MyGravitron.shield );
 		if ( MyGravitron.charge < (MyGravitron.shield * 10) ) {
 			MyGravitron.counter++;
 			if( MyGravitron.counter > chargingValue ) {

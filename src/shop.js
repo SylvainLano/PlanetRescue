@@ -11,192 +11,269 @@
 
 
 // The upgrades of the pause menu : adding one only takes a new line here, and its place in shopLayout
-//	- name and tip are shown in the menu (the tip is split by " - " into a title and a text)
+//	- name and tip are shown in the menu (the tip's text follows its title, after " - ")
 //	- max is the maximum level, price the name of its formula in calculate()
 //	- level() reads the current level, raise() buys the next one
-//	- appears(), if any, tells when it is worth buying : its line stays hidden until then
+//	- appears(), if any, tells when it is worth buying : its tile stays hidden until then
+//	- its tile (tiles.js) shows its picture (tilePictures), its value as the player reads it (value(), or else its level) and its unit ;
+//	  its tooltip tells what one more of it does : change(), or else what it is, from its value to the next one
+//	  (next(), or else its value with one step more : step, or else one, less when it is decreasing)
 var upgrades = {
 	// GRAVITRON
 	gravSort			: { name : "Sorting", tip : "Sorting the asteroids - This means your Gravitron will attract asteroids less and debris more.",
 							max : 5, price : "5powtimes4",
-							level : function () { return MyGravitron.sort; }, raise : function () { MyGravitron.sort++; } },
+							level : function () { return MyGravitron.sort; }, raise : function () { MyGravitron.sort++; },
+							picture : "sort", unit : "on rocks", value : function () { return rockPull ( MyGravitron.sort, MyGravitron.power ) + "%"; },
+							change : function () { return "the asteroids feel " + rockPull ( MyGravitron.sort, MyGravitron.power ) + "% → " + rockPull ( MyGravitron.sort + 1, MyGravitron.power ) + "% of the pull on the debris"; } },
 	gravPower			: { name : "Gravity Generator", tip : "Gravity Generator - This represent the suction power of the opened part of the Gravitron.",
 							max : 5, price : "5powtimes4",
-							level : function () { return MyGravitron.power; }, raise : function () { MyGravitron.power++; } },
+							level : function () { return MyGravitron.power; }, raise : function () { MyGravitron.power++; },
+							picture : "pull", unit : "pull", value : function () { return "×" + MyGravitron.power; },
+							change : function () { return "×" + MyGravitron.power + " → ×" + ( MyGravitron.power + 1 ) + " pull on the debris, the asteroids feeling "
+								+ rockPull ( MyGravitron.sort, MyGravitron.power + 1 ) + "% of it"; } },
 	repulsion			: { name : "Repulsion", tip : "Repulsion - This represent the repulsion power of the closed part of the Gravitron. It uses the Gravity Generator power and the Gravitron's sorting effect to perform.",
 							max : 1, price : "plus250", appears : function () { return MyGravitron.power > 1; },
-							level : function () { return MyGravitron.repulsion; }, raise : function () { MyGravitron.repulsion++; } },
+							level : function () { return MyGravitron.repulsion; }, raise : function () { MyGravitron.repulsion++; },
+							picture : "push", unit : "", value : function () { return MyGravitron.repulsion ? "on" : "off"; },
+							change : function () { return "the closed part of the Gravitron pushes the asteroids away"; } },
 	gravShield			: { name : "Gravitron Shield", tip : "Gravitron Shield - With a shielding effect, your Gravitron will protect your planet (a few). It loads over time and then unloads on asteroids, thus damaging them.",
 							max : 5, price : "times10plus50",
-							level : function () { return MyGravitron.shield; }, raise : function () { MyGravitron.shield++; } },
+							level : function () { return MyGravitron.shield; }, raise : function () { MyGravitron.shield++; },
+							picture : "shield", unit : function () { return MyGravitron.shield ? "charge" : ""; }, value : function () { return MyGravitron.shield ? MyGravitron.shield * 10 : "off"; },
+							change : function () { var s = MyGravitron.shield; return ( s ? s * 10 + " → " : "" ) + ( s + 1 ) * 10 + " charge, a point every "
+								+ shieldSeconds ( s + 1 ) + " s" + ( s ? " instead of " + shieldSeconds ( s ) : "" ); } },
 	gravPulse			: { name : "Gravitron Pulse", tip : "Gravitron Pulse - When the shield is hit by an asteroid, it will emit a pulse that causes damages to the nearby asteroids. At level 2 it will also pulse when shield is fully loaded.",
 							max : 2, price : "plus1times500", appears : function () { return MyGravitron.shield > 0; },
-							level : function () { return MyGravitron.pulse; }, raise : function () { MyGravitron.pulse++; } },
+							level : function () { return MyGravitron.pulse; }, raise : function () { MyGravitron.pulse++; },
+							picture : "pulse", unit : "of 2",
+							change : function () { return MyGravitron.pulse ? "level 2, a pulse when the shield is full, too" : "level 1, a pulse when an asteroid hits the shield"; } },
 	gravScanner			: { name : "Field Scanner", tip : "Field Scanner - Level 1 shows the limits of the Gravitron's field. Level 2 colors the asteroids it pulls in red, and the ones it pushes away in green.",
 							max : 2, price : "plus1times50",
-							level : function () { return MyGravitron.scanner; }, raise : function () { MyGravitron.scanner++; } },
+							level : function () { return MyGravitron.scanner; }, raise : function () { MyGravitron.scanner++; },
+							picture : "eye", unit : "of 2",
+							change : function () { return MyGravitron.scanner ? "level 2, coloring the asteroids pulled in red, the ones pushed away in green" : "level 1, showing the limits of the Gravitron's field"; } },
 	gravProspector		: { name : "Prospector", tip : "Prospector - Your Gravitron draws in more asteroids with a metal in their rock: copper, silver or gold. Half of their debris are made of it, and worth 2, 3 or 5 mat. Each level makes them 50% more frequent.",
 							max : 2, price : "plus1times50",
-							level : function () { return MyGravitron.prospector; }, raise : function () { MyGravitron.prospector++; } },
+							level : function () { return MyGravitron.prospector; }, raise : function () { MyGravitron.prospector++; },
+							picture : "crystal", unit : "metals", value : function () { return "×" + ( 1 + prospectorBonus * MyGravitron.prospector ); },
+							change : function () { return "×" + ( 1 + prospectorBonus * MyGravitron.prospector ) + " → ×" + ( 1 + prospectorBonus * ( MyGravitron.prospector + 1 ) ) + " asteroids with a metal"; } },
 	// brought by its research (researches.js)
 	compactor			: { name : "Compactor", tip : "Compactor - Each level makes 10% more mat from the debris your Gravitron gathers.",
 							max : 5, price : "plus1times100", appears : function () { return research.done.compactor ? true : false; },
-							level : function () { return MyGravitron.compactor; }, raise : function () { MyGravitron.compactor++; } },
+							level : function () { return MyGravitron.compactor; }, raise : function () { MyGravitron.compactor++; },
+							picture : "press", unit : "mat", value : function () { return "+" + Math.round ( MyGravitron.compactor * compactorBonus * 100 ) + "%"; },
+							change : function () { return "+" + Math.round ( MyGravitron.compactor * compactorBonus * 100 ) + "% → +" + Math.round ( ( MyGravitron.compactor + 1 ) * compactorBonus * 100 )
+								+ "% mat from the debris gathered"; } },
 
 	// MAIN STRUCTURE
 	mCMSpeed			: { name : "Main Structure Move Speed", tip : "Main Structure Move Speed - Making the Main Structure to move faster.",
 							max : 5, price : "5powtimes4",
-							level : function () { return mainCanMovSpeed; }, raise : function () { mainCanMovSpeed++; } },
+							level : function () { return mainCanMovSpeed; }, raise : function () { mainCanMovSpeed++; },
+							picture : "turn", unit : "° / s", value : function () { return turnSpeed ( mainCanMovSpeed ); }, next : function () { return turnSpeed ( mainCanMovSpeed + 1 ); },
+							what : "degrees per second" },
 	SMART				: { name : "Main Structure SMART AI", tip : "Main Structure SMART AI - Next level of SMART AI will grant you anticipation, to make basic weapon more effective.",
 							max : 5, price : "times250",
-							level : function () { return mainCannon.smart; }, raise : function () { mainCannon.smart++; } },
+							level : function () { return mainCannon.smart; }, raise : function () { mainCannon.smart++; },
+							picture : "chip", unit : "AI level", what : "level of SMART AI" },
 	MaxWAtATime			: { name : "Multiple weapon", tip : "Multiple weapon structure - Each level gives you one more weapon to activate at the same time.",
 							max : 2, price : "times250", appears : function () { return ownedWeapons() > 1; },
-							level : function () { return maxWAtATime; }, raise : function () { maxWAtATime++; } },
+							level : function () { return maxWAtATime; }, raise : function () { maxWAtATime++; },
+							picture : "weapons", unit : "at a time", what : "weapon active at a time" },
 	// the critical shots of the Basic, Spiral and Magnetic weapons (bonuses.js)
 	critChance			: { name : "Critical Chance", tip : "Critical Chance - The chance of a shot of your Basic, Spiral or Magnetic weapon to be critical: red, it does several times its power. Expressed in percents, 5 more at each level.",
 							max : 25, price : "times10",
-							level : function () { return Math.round ( critChance * 100 ); }, raise : function () { critChance = ( Math.round ( critChance * 100 ) + 5 ) / 100; } },
+							level : function () { return Math.round ( critChance * 100 ); }, raise : function () { critChance = ( Math.round ( critChance * 100 ) + 5 ) / 100; },
+							picture : "dice", unit : "of shots", value : function () { return Math.round ( critChance * 100 ) + "%"; },
+							change : function () { return Math.round ( critChance * 100 ) + "% → " + ( Math.round ( critChance * 100 ) + 5 ) + "% of the shots critical"; } },
 	critDamage			: { name : "Critical Damage", tip : "Critical Damage - How many times its power a critical shot does.",
 							max : 5, price : "minus2times100",
-							level : function () { return critDamage; }, raise : function () { critDamage += 0.5; } },
+							level : function () { return critDamage; }, raise : function () { critDamage += 0.5; },
+							picture : "burst", unit : "power", value : function () { return "×" + critDamage; },
+							change : function () { return "×" + critDamage + " → ×" + ( critDamage + 0.5 ) + " power for a critical shot"; } },
 
 	// BASIC CANNON
 	mCNumber			: { name : "Cannons", tip : "Basic Cannons Number - Increased fire spread, and so fire rate as well.",
 							max : 5, price : "times250",
-							level : function () { return mainCannon.cannonNbr; }, raise : function () { mainCannon.cannonNbr++; } },
+							level : function () { return mainCannon.cannonNbr; }, raise : function () { mainCannon.cannonNbr++; },
+							picture : "cannons", unit : "cannons", what : "cannon" },
 	mCFireRate			: { name : "Fire Rate", tip : "Basic Weapon Fire Rate - Making the weapon to fire faster. Expressed in Shots Per Second.",
 							max : 5, price : "expFrom26times1000squared",
-							level : function () { return Math.floor(2500/mainCannon.fireRate)/100; }, raise : function () { mainCannon.fireRate-=2; } },
+							level : function () { return Math.floor(2500/mainCannon.fireRate)/100; }, raise : function () { mainCannon.fireRate-=2; },
+							picture : "bolt", unit : "shots / s", next : function () { return fireRateAfter ( mainCannon, 2 ); }, what : "shots per second" },
 	mainPow				: { name : "Fire Power", tip : "Basic Shots Power - To cause more damages.",
 							max : 10, price : "times3pow2",
-							level : function () { return mainCannon.power; }, raise : function () { mainCannon.power++; } },
+							level : function () { return mainCannon.power; }, raise : function () { mainCannon.power++; },
+							picture : "flame", unit : "damage", what : "damage per shot" },
 	mainSpeed			: { name : "Fire Speed", tip : "Basic Shots Speed - To reach targets faster.",
 							max : 5, price : "times10plus50",
-							level : function () { return mainCannon.speed; }, raise : function () { mainCannon.speed++; } },
+							level : function () { return mainCannon.speed; }, raise : function () { mainCannon.speed++; },
+							picture : "speed", unit : "speed", what : "speed for the shots" },
 
 	// SPIRAL AND ORBITAL CANNON
 	SaOCNumber			: { name : "Cannons", tip : "Spiral Cannons Number - Increased fire spread and unlock new modes.",
 							max : 5, price : "times250",
-							level : function () { return spiralCannon.cannonNbr; }, raise : function () { spiralCannon.cannonNbr++; } },
+							level : function () { return spiralCannon.cannonNbr; }, raise : function () { spiralCannon.cannonNbr++; },
+							picture : "cannons", unit : "cannons", what : "cannon" },
 	SaOCFireRate		: { name : "Fire Rate", tip : "Spiral Weapon Fire Rate - Making the weapon to fire faster. Expressed in Shots Per Second.",
 							max : 5, price : "expFrom26times1000squared",
-							level : function () { return Math.floor(2500/spiralCannon.fireRate)/100; }, raise : function () { spiralCannon.fireRate-=2; } },
+							level : function () { return Math.floor(2500/spiralCannon.fireRate)/100; }, raise : function () { spiralCannon.fireRate-=2; },
+							picture : "bolt", unit : "shots / s", next : function () { return fireRateAfter ( spiralCannon, 2 ); }, what : "shots per second" },
 	SaOPow				: { name : "Fire Power", tip : "Spiral Shots Power - To cause more damages.",
 							max : 10, price : "plus1times50",
-							level : function () { return spiralCannon.power; }, raise : function () { spiralCannon.power++; } },
+							level : function () { return spiralCannon.power; }, raise : function () { spiralCannon.power++; },
+							picture : "flame", unit : "damage", what : "damage per shot" },
 	// this one goes down : slower spiral shots stay longer in game
 	SaOSpeed			: { name : "Fire Speed", tip : "Spiral Shots Speed - To slow down shoots, thus making more of them staying in game.",
 							max : 1, decreasing : true, price : "from6times100",
-							level : function () { return spiralCannon.speed; }, raise : function () { spiralCannon.speed--; } },
+							level : function () { return spiralCannon.speed; }, raise : function () { spiralCannon.speed--; },
+							picture : "slow", unit : "speed", what : "speed for the shots, to stay longer" },
 
 	// MAGNETIC CANNON
 	magneticCNumber		: { name : "Cannons", tip : "Magnetic Cannons Number - Increased fire spread.",
 							max : 5, price : "times250",
-							level : function () { return magneticCannon.cannonNbr; }, raise : function () { magneticCannon.cannonNbr++; } },
+							level : function () { return magneticCannon.cannonNbr; }, raise : function () { magneticCannon.cannonNbr++; },
+							picture : "cannons", unit : "cannons", what : "cannon" },
 	magneticCFireRate	: { name : "Fire Rate", tip : "Magnetic Weapon Fire Rate - Making the weapon to fire faster. Expressed in Shots Per Second.",
 							max : 5, price : "expFrom26times1000squared",
-							level : function () { return Math.floor(2500/magneticCannon.fireRate)/100; }, raise : function () { magneticCannon.fireRate-=2; } },
+							level : function () { return Math.floor(2500/magneticCannon.fireRate)/100; }, raise : function () { magneticCannon.fireRate-=2; },
+							picture : "bolt", unit : "shots / s", next : function () { return fireRateAfter ( magneticCannon, 2 ); }, what : "shots per second" },
 	magneticPow			: { name : "Fire Power", tip : "Magnetic Shots Power - To cause more damages.",
 							max : 10, price : "plus1times3pow2",
-							level : function () { return magneticCannon.power; }, raise : function () { magneticCannon.power++; } },
+							level : function () { return magneticCannon.power; }, raise : function () { magneticCannon.power++; },
+							picture : "flame", unit : "damage", what : "damage per shot" },
 	magneticSpeed		: { name : "Fire Friction", tip : "Magnetic Shots Friction - To slow down shoots, thus making more of them staying in game.",
 							max : 5, price : "times10plus50",
-							level : function () { return magneticCannon.speed; }, raise : function () { magneticCannon.speed++; } },
+							level : function () { return magneticCannon.speed; }, raise : function () { magneticCannon.speed++; },
+							picture : "slow", unit : "friction", what : "friction, to keep the shots longer" },
 
 	// HAMMER AND BROOM CANNON
 	HaBCNumber			: { name : "Cannons", tip : "Hammer Cannons Number - Increased fire spread.",
 							max : 5, price : "times250",
-							level : function () { return hammerCannon.cannonNbr; }, raise : function () { hammerCannon.cannonNbr++; } },
+							level : function () { return hammerCannon.cannonNbr; }, raise : function () { hammerCannon.cannonNbr++; },
+							picture : "cannons", unit : "cannons", what : "cannon" },
 	HaBCFireRate		: { name : "Fire Rate", tip : "Hammer Weapon Fire Rate - Making the weapon to fire faster. Expressed in Shots Per Second.",
 							max : 5, price : "expFrom26times1000squared2",
-							level : function () { return Math.floor(2500/hammerCannon.fireRate)/100; }, raise : function () { hammerCannon.fireRate-=2; } },
+							level : function () { return Math.floor(2500/hammerCannon.fireRate)/100; }, raise : function () { hammerCannon.fireRate-=2; },
+							picture : "bolt", unit : "shots / s", next : function () { return fireRateAfter ( hammerCannon, 2 ); }, what : "shots per second" },
 	HaBPow				: { name : "Fire Power", tip : "Hammer Shots Power - To cause more damages.",
 							max : 10, price : "plus1times3pow2",
-							level : function () { return hammerCannon.power; }, raise : function () { hammerCannon.power++; } },
+							level : function () { return hammerCannon.power; }, raise : function () { hammerCannon.power++; },
+							picture : "flame", unit : "power", what : "power per shot" },
 	HaBSpeed			: { name : "Fire Spread", tip : "Hammer Shots Spread - To slow down shoots, thus making more of them staying in game.",
 							max : 5, price : "times10plus50",
-							level : function () { return hammerCannon.speed; }, raise : function () { hammerCannon.speed++; } },
+							level : function () { return hammerCannon.speed; }, raise : function () { hammerCannon.speed++; },
+							picture : "spread", unit : "spread", what : "spread, to keep the shots longer" },
 
 	// MISSILE LAUNCHER : a secondary weapon, given by its research (researches.js)
 	missileFireRate		: { name : "Fire Rate", tip : "Missile Fire Rate - Making the launcher to fire faster. Expressed in Missiles Per Second.",
 							max : 0.5, price : "times600",
-							level : function () { return Math.floor(2500/missileLauncher.fireRate)/100; }, raise : function () { missileLauncher.fireRate-=10; } },
+							level : function () { return Math.floor(2500/missileLauncher.fireRate)/100; }, raise : function () { missileLauncher.fireRate-=10; },
+							picture : "bolt", unit : "missiles / s", next : function () { return fireRateAfter ( missileLauncher, 10 ); }, what : "missiles per second" },
 	missilePow			: { name : "Blast Power", tip : "Missile Blast Power - The damages done to the asteroid touched, and half of them to the others caught in the blast.",
 							max : 8, price : "times3pow2",
-							level : function () { return missileLauncher.power; }, raise : function () { missileLauncher.power++; } },
+							level : function () { return missileLauncher.power; }, raise : function () { missileLauncher.power++; },
+							picture : "flame", unit : "damage", what : "damage" },
 	missileBlast		: { name : "Blast Radius", tip : "Missile Blast Radius - To catch more asteroids in each blast.",
 							max : 50, price : "times10plus50",
-							level : function () { return missileLauncher.blast; }, raise : function () { missileLauncher.blast+=5; } },
+							level : function () { return missileLauncher.blast; }, raise : function () { missileLauncher.blast+=5; },
+							picture : "blast", unit : "radius", step : 5, what : "blast radius" },
 
 	// NITROGLYCERINE LAUNCHER : another secondary weapon, given by its research
 	// (this one goes down : the seconds it waits for a new capsule, once the bomb before is gone)
 	nitroReload			: { name : "Reload Time", tip : "Nitroglycerine Reload Time - The time the launcher waits before firing a new capsule, once the bomb before is gone. Expressed in seconds.",
 							max : 3, decreasing : true, price : "from9times100",
-							level : function () { return nitroLauncher.fireRate / framesPerSecond; }, raise : function () { nitroLauncher.fireRate-=framesPerSecond; } },
+							level : function () { return nitroLauncher.fireRate / framesPerSecond; }, raise : function () { nitroLauncher.fireRate-=framesPerSecond; },
+							picture : "hourglass", unit : "s reload", what : "seconds of reload" },
 	nitroPow			: { name : "Blast Power", tip : "Nitroglycerine Blast Power - The damages done to every asteroid caught in the blast of a bomb.",
 							max : 30, price : "squared",
-							level : function () { return nitroLauncher.power; }, raise : function () { nitroLauncher.power+=2; } },
+							level : function () { return nitroLauncher.power; }, raise : function () { nitroLauncher.power+=2; },
+							picture : "flame", unit : "damage", step : 2, what : "damage" },
 	nitroBlast			: { name : "Blast Radius", tip : "Nitroglycerine Blast Radius - To catch more asteroids in each blast.",
 							max : 80, price : "times10plus50",
-							level : function () { return nitroLauncher.blast; }, raise : function () { nitroLauncher.blast+=5; } },
+							level : function () { return nitroLauncher.blast; }, raise : function () { nitroLauncher.blast+=5; },
+							picture : "blast", unit : "radius", step : 5, what : "blast radius" },
 
 	// LASER : one more secondary weapon, given by its research
 	// (its cooldown goes down, in seconds as its beam's duration)
 	laserPow			: { name : "Beam Power", tip : "Laser Beam Power - The damages done by the beam each second.",
 							max : 24, price : "squaredtimes3",
-							level : function () { return laserCannon.power; }, raise : function () { laserCannon.power+=2; } },
+							level : function () { return laserCannon.power; }, raise : function () { laserCannon.power+=2; },
+							picture : "flame", unit : "damage / s", step : 2, what : "damage per second" },
 	laserDuration		: { name : "Beam Duration", tip : "Laser Beam Duration - How long the beam burns, before it cools down. Expressed in seconds.",
 							max : 5, price : "times100",
-							level : function () { return laserCannon.duration / framesPerSecond; }, raise : function () { laserCannon.duration+=framesPerSecond/2; } },
+							level : function () { return laserCannon.duration / framesPerSecond; }, raise : function () { laserCannon.duration+=framesPerSecond/2; },
+							picture : "beam", unit : "s beam", step : 0.5, what : "seconds of beam" },
 	laserCooldown		: { name : "Cooldown", tip : "Laser Cooldown - The time the laser needs to cool down, before it fires again. Expressed in seconds.",
 							max : 4, decreasing : true, price : "from16times100",
-							level : function () { return laserCannon.fireRate / framesPerSecond; }, raise : function () { laserCannon.fireRate-=2*framesPerSecond; } },
+							level : function () { return laserCannon.fireRate / framesPerSecond; }, raise : function () { laserCannon.fireRate-=2*framesPerSecond; },
+							picture : "cold", unit : "s cooldown", step : -2, what : "seconds of cooldown" },
 
 	// REBOUND CANNON : the last secondary weapon, given by its research
 	// (its reload time goes down, in seconds)
 	reboundReload		: { name : "Reload Time", tip : "Rebound Reload Time - The time the cannon waits before firing a new shot. Expressed in seconds.",
 							max : 2, decreasing : true, price : "from6times100",
-							level : function () { return reboundCannon.fireRate / framesPerSecond; }, raise : function () { reboundCannon.fireRate-=framesPerSecond/2; } },
+							level : function () { return reboundCannon.fireRate / framesPerSecond; }, raise : function () { reboundCannon.fireRate-=framesPerSecond/2; },
+							picture : "hourglass", unit : "s reload", step : -0.5, what : "seconds of reload" },
 	reboundPow			: { name : "Hit Power", tip : "Rebound Hit Power - The damages done to every asteroid a shot hits.",
 							max : 8, price : "times3pow2",
-							level : function () { return reboundCannon.power; }, raise : function () { reboundCannon.power++; } },
+							level : function () { return reboundCannon.power; }, raise : function () { reboundCannon.power++; },
+							picture : "flame", unit : "damage", what : "damage per hit" },
 	// (two at a time : a shot going to and fro between an asteroid and the planet only hits it again every two rebounds)
 	reboundBounces		: { name : "Rebounds", tip : "Rebounds - How many times a shot can ricochet, on the asteroids, the edges of space or your planet, before it is spent. Two more at each level.",
 							max : 8, price : "times150",
-							level : function () { return reboundCannon.rebounds; }, raise : function () { reboundCannon.rebounds+=2; } },
+							level : function () { return reboundCannon.rebounds; }, raise : function () { reboundCannon.rebounds+=2; },
+							picture : "pinball", unit : "rebounds", step : 2, what : "rebounds" },
 
 	// PLANET
 	// healing is bought by the inhabitants : its price counts the ones left to heal, and it can heal a part of them only
+	// (its tile shows the inhabitants left to heal, and tells what a click heals : healingInfo, tiles.js)
 	healing				: { name : "Healing", tip : "Healing - Here you can spend your Mat to help the reconstruction of your planet.",
 							max : function () { return MyPlanet.maxLife; }, price : "times-healFact",
 							level : function () { return MyPlanet.life + planetHealPend; },
 							toPay : function () { return MyPlanet.maxLife - MyPlanet.life - planetHealPend; },
-							raise : function ( healed ) { planetHealPend += healed; } },
+							raise : function ( healed ) { planetHealPend += healed; },
+							picture : "heal", unit : "M to heal", value : function () { return this.toPay(); } },
 	healFact			: { name : "Healing Factor", tip : "Healing Factor - This will make your healing more effective: each level heals an inhabitant for 1 mat less (from 5 down to 1) and a second faster (from 5 seconds down to 1).",
 							max : 5, price : "times100",
-							level : function () { return planetHealFact; }, raise : function () { planetHealFact++; } },
+							level : function () { return planetHealFact; }, raise : function () { planetHealFact++; },
+							picture : "healFactor", unit : "mat / inhab.", value : function () { return healCost(); },
+							change : function () { return healCost() + " → " + ( healCost() - 1 ) + " mat per inhabitant healed, one every "
+								+ Math.round ( ( healTurns() - healFaster ) / framesPerSecond ) + " s instead of " + Math.round ( healTurns() / framesPerSecond ); } },
 	maxHealth			: { name : "Maximum Health", tip : "Maximum Health - It's the maximum amount of inhabitants your planet can have on.",
 							max : 50, price : "times5",
-							level : function () { return MyPlanet.maxLife; }, raise : function () { MyPlanet.maxLife+=10; } },
+							level : function () { return MyPlanet.maxLife; }, raise : function () { MyPlanet.maxLife+=10; },
+							picture : "people", unit : "M inhab.", next : function () { return MyPlanet.maxLife + 10; }, what : "million inhabitants at most" },
 	maxMat				: { name : "Maximum Mat", tip : "Maximum Mat - It's the maximum amount of material your planet can store.",
 							max : 1000, price : "times0.75",
-							level : function () { return MyPlanet.maxMat; }, raise : function () { MyPlanet.maxMat+=100; } },
+							level : function () { return MyPlanet.maxMat; }, raise : function () { MyPlanet.maxMat+=100; },
+							picture : "crate", unit : "mat stored", next : function () { return MyPlanet.maxMat + 100; }, what : "mat stored at most" },
 	autoHeal			: { name : "Auto-Healing", tip : "Auto-Healing - Your planet heals an inhabitant for every few mat your Gravitron gathers, without spending them: every 10 mat, then 8, 6, 4 and 2 with the next levels.",
 							max : 5, price : "plus1times50",
-							level : function () { return planetAutoHeal; }, raise : function () { planetAutoHeal++; } },
+							level : function () { return planetAutoHeal; }, raise : function () { planetAutoHeal++; },
+							picture : "autoHeal", unit : function () { return planetAutoHeal ? "mat / inhab." : ""; },
+							value : function () { return planetAutoHeal ? autoHealMat() : "off"; },
+							change : function () { return planetAutoHeal ? autoHealMat() + " → " + ( autoHealMat() - autoHealStep ) + " mat gathered per inhabitant healed"
+								: "an inhabitant healed for every " + ( autoHealStep * maxUpgrade("autoHeal") ) + " mat gathered"; } },
+	// (a crash gives back a fifth of its asteroid's life as mat by level : engine.js)
 	recovery			: { name : "Recovery", tip : "Recovery - With this upgrade, your citizens will be able to get mat from the asteroids crashing on their planet.",
 							max : 5, price : "plus1times50",
-							level : function () { return planetRecovery; }, raise : function () { planetRecovery++; } },
+							level : function () { return planetRecovery; }, raise : function () { planetRecovery++; },
+							picture : "recovery", unit : "of a crash", value : function () { return planetRecovery * 20 + "%"; },
+							change : function () { return planetRecovery * 20 + "% → " + ( planetRecovery + 1 ) * 20 + "% of the inhabitants a crash takes, given back as mat"; } },
 	// brought by its research (researches.js)
 	earlyWarning		: { name : "Early Warning", tip : "Early Warning - Each level evacuates 5% of the inhabitants an asteroid's crash would take away.",
 							max : 5, price : "plus1times100", appears : function () { return research.done.earlyWarning ? true : false; },
-							level : function () { return MyPlanet.warning; }, raise : function () { MyPlanet.warning++; } },
+							level : function () { return MyPlanet.warning; }, raise : function () { MyPlanet.warning++; },
+							picture : "warning", unit : "evacuated", value : function () { return Math.round ( MyPlanet.warning * warningShare * 100 ) + "%"; },
+							change : function () { return Math.round ( MyPlanet.warning * warningShare * 100 ) + "% → " + Math.round ( ( MyPlanet.warning + 1 ) * warningShare * 100 )
+								+ "% of the inhabitants a crash would take, evacuated"; } },
 	// the planet's lab, needed for any research (researches.js) : it comes once an achievement has opened a branch of the research tree,
 	// and its level 2, the Automation, does the researches one after the other by itself
 	lab					: { name : "Research Lab", tip : "",
 							max : 2, price : "times200plus100", appears : function () { return anyBranchOpen(); },
-							level : function () { return research.lab; }, raise : function () { research.lab++; } }
+							level : function () { return research.lab; }, raise : function () { research.lab++; },
+							picture : "lab", unit : "", value : function () { return [ "off", "lab", "auto" ][research.lab]; },
+							change : function () { return research.lab ? "the Automation, doing the researches by itself" : "the lab, needed for any research"; } }
 };
 
 // The layout of the pause menu, built by menu.js : its sections, the weapons' one being split into tabs
@@ -356,35 +433,6 @@ function modeUpdate ( weapon ) {
 // function to refresh the upgrade menu
 function refresh() {
 	document.getElementById("matNbr").innerHTML = MyPlanet.mat;
-	for ( var thing in upgrades ) {
-		var item = document.getElementById(thing);
-		item.innerHTML = "<b>" + translate(thing) + "</b>";
-		if ( !maxReached(thing) ) {
-			var price = priceToPay(thing);
-			if ( thing == "healing" ) {
-				var healFact = (maxUpgrade("healFact") - planetHealFact + 1 );
-				var HPRecovery = price / healFact;
-				if ( enoughFor(thing) != false ) {
-					item.innerHTML = " <span class='upgreen'>HEAL ALL HP FOR "+price+" MAT</span>";
-				} else if ( MyPlanet.mat >= healFact ) {
-					HPRecovery = Math.floor ( MyPlanet.mat / healFact );
-					price = HPRecovery * healFact;
-					item.innerHTML = " <span class='upgreen'>HEAL "+HPRecovery+" HP FOR "+price+" MAT</span>";
-				} else {
-					item.innerHTML = " <span class='upred'>COST "+healFact+" MAT</span>";
-				}
-			} else {
-				if ( enoughFor(thing) != false ) {
-					item.innerHTML += " <span class='upgreen'>UPGRADE FOR "+price+" MAT</span>";
-				} else {
-					item.innerHTML += " <span class='upred'>COST "+price+" MAT</span>";
-				}
-			}
-		} else {
-			// its level, then MAX in the prices' column (healing has no level to show)
-			item.innerHTML = ( thing == "healing" ? "" : "<b>" + translate(thing) + "</b>" ) + "<span class='max'>MAX</span>";
-		}
-	}
 	upgrades.SMART.tip = "Main Structure SMART AI - " + smartNextLevel[translate("SMART")];
 	upgrades.lab.tip = labNextLevel[translate("lab")];
 	for ( var iw=1; iw<=weaponList.length; iw++ ){
@@ -398,6 +446,7 @@ function refresh() {
 		modeUpdate ( weaponList[iw-1] );
 	}
 	refreshResearches();
+	refreshTiles();
 	refreshAppearing();
 	refreshBadges();
 }

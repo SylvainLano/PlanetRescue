@@ -11,11 +11,11 @@
 
 
 // The pause menu, built from shopLayout and upgrades (shop.js) : its sections open one at a time,
-// the weapons are shown by tabs, and every line has a tooltip. (It used jQuery and its plugins until 2026.)
+// the weapons are shown by tabs, the upgrades by tiles (tiles.js), and every line and tile has a tooltip. (It used jQuery and its plugins until 2026.)
 var shopTooltip = false;
 var researchSection = false;	// the Researches section, opened with the pause when a research waits for the player
 var menuBadges = [];			// the counters of the titles and weapon tabs : what can be bought there (refreshBadges)
-var menuAppearing = [];			// the weapon tabs and upgrade lines hidden until they are worth buying (refreshAppearing)
+var menuAppearing = [];			// the sections, weapon tabs and upgrade tiles hidden until they are worth buying (refreshAppearing)
 
 // function to build the pause menu
 function buildShop() {
@@ -46,8 +46,7 @@ function addSection ( shop, section ) {
 	head.addEventListener ( "click", function () { openSection ( block ); } );
 	var content = newElement ( "div", "content", block );
 	if ( section.upgrades ) {
-		content.classList.add ( "lines" );		// names, levels and prices in three aligned columns (css/main.css)
-		addUpgrades ( content, section.upgrades );
+		addTiles ( content, section.upgrades );		// shown as tiles (tiles.js)
 	} else if ( section.panels ) {
 		addPanels ( content, section.panels );
 	} else if ( section.researches ) {
@@ -93,14 +92,14 @@ function addPanel ( tabs, holder, panel ) {
 		status.querySelector ( "a" ).innerHTML = "<span class='green'>active</span>";
 	} else if ( panel.weapon ) {
 		addLine ( box, "Status", panel.weapon, panel.statusTip, function () { activate ( panel.weapon ); } );
-		// the weapon's upgrades, shown by refresh() once it is bought
+		// the weapon's mode and upgrades, shown by refresh() once it is bought
 		list = newElement ( "div", "more", box );
 		list.id = panel.weapon + "Upgrades";
 		if ( panel.modes ) {
 			addLine ( list, "Mode", panel.weapon + "Mode", "Change the mode to trigger alternative fire.", function () { modeChange ( panel.weapon ); } );
 		}
 	}
-	addUpgrades ( list, panel.upgrades );
+	addTiles ( list, panel.upgrades );		// under the lines of its status and mode (tiles.js)
 }
 
 // function to show a weapon panel, hiding the others
@@ -147,7 +146,7 @@ function sectionAppears ( section ) {
 	return false;
 }
 
-// function to show the weapon tabs and upgrade lines once they are worth buying, at each refresh()
+// function to show the weapon tabs and upgrade tiles once they are worth buying, at each refresh()
 // (they are hidden again at a new game : back to the first tab if the one shown goes)
 function refreshAppearing () {
 	for ( var n in menuAppearing ) {
@@ -230,21 +229,7 @@ function refreshBadges () {
 	}
 }
 
-// function to add the lines of a list of upgrades, each one bought by a click
-function addUpgrades ( parent, list ) {
-	for ( var u in list ) {
-		addUpgrade ( parent, list[u] );
-	}
-}
-
-// function to add the line of an upgrade : its tooltip is read from upgrades when shown, as some of them change (SMART)
-function addUpgrade ( parent, thing ) {
-	var line = addLine ( parent, upgrades[thing].name, thing, false, function () { upgrade ( thing ); } );
-	line.setAttribute ( "data-upgrade", thing );
-	menuAppearing.push ( { element : line.parentNode, appears : function () { return thingAppears ( { upgrade : thing } ); } } );
-}
-
-// function to add a line of the menu : its label, the link that refresh() fills, and its tooltip
+// function to add a line of the menu (a weapon's status or mode, a research) : its label, the link that refresh() fills, and its tooltip
 function addLine ( parent, label, id, tip, onClick ) {
 	var line = newElement ( "span", "tip", newElement ( "p", "", parent ) );
 	newElement ( "span", "label", line ).textContent = label;
@@ -257,8 +242,8 @@ function addLine ( parent, label, id, tip, onClick ) {
 	return line;
 }
 
-// function to show the tooltips of the menu, following the mouse ; their text is split by " - " into a title and a text
-// (the tooltip is put into the game area, to be zoomed with it)
+// function to show the tooltips of the menu's lines, following the mouse ; their text is split by " - " into a title and a text
+// (the tooltip is put into the game area, to be zoomed with it ; the tiles fill it themselves : tiles.js)
 function addTooltips ( shop ) {
 	shopTooltip = newElement ( "div", "", document.getElementById("gameArea") );
 	shopTooltip.id = "tooltip";
@@ -267,7 +252,7 @@ function addTooltips ( shop ) {
 		if ( !line ) {
 			return;
 		}
-		var tip = line.getAttribute ( "data-tip" ) || upgrades[line.getAttribute ( "data-upgrade" )].tip;
+		var tip = line.getAttribute ( "data-tip" );
 		var cut = tip.indexOf ( " - " );
 		shopTooltip.innerHTML = "";
 		if ( cut >= 0 ) {
@@ -285,7 +270,12 @@ function addTooltips ( shop ) {
 			hideTooltip();
 		}
 	} );
-	shop.addEventListener ( "click", hideTooltip );
+	// (a tile keeps its tooltip, telling what the next click buys)
+	shop.addEventListener ( "click", function ( e ) {
+		if ( !e.target.closest ( ".tile" ) ) {
+			hideTooltip();
+		}
+	} );
 }
 
 // function to move the tooltip under the mouse, above it near the bottom of the game area
