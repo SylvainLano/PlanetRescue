@@ -136,11 +136,18 @@ body {
 	height: 100%;
 }
 
-/* each number of the status bar : its name, its gauge, its value (showStatus) ; the gauges hide as digits are asked */
+/* closer together when they are five (a hunt of the Adventure, with the shield) */
+#status .stats:has(.stat:nth-child(5)) {
+	gap: 10px;
+}
+
+/* each number of the status bar : its name, its gauge, its value (showStatus) ; the gauges hide as digits are asked,
+   and get shorter when the numbers are too many for the bar (the Adventure's gauge comes as a fourth one) */
 #status .stat {
 	display: flex;
 	align-items: center;
 	gap: 6px;
+	min-width: 0;
 }
 
 #status .name {
@@ -153,6 +160,8 @@ body {
 #status .gauge {
 	display: flex;
 	width: 74px;
+	min-width: 28px;
+	flex-shrink: 1;
 	height: 7px;
 	overflow: hidden;
 	background: rgba(255,255,255,0.1);

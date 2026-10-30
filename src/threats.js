@@ -53,12 +53,12 @@ function advanceAnnounces ( ctx ) {
 }
 
 // function to draw the announces at the top of the game : the newest one's whole message first, then its line, fading
-// into each other ; the lines of the others under it, one under the other (and the marks of the sides the threats will come from)
+// into each other ; the lines of the others under it, one under the other
+// (the marks of the sides the threats will come from are drawn with space, as the camera sees it : drawThreatSides, engine.js)
 function drawAnnounce ( ctx ) {
 	if ( announces.length == 0 ) {
 		return;
 	}
-	drawThreatSides ( ctx );
 	ctx.save();
 	ctx.textBaseline = 'alphabetic';
 	var top = 34;		// where the next line goes, under the message shown
@@ -211,11 +211,13 @@ var cometGap		= [30, 60];	// seconds between two comets in the Arcade, at least 
 var cometTimer		= 0;		// turns left before the next comet in the Arcade
 
 // function to launch a comet from the edge, toward the planet or grazing it
-function launchComet ( ctx ) {
-	var angle = Math.random() * Math.PI * 2;
-	var x = MyPlanet.x + gameSize / 2 * Math.cos ( angle );
-	var y = MyPlanet.y + gameSize / 2 * Math.sin ( angle );
-	var aim = angle + ( Math.random() * 2 - 1 ) * cometAside;
+// (or from a side and a distance : the Colossus's, boss.js ; from further away, aiming closer, to miss the planet by as much)
+function launchComet ( ctx, side, distance ) {
+	var angle = ( side === undefined ) ? Math.random() * Math.PI * 2 : side;
+	var radius = distance || gameSize / 2;
+	var x = MyPlanet.x + radius * Math.cos ( angle );
+	var y = MyPlanet.y + radius * Math.sin ( angle );
+	var aim = angle + ( Math.random() * 2 - 1 ) * cometAside * Math.min ( 1, gameSize / 2 / radius );
 	var velocity = ( Math.random() + 1.5 ) * asteroidSpeedFactor() * asteroidBS * cometSpeed;
 	var comet = new Asteroid ( ctx, cometLife, cometRadius, asteroidBM, x, y, - velocity * Math.cos ( aim ), - velocity * Math.sin ( aim ), false, "ice" );
 	comet.comet = true;
@@ -268,6 +270,7 @@ var splitLife		= 3;		// a part's life,
 var splitSize		= 0.55;		// its size and mass, from an asteroid's,
 var splitSpeed		= 1.5;		// its speed, from the asteroid burst's,
 var splitSpread		= 0.35;		// and how far apart the parts go, in radians
+var splinterHits	= 0;		// the parts that crashed on the planet in this game (a challenge of the Adventure)
 
 // function to make an asteroid a splitting one : bigger, its rock cracked, drawn in its halo
 function makeSplitter ( asteroid ) {
@@ -301,7 +304,15 @@ function splitRock ( ctx, asteroid, kept ) {
 		var part = new Asteroid ( ctx, splitLife, asteroidBR * splitSize, asteroidBM * splitSize,
 			asteroid.x + Math.cos ( way ) * asteroid.radius, asteroid.y + Math.sin ( way ) * asteroid.radius,
 			speed * Math.cos ( way ), speed * Math.sin ( way ), false, false );
+		part.part = true;
 		kept.push ( part );
+	}
+}
+
+// function to count a crash on the planet, at the moment it happens (engine.js) : the parts of a splitting asteroid are counted
+function countCrash ( asteroid ) {
+	if ( asteroid.part ) {
+		splinterHits++;
 	}
 }
 
@@ -352,10 +363,11 @@ function announceSwarm ( seconds ) {
 }
 
 // function to launch a swarm from a side : its pebbles beyond the edge, a bit apart, all flying toward the planet
-function launchSwarm ( ctx, side ) {
+// (or from closer, over a narrower arc in degrees : spat by the Colossus, boss.js)
+function launchSwarm ( ctx, side, near, arc ) {
 	for ( var p = 0; p < swarmSize; p++ ) {
-		var angle = side + ( Math.random() * 2 - 1 ) * swarmArc * Math.PI / 180;
-		var d = gameSize / 2 + Math.random() * swarmDepth;
+		var angle = side + ( Math.random() * 2 - 1 ) * ( arc || swarmArc ) * Math.PI / 180;
+		var d = ( near || gameSize / 2 ) + Math.random() * swarmDepth;
 		var aim = angle + ( Math.random() * 2 - 1 ) * 0.12;
 		var velocity = ( Math.random() * 0.5 + 1.5 ) * asteroidSpeedFactor() * asteroidBS;
 		var pebble = new Asteroid ( ctx, 1 + Math.floor ( Math.random() * swarmLife ), swarmRadius, asteroidBM * 0.3,
@@ -376,6 +388,8 @@ var armorArc		= 25;		// how far from its side each one may come, in degrees on e
 var armorGift		= 80;		// the mat given with its announce
 var armorEvery		= [60, 90];	// seconds between two groups in the Arcade, at least and at most
 var armorAt			= 0;		// the turn the next group comes in the Arcade (0 : not planned yet)
+var armorClosest	= 600;		// the closest an armored asteroid came to the planet's center (a challenge of the Adventure ;
+							// gameSize at each game's start, parameters.js being read after this file)
 
 // function to make an asteroid an armored one, its rock plated
 function makeArmored ( asteroid ) {
@@ -386,6 +400,9 @@ function makeArmored ( asteroid ) {
 // function to get the damage of a hit on an asteroid : its power, or nothing on an armored one when it is too weak,
 // the hit then bouncing off with a white spark where it hit (the critical shots' flashes : bonuses.js) and a ricochet's sound
 function armorDamage ( asteroid, power, x, y ) {
+	if ( asteroid.colossus ) {
+		return plateDamage ( asteroid, power, x, y );		// (the Colossus's plates : boss.js)
+	}
 	if ( !asteroid.armored || power >= armorMin ) {
 		return power;
 	}

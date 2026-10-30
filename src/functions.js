@@ -129,8 +129,8 @@ function resolveDebris (debrisList,ctx,MyPlanet,pause,gravSuction,gravPower,grav
 			debrisList[i].x += debrisList[i].vx;
 			debrisList[i].y += debrisList[i].vy;
 			
-			// Testing if debris still in game 
-			if ( distance > gameSize ){
+			// Testing if debris still in game (further in the duel : boss.js)
+			if ( distance > fieldReach ){
 				
 				// Debris outta game, destroying it
 				keepit = 0;
@@ -355,7 +355,9 @@ function movingParts() {
 		{ objects : blastList, parts : ["size", "age"] },
 		{ objects : pulseList, parts : ["radius"] },
 		{ objects : weaponList, parts : ["angle"] },	// the Spiral & Orbital weapon's "angle" is a number of cannon, but it is not drawn
-		{ objects : [banner], parts : ["y"] }
+		{ objects : [banner], parts : ["y"] },
+		{ objects : [camera], parts : ["share"] },	// (the duel's camera : boss.js)
+		{ objects : kamikazeList, parts : ["x", "y"] }	// (the kamikazes : kamikaze.js)
 	];
 }
 
@@ -623,7 +625,7 @@ function drawFieldLimits(ctx) {
 	ctx.beginPath();
 	for ( var l in limits ) {
 		ctx.moveTo(MyPlanet.x + (MyGravitron.radius + 6) * Math.cos(limits[l]), MyPlanet.y + (MyGravitron.radius + 6) * Math.sin(limits[l]));
-		ctx.lineTo(MyPlanet.x + gameSize * Math.cos(limits[l]), MyPlanet.y + gameSize * Math.sin(limits[l]));
+		ctx.lineTo(MyPlanet.x + fieldReach * Math.cos(limits[l]), MyPlanet.y + fieldReach * Math.sin(limits[l]));
 	}
 	ctx.stroke();
 	ctx.setLineDash([]);
@@ -653,14 +655,16 @@ function spawnInterval() {
 
 // Function to send an asteroid toward the planet from the edge of the game area, at an angle around the planet (in radians) :
 // its speed and its life grow as time passes, and a giant is stronger, bigger, heavier and slower
-// (speed, if any, changes its speed : the Adventure's waves, adventure.js) ; it gives the asteroid, for a threat to change it (threats.js)
-function launchAsteroid(ctx,angle,giant,speed) {
-	var radius = gameSize / 2;
+// (speed, if any, changes its speed : the Adventure's waves, adventure.js ; distance, its distance to the planet : the duel, boss.js) ;
+// it gives the asteroid, for a threat to change it (threats.js)
+function launchAsteroid(ctx,angle,giant,speed,distance) {
+	var radius = distance || gameSize / 2;
 	var x = MyPlanet.x + (radius * Math.cos(angle));
 	var y = MyPlanet.y + (radius * Math.sin(angle));
-	// with a few asteroids in game already, it may go beside the planet
+	// with a few asteroids in game already, it may go beside the planet (from further away, aiming closer, to miss it by as much)
 	if ( asteroidList.length > 2 ) {
-		angle = angle - Math.PI / 4 + Math.random() * Math.PI / 2;
+		var spread = Math.PI / 4 * Math.min ( 1, gameSize / 2 / radius );
+		angle = angle - spread + Math.random() * spread * 2;
 	}
 	var velocity = (Math.random() * 2 + 1) * asteroidSpeedFactor() * asteroidBS * ( giant ? giantSpeed : 1 ) * ( speed || 1 );
 	var life = ( giant ? gameValues.giantLife : gameValues.asteroidLife ) + asteroidExtraLife();
@@ -1055,10 +1059,9 @@ function showStatus(status) {
 	if ( MyGravitron.shield > 0 ) {
 		html += statusGauge ( "Shield", MyGravitron.charge / ( MyGravitron.shield * 10 ), gravColor, MyGravitron.charge, MyGravitron.shield * 10, 0 );
 	}
-	// and in the Adventure, the waves of the level come so far (adventure.js)
+	// and in the Adventure, the waves of the level come so far, or a hunt's or a survival's progress (adventure.js)
 	if ( inAdventure() ) {
-		var waves = adventureLevels[adventure.level].waves.length;
-		html += statusGauge ( "Wave", adventure.wave / waves, "#8fb8ff", adventure.wave, waves, 0 );
+		html += adventureGauges();
 	}
 	status.classList.toggle ( "digits", displayS == "digits" );
 	status.innerHTML = "<div class='stats'>" + html + "</div>";
@@ -1136,7 +1139,7 @@ function crashTime ( asteroid ) {
 		if ( distance < crash ) {
 			return n;
 		}
-		if ( distance > gameSize ) {
+		if ( distance > fieldReach ) {
 			return false;
 		}
 		var angle = Math.atan2(y, x);

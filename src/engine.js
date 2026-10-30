@@ -436,6 +436,7 @@ function engine() {
 		laserCannon.firing = 0;
 		reboundList = [];
 		flashList = [];
+		kamikazeList = [];
 	} else if ( key[4] == 1 && pause == 0 ) {
 		pause++; pauseStep++;
 		refresh();
@@ -480,6 +481,10 @@ function engine() {
 		}
 		// the NAZA's announces count down to what they announce (threats.js)
 		advanceAnnounces(ctx);
+		// the camera goes to the duel's view, once it began (boss.js)
+		advanceCamera();
+		// and the kamikazes are built, and fly to the asteroids they were sent to (kamikaze.js)
+		advanceKamikazes(ctx);
 	}	// this is the pause bracket
 
 	
@@ -550,6 +555,9 @@ function engine() {
 		var distance = distanceToPlanet(asteroidList[i].x, asteroidList[i].y);
 		if ( asteroidList[i].giant && distance < giantClosest ) {
 			giantClosest = distance;
+		}
+		if ( asteroidList[i].armored && distance < armorClosest ) {
+			armorClosest = distance;		// (the same for the armored asteroids : threats.js)
 		}
 		// resolving gravitron's gravity !
 			// Calculating angle around the planet to the asteroid
@@ -632,14 +640,14 @@ function engine() {
 		}
 		
 		// Testing if asteroid still in game
-		if ( distance > gameSize && ( inAdventure() || asteroidList[i].flyBy ) ){
+		if ( ( distance > fieldReach && ( inAdventure() || asteroidList[i].flyBy ) ) || outOfDuel ( asteroidList[i] ) ){
 
 		// in the Adventure, an asteroid gone so far is gone for good, for the waves to stay as written (adventure.js),
-		// and a comet or a swarm's pebble flies by for good (threats.js)
+		// a comet or a swarm's pebble flies by for good (threats.js), and in the duel, one going away out of sight (boss.js)
 			keepit = 0;
 			asteroidList[i].life = 0;
 
-		} else if ( distance > gameSize ){
+		} else if ( distance > fieldReach ){
 
 		// Asteroid outta game, relaunching it toward player's planet
 
@@ -661,6 +669,11 @@ function engine() {
 		} else if ( distance < (MyPlanet.radius + asteroidList[i].radius) ){
 			// Yes it is ! Decreasing life (less with the Early Warning) and destroying asteroid
 			var damage = crashDamage(crashLife(asteroidList[i]));	// (a comet takes few : threats.js)
+			if ( asteroidList[i].colossus ) {
+				damage = Math.max ( damage, MyPlanet.life );		// (the Colossus crushes the planet : boss.js)
+				asteroidList[i].crashed = true;
+			}
+			countCrash(asteroidList[i]);		// (the parts of a splitting asteroid are counted : threats.js)
 			MyPlanet.life -= damage;
 			nbrDamage += damage;
 			if( MyPlanet.life < 0 ){
@@ -716,14 +729,15 @@ function engine() {
 						// will they bounce or do they completely crash
 						   var CollisionSpeed = Math.abs(vx2minus1)+Math.abs(vy2minus1);
 						   
-						// debris creation from asteroids' life
+						// debris creation from asteroids' life (an asteroid already destroyed in this turn hits with none left,
+						// not with less than none : it would heal the other one)
 							var iLife = asteroidList[i].life;
 							var jLife = asteroidList[j].life;
-							var iColl = Math.floor(asteroidList[j].life * CollisionSpeed / MaxCollSpd * slung(asteroidList[j]) );
+							var iColl = Math.floor(Math.max(0, asteroidList[j].life) * CollisionSpeed / MaxCollSpd * slung(asteroidList[j]) );
 							addDebris(ctx,iColl,asteroidList[i].x,asteroidList[i].y,asteroidList[j].vx,asteroidList[j].vy,debrisList,asteroidList[i].metal);
 							asteroidList[i].life -= iColl;
 
-							var jColl = Math.floor(asteroidList[i].life * CollisionSpeed / MaxCollSpd * slung(asteroidList[i]) );
+							var jColl = Math.floor(Math.max(0, asteroidList[i].life) * CollisionSpeed / MaxCollSpd * slung(asteroidList[i]) );
 							addDebris(ctx,jColl,asteroidList[j].x,asteroidList[j].y,asteroidList[i].vx,asteroidList[i].vy,debrisList,asteroidList[j].metal);
 							asteroidList[j].life -= jColl;
 
@@ -954,7 +968,7 @@ function engine() {
 
 			// Testing if shot still in game
 			var distance = distanceToPlanet(shotList[i].x,shotList[i].y);
-			if ( distance > gameSize ){
+			if ( distance > fieldReach ){
 			
 			// Shot outta game, destroying it
 				keepit = 0;
@@ -1022,7 +1036,7 @@ function engine() {
 	// Resolving the missiles, the capsules, the blasts, the rebound shots and their sparks (secondary.js)
 	if ( pause == 0 ) {
 		resolveMissiles(ctx);
-		resolveCapsules();
+		resolveCapsules(ctx);
 		resolveBlasts();
 		resolveRebounds(ctx);
 		resolveSparks();
@@ -1140,7 +1154,19 @@ function drawGame ( blend ) {
 			MyPlanet.Draw();
 			drawBanner ( ctx );
 		} else if ( state == "playing" ) {
+			// the Red Effect, when the planet is hit, over the whole game area
+			if ( redEffect != 0 ) {
+				ctx.fillStyle = "rgba(" + redEffect + ", 0, 0, 1)";
+				ctx.fillRect(0,0,gameSize,gameSize);
+			}
+			// space as the camera sees it (the duel's : boss.js), with the sides of the threats announced (threats.js),
+			// then what is written over it (the drawings keep the lines' width and colors left by the ones before, as in 2010)
+			aimCamera ( ctx );
 			drawPlaying ( ctx );
+			drawKamikazes ( ctx );		// (the kamikazes flying, and the ones ready in a corner : kamikaze.js)
+			drawThreatSides ( ctx );
+			ctx.setTransform(scale,0,0,scale,0,0);
+			drawKamikazeGauge ( ctx );
 			drawBanner ( ctx );
 			drawWaveBanner ( ctx );		// the Adventure's waves (adventure.js)
 			drawAnnounce ( ctx );		// and the NAZA's announces of the threats coming (threats.js)
@@ -1160,11 +1186,6 @@ function drawGame ( blend ) {
 
 // Function to draw a game being played, in the order of 2010 : some drawings keep the line's width left by the one before
 function drawPlaying ( ctx ) {
-	// the Red Effect, when the planet is hit
-	if ( redEffect != 0 ) {
-		ctx.fillStyle = "rgba(" + redEffect + ", 0, 0, 1)";
-		ctx.fillRect(0,0,gameSize,gameSize);
-	}
 	// the limits of the GRAVITRON's field, with the Field Scanner
 	if ( MyGravitron.scanner > 0 && pause == 0 ) {
 		drawFieldLimits(ctx);

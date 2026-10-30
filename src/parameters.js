@@ -49,6 +49,8 @@
 		nitroW			: { delay : 200, power : 12, speed : 1.5, smart : 0, cannons : 0, blast : 40 },	// another one, its delay counted once its bomb is gone
 		laserW			: { delay : 350, power : 6, speed : 0, smart : 0, cannons : 0, duration : 50 },	// the laser : its power per second, its beam's duration and its cooldown in turns
 		reboundW		: { delay : 125, power : 3, speed : 6, smart : 0, cannons : 0, rebounds : 2 },	// and the rebound shot, with the rebounds it can make
+		kamikazes		: 1,		// the kamikazes ready at the start, sent with a click on an asteroid (kamikaze.js),
+		kamikazeBuilding: 30,		// and the seconds to build a new one
 		critChance		: 0.05,		// the chance of a main weapon's shot to be critical (bonuses.js),
 		critDamage		: 3,		// and how many times its power it then does
 
@@ -250,7 +252,9 @@ function initDefault(context,level) {
 	goliath			= false;
 	giantClosest	= gameSize;
 	newAchievements	= [];		// the achievements obtained in this game (achievements.js)
-	newWaves();					// and the waves of the Adventure, if it is a level of it (adventure.js)
+	newWaves();					// and the waves of the Adventure, if it is a level of it (adventure.js),
+	newDuel();					// seen as usual, with no boss until a duel (boss.js),
+	newKamikazes();				// and the kamikazes ready (kamikaze.js)
 
 	// player's planet parameters
 	MyPlanet.skin		= planetSkin;
@@ -315,6 +319,8 @@ function initDefault(context,level) {
 	cometTimer		= 0;
 	swarmAt			= 0;
 	armorAt			= 0;
+	armorClosest	= gameSize;
+	splinterHits	= 0;
 	newResearches();
 	
 	// player's GRAVITRON parameters

@@ -264,9 +264,19 @@ var upgrades = {
 							level : function () { return planetRecovery; }, raise : function () { planetRecovery++; },
 							picture : "recovery", unit : "of a crash", value : function () { return planetRecovery * 20 + "%"; },
 							change : function () { return planetRecovery * 20 + "% → " + ( planetRecovery + 1 ) * 20 + "% of the inhabitants a crash takes, given back as mat"; } },
-	// brought by its research (researches.js)
+	// brought by its research (researches.js), or by a level of the Adventure (adventure.js)
+	// THE KAMIKAZES : the ships sent with a click on an asteroid, to stop it (kamikaze.js)
+	// (the building time goes down, five seconds at a time)
+	kamikazeNbr			: { name : "Kamikazes", tip : "Kamikazes - Click on an asteroid to send a kamikaze from your planet: it rams the asteroid head-on and stops it, for your cannon to hit it. Each level adds one more ship, built one after the other.",
+							max : 3, price : "times50",
+							level : function () { return kamikazes.most; }, raise : function () { kamikazes.most++; kamikazes.ready++; },
+							picture : "kamikaze", unit : "ships", what : "kamikaze" },
+	kamikazeBuilding	: { name : "Kamikaze Building", tip : "Kamikaze Building Time - The seconds your planet takes to build a new kamikaze, once one is sent.",
+							max : 15, decreasing : true, price : "from45times5",
+							level : function () { return kamikazes.building; }, raise : function () { kamikazes.building -= 5; },
+							picture : "hourglass", unit : "s to build", step : -5, what : "seconds to build one" },
 	earlyWarning		: { name : "Early Warning", tip : "Early Warning - Each level evacuates 5% of the inhabitants an asteroid's crash would take away.",
-							max : 5, price : "plus1times100", appears : function () { return research.done.earlyWarning ? true : false; },
+							max : 5, price : "plus1times100", appears : function () { return research.done.earlyWarning || inAdventure() ? true : false; },	// (in the Adventure, a level brings it)
 							level : function () { return MyPlanet.warning; }, raise : function () { MyPlanet.warning++; },
 							picture : "warning", unit : "evacuated", value : function () { return Math.round ( MyPlanet.warning * warningShare * 100 ) + "%"; },
 							change : function () { return Math.round ( MyPlanet.warning * warningShare * 100 ) + "% → " + Math.round ( ( MyPlanet.warning + 1 ) * warningShare * 100 )
@@ -319,7 +329,7 @@ var shopLayout = [
 			statusTip : "A secondary weapon, always active : it takes no place among your active weapons.",
 			upgrades : ["reboundReload","reboundPow","reboundBounces"] }
 	] },
-	{ title : "Heal or upgrade your Planet", upgrades : ["healing","healFact","crews","maxHealth","maxMat","autoHeal","recovery","earlyWarning","lab"] },
+	{ title : "Heal or upgrade your Planet", upgrades : ["healing","healFact","crews","maxHealth","maxMat","autoHeal","recovery","earlyWarning","kamikazeNbr","kamikazeBuilding","lab"] },
 	{ title : "Researches", researches : true }		// filled by refreshResearches() (researches.js)
 ];
 
@@ -649,6 +659,9 @@ function calculate(type,ref) {
 			break;
 		case "from9times100" :
 			ref = ( 9 - ref ) * 100;
+			break;
+		case "from45times5" :
+			ref = ( 45 - ref ) * 5;
 			break;
 		case "squared" :
 			ref *= ref;

@@ -85,7 +85,7 @@ function resolveMissiles ( ctx ) {
 		}
 		missile.x += missile.vx;
 		missile.y += missile.vy;
-		if ( distanceToPlanet ( missile.x, missile.y ) > gameSize ) {
+		if ( distanceToPlanet ( missile.x, missile.y ) > fieldReach ) {
 			continue;
 		}
 		var hit = false;
@@ -220,12 +220,12 @@ function bombInPlay () {
 }
 
 // function to choose the asteroid to turn into a bomb : the one farthest from the planet, still in view,
-// for the player to have time to steer it
+// for the player to have time to steer it (never the Colossus, much too big : boss.js)
 function bombTarget () {
 	var target = false, best = 0;
 	for ( var a in asteroidList ) {
 		var distance = distanceToPlanet ( asteroidList[a].x, asteroidList[a].y );
-		if ( asteroidList[a].life > 0 && distance < gameSize / 2 - 20 && distance > best ) {
+		if ( asteroidList[a].life > 0 && !asteroidList[a].colossus && distance < gameSize / 2 - 20 && distance > best ) {
 			target = asteroidList[a];
 			best = distance;
 		}
@@ -234,13 +234,13 @@ function bombTarget () {
 }
 
 // function to move the capsules : each one turns the first asteroid it touches into a bomb, or gets lost in space
-function resolveCapsules () {
+function resolveCapsules ( ctx ) {
 	var kept = [];
 	for ( var c in capsuleList ) {
 		var capsule = capsuleList[c];
 		capsule.x += capsule.vx;
 		capsule.y += capsule.vy;
-		if ( distanceToPlanet ( capsule.x, capsule.y ) > gameSize ) {
+		if ( distanceToPlanet ( capsule.x, capsule.y ) > fieldReach ) {
 			continue;
 		}
 		var hit = false;
@@ -250,7 +250,10 @@ function resolveCapsules () {
 				hit = asteroid;
 			}
 		}
-		if ( hit ) {
+		if ( hit && hit.colossus ) {
+			// (the Colossus is too big to be a bomb : the capsule explodes against it at once, as a bomb would : boss.js)
+			explodeBomb ( ctx, { x : capsule.x, y : capsule.y, bomb : { power : capsule.power, blast : capsule.blast, family : { destroyed : 0 } } } );
+		} else if ( hit ) {
 			// (its family, shared with the bombs of its Chain Reaction, counts the asteroids they destroy)
 			hit.bomb = { power : capsule.power, blast : capsule.blast, family : { destroyed : 0 } };
 		} else {
@@ -294,7 +297,7 @@ function explodeBomb ( ctx, bomb ) {
 			if ( asteroid.life <= 0 ) {
 				allPassed = 1;
 				family.destroyed++;
-			} else if ( chained > 0 && !asteroid.bomb ) {
+			} else if ( chained > 0 && !asteroid.bomb && !asteroid.colossus ) {
 				asteroid.bomb = { power : chained, blast : blast, family : family };
 			}
 		}
@@ -428,16 +431,17 @@ function beamCrosses ( asteroid ) {
 
 // function to choose the laser's target among the asteroids in view : the giants first, the closest one, then the asteroids
 // going to crash on the planet, the soonest crash first, or else the closest asteroid
+// (the Colossus as a giant, once its rock is in reach : boss.js)
 function laserTarget () {
 	var best = false, bestRank = 0, bestScore = 0;
 	for ( var a in asteroidList ) {
 		var asteroid = asteroidList[a];
 		var distance = distanceToPlanet ( asteroid.x, asteroid.y );
-		if ( asteroid.life <= 0 || distance > gameSize / 2 - 20 ) {
+		if ( asteroid.life <= 0 || distance - ( asteroid.colossus ? asteroid.radius : 0 ) > gameSize / 2 - 20 ) {
 			continue;
 		}
 		var rank = 0, score = distance;
-		if ( asteroid.giant ) {
+		if ( asteroid.giant || asteroid.colossus ) {
 			rank = 2;
 		} else {
 			var crash = crashTime ( asteroid );
@@ -478,11 +482,11 @@ function drawLaser ( ctx ) {
 		ctx.fillStyle = cone;
 		ctx.beginPath();
 		ctx.moveTo ( target.x, target.y );
-		ctx.lineTo ( target.x + gameSize * Math.cos ( angle + pierceCone ), target.y + gameSize * Math.sin ( angle + pierceCone ) );
-		ctx.lineTo ( target.x + gameSize * Math.cos ( angle - pierceCone ), target.y + gameSize * Math.sin ( angle - pierceCone ) );
+		ctx.lineTo ( target.x + fieldReach * Math.cos ( angle + pierceCone ), target.y + fieldReach * Math.sin ( angle + pierceCone ) );
+		ctx.lineTo ( target.x + fieldReach * Math.cos ( angle - pierceCone ), target.y + fieldReach * Math.sin ( angle - pierceCone ) );
 		ctx.closePath();
 		ctx.fill();
-		drawBeam ( ctx, target.x, target.y, MyPlanet.x + gameSize * Math.cos ( angle ), MyPlanet.y + gameSize * Math.sin ( angle ), flicker / 2 );
+		drawBeam ( ctx, target.x, target.y, MyPlanet.x + fieldReach * Math.cos ( angle ), MyPlanet.y + fieldReach * Math.sin ( angle ), flicker / 2 );
 		for ( var a in asteroidList ) {
 			if ( asteroidList[a].life > 0 && beamCrosses ( asteroidList[a] ) ) {
 				burnMark ( ctx, asteroidList[a], flicker / 2 );
@@ -608,9 +612,10 @@ function ricochet ( ctx, shot ) {
 
 // function to find what a rebound shot meets : the first of the rocks it goes into (the asteroids, or none when the Trick Shot
 // looks for the others itself), the planet's atmosphere, or an edge of space ; returns what it touched (false for an edge)
-// and the way out of it, or false when it meets nothing
+// and the way out of it, or false when it meets nothing (the edges of space being the ones the camera shows : boss.js)
 function contactOf ( shot, rocks ) {
 	var touched = false;
+	var edges = viewEdges();
 	for ( var r = 0; r < rocks.length; r++ ) {
 		if ( rocks[r].life > 0 && bounceOn ( shot, rocks[r].x, rocks[r].y, rocks[r].radius + 2 ) ) {
 			touched = rocks[r];
@@ -623,13 +628,13 @@ function contactOf ( shot, rocks ) {
 	if ( touched ) {
 		// (bounceOn has put the shot on its surface, the way out)
 		return { rock : touched, nx : ( shot.x - touched.x ) / ( touched.radius + 2 ), ny : ( shot.y - touched.y ) / ( touched.radius + 2 ) };
-	} else if ( shot.x < 0 && shot.vx < 0 ) {
+	} else if ( shot.x < edges.left && shot.vx < 0 ) {
 		return { rock : false, nx : 1, ny : 0 };
-	} else if ( shot.x > gameSize && shot.vx > 0 ) {
+	} else if ( shot.x > edges.right && shot.vx > 0 ) {
 		return { rock : false, nx : -1, ny : 0 };
-	} else if ( shot.y < 0 && shot.vy < 0 ) {
+	} else if ( shot.y < edges.top && shot.vy < 0 ) {
 		return { rock : false, nx : 0, ny : 1 };
-	} else if ( shot.y > gameSize && shot.vy > 0 ) {
+	} else if ( shot.y > edges.bottom && shot.vy > 0 ) {
 		return { rock : false, nx : 0, ny : -1 };
 	}
 	return false;

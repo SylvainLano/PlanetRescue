@@ -53,6 +53,7 @@ var tilePictures = {
 	autoHeal	: '<path d="M44.7 26.1A14 14 0 0 0 19.3 26.1M19.3 37.9A14 14 0 0 0 44.7 37.9"/><path d="M15 23l4.3 3.1 2-5M49 41l-4.3-3.1-2 5"/><path d="M32 27v10M27 32h10" stroke-width="2.5"/>',
 	recovery	: '<path d="M14 21l4-6.5 6.5-1 5 4.5-.5 7-5 4.5-7-.5-3-4.5z"/><path d="M39 35.5h9l4 5-8.5 10-8.5-10z"/><path d="M31 23q11 0 12 8" stroke-dasharray="3 3" stroke-width="2"/><path d="M39.5 28.5l3.5 4 3-4.5" stroke-width="2"/>',
 	warning		: '<path d="M32 14L52 48H12z"/><path d="M32 26v10" stroke-width="4"/><circle fill="INK" stroke="none" cx="32" cy="42" r="2.5"/>',
+	kamikaze	: '<path d="M32 9l9 26-9-5-9 5z"/><path d="M27 41l5 13 5-13" stroke-width="2"/><circle cx="48" cy="17" r="5" stroke-width="2"/>',
 	lab			: medalPictures.flask
 };
 var tileInk = "#9fb3cf";	// their color, darkened by the tile (css/main.css)

@@ -33,7 +33,9 @@ var sounds = {
 	critical	: { gap : 60, play : function ( t ) { tone ( "square", 1600, 700, 0.09, 0.04, t ); hiss ( 2500, 0.12, 0.25, t ); } },
 	achievement	: { gap : 0, play : function ( t ) { notes ( [1047, 1319, 1568], 0.12, t ); } },
 	research	: { gap : 0, play : function ( t ) { notes ( [784, 1175], 0.14, t ); } },
-	shelters	: { gap : 0, play : function ( t ) { notes ( [523, 659, 392], 0.2, t ); } }
+	shelters	: { gap : 0, play : function ( t ) { notes ( [523, 659, 392], 0.2, t ); } },
+	kamikaze	: { gap : 0, play : function ( t ) { tone ( "sawtooth", 260, 820, 0.25, 0.04, t ); } },
+	ram			: { gap : 40, play : function ( t ) { hiss ( 700, 0.25, 0.4, t ); tone ( "sine", 140, 60, 0.2, 0.3, t ); } }
 };
 
 // function to turn the sounds on or off, from the start menu or with the M key
