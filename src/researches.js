@@ -82,7 +82,11 @@ function newResearches () {
 }
 
 // function to know if a branch is open, by its achievement
+// (in the Adventure, by the level being played : adventure.js)
 function branchOpen ( branch ) {
+	if ( inAdventure() ) {
+		return adventureAllows ( branch );
+	}
 	return achieved[researchBranches[branch].opener] ? true : false;
 }
 
@@ -97,9 +101,10 @@ function anyBranchOpen () {
 }
 
 // function to know if a research is opened : its branch, and its own achievement if it has one
+// (in the Adventure, its branch is enough)
 function researchOpened ( id ) {
 	var opener = researches[id].opener;
-	return branchOpen ( researches[id].branch ) && ( !opener || achieved[opener] ? true : false );
+	return branchOpen ( researches[id].branch ) && ( inAdventure() || !opener || achieved[opener] ? true : false );
 }
 
 // function to know if a research can be done : the lab built, opened, not done yet, and the researches it needs done

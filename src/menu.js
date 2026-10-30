@@ -40,6 +40,7 @@ function newElement ( tag, className, parent ) {
 // function to add a section of the menu, opened by a click on its title
 function addSection ( shop, section ) {
 	var block = newElement ( "div", "section", shop );
+	menuAppearing.push ( { element : block, appears : function () { return sectionAppears ( section ); } } );
 	var head = newElement ( "div", "head", block );
 	addBadge ( head, section.title, section.researches ? "research" : sectionThings ( section ) );
 	head.addEventListener ( "click", function () { openSection ( block ); } );
@@ -82,9 +83,7 @@ function addPanel ( tabs, holder, panel ) {
 	var tab = newElement ( "a", panel.secondary ? "tab secondary" : "tab", tabs );	// (the secondary weapons' tabs on a row of their own)
 	addBadge ( tab, panel.tab, panelThings ( panel ) );
 	tab.addEventListener ( "click", function () { showPanel ( index, tabs, holder ); } );
-	if ( panel.appears ) {
-		menuAppearing.push ( { element : tab, appears : panel.appears } );
-	}
+	menuAppearing.push ( { element : tab, appears : function () { return panelAppears ( panel ); } } );
 	var box = newElement ( "div", "panel lines", holder );
 	newElement ( "h2", "", box ).textContent = panel.title;
 	var list = box;
@@ -110,6 +109,42 @@ function showPanel ( index, tabs, holder ) {
 		holder.children[n].style.display = ( n == index ) ? "" : "none";	// (shown as its columns ask, css/main.css)
 		tabs.children[n].classList.toggle ( "current", n == index );
 	}
+}
+
+// function to know if a weapon tab is shown : once its weapon or one of its upgrades can be bought, as the level of the Adventure decides
+// (adventure.js), and once the tab is worth it (appears)
+function panelAppears ( panel ) {
+	if ( panel.appears && !panel.appears() ) {
+		return false;
+	}
+	if ( adventureAllows ( panel.weapon ) ) {
+		return true;
+	}
+	for ( var u in panel.upgrades ) {
+		if ( adventureAllows ( panel.upgrades[u] ) ) {
+			return true;
+		}
+	}
+	return false;
+}
+
+// function to know if a section of the menu is shown : once something of it can be bought, as the level of the Adventure decides
+// (the Researches, once a branch is open)
+function sectionAppears ( section ) {
+	if ( section.researches ) {
+		return !inAdventure() || anyBranchOpen();
+	}
+	for ( var u in section.upgrades ) {
+		if ( adventureAllows ( section.upgrades[u] ) ) {
+			return true;
+		}
+	}
+	for ( var p in section.panels ) {
+		if ( panelAppears ( section.panels[p] ) ) {
+			return true;
+		}
+	}
+	return false;
 }
 
 // function to show the weapon tabs and upgrade lines once they are worth buying, at each refresh()
@@ -206,9 +241,7 @@ function addUpgrades ( parent, list ) {
 function addUpgrade ( parent, thing ) {
 	var line = addLine ( parent, upgrades[thing].name, thing, false, function () { upgrade ( thing ); } );
 	line.setAttribute ( "data-upgrade", thing );
-	if ( upgrades[thing].appears ) {
-		menuAppearing.push ( { element : line.parentNode, appears : upgrades[thing].appears } );
-	}
+	menuAppearing.push ( { element : line.parentNode, appears : function () { return thingAppears ( { upgrade : thing } ); } } );
 }
 
 // function to add a line of the menu : its label, the link that refresh() fills, and its tooltip

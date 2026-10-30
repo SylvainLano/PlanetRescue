@@ -420,6 +420,40 @@ kbd {
 	color: #fff;
 }
 
+/* the end of a level of the Adventure : its three stars, gold once won, with what wins them (src/adventure.js) */
+#gameOver .over .stars {
+	display: flex;
+	justify-content: center;
+	gap: 10px;
+	margin: 12px auto 14px;
+}
+
+#gameOver .over .star {
+	width: 150px;
+}
+
+#gameOver .over .star span {
+	display: block;
+	font-size: 56px;
+	line-height: 1;
+	color: rgba(255,255,255,0.15);
+}
+
+#gameOver .over .star.won span {
+	color: rgb(242,201,76);
+	text-shadow: 0 0 18px rgba(242,201,76,0.5);
+}
+
+#gameOver .over .star .reason {
+	margin-top: 4px;
+	font-size: 11px;
+	color: #888;
+}
+
+#gameOver .over .star.won .reason {
+	color: #ddd;
+}
+
 /* the hi-scores page : a tab for each difficulty level */
 #gameOver .over .levels {
 	margin: 10px 0 4px;
@@ -571,6 +605,15 @@ a.level.current {
 	text-align: center;
 }
 
+/* closer to the title, to make room for the Adventure's levels once they are shown (src/adventure.js) */
+#mainMenu.adventure {
+	margin-top: 60px;
+}
+
+#mainMenu.adventure #moreLinks {
+	margin-top: 28px;
+}
+
 #levels {
 	margin-top: 26px;
 }
@@ -580,6 +623,52 @@ a.level.current {
 	margin-top: 8px;
 	font-size: 12px;
 	color: #aaa;
+}
+
+/* the levels of the Adventure, with their stars (src/adventure.js) */
+#adventureList {
+	margin-top: 22px;
+}
+
+#adventureList .label {
+	margin-bottom: 6px;
+	font-size: 11px;
+	text-transform: uppercase;
+	letter-spacing: 1px;
+	color: #999;
+}
+
+#adventureList .stage {
+	display: inline-block;
+	margin: 0 4px;
+	padding: 4px 14px;
+	font-family: 'MirageRegular';
+	font-size: 20px;
+	color: #fff;
+	background: rgba(242,201,76,0.1);
+	border: 1px solid rgba(242,201,76,0.6);
+	border-radius: 6px;
+}
+
+#adventureList .stage:hover {
+	background: rgba(242,201,76,0.35);
+}
+
+#adventureList .stage.locked {
+	opacity: 0.35;
+	cursor: default;
+}
+
+#adventureList .stage.locked:hover {
+	background: rgba(242,201,76,0.1);
+}
+
+#adventureList .stars {
+	display: block;
+	font-family: Arial, Helvetica, sans-serif;
+	font-size: 14px;
+	letter-spacing: 2px;
+	color: rgb(242,201,76);
 }
 
 #moreLinks {

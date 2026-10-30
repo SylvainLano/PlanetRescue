@@ -30,6 +30,7 @@ var sounds = {
 	bomb		: { gap : 40, play : function ( t ) { hiss ( 450, 0.7, 0.8, t ); tone ( "sine", 70, 30, 0.6, 0.5, t ); } },
 	rebound		: { gap : 80, play : function ( t ) { tone ( "triangle", 500, 1100, 0.08, 0.06, t ); } },
 	ricochet	: { gap : 40, play : function ( t ) { tone ( "triangle", 2200, 1500, 0.07, 0.05, t ); } },
+	critical	: { gap : 60, play : function ( t ) { tone ( "square", 1600, 700, 0.09, 0.04, t ); hiss ( 2500, 0.12, 0.25, t ); } },
 	achievement	: { gap : 0, play : function ( t ) { notes ( [1047, 1319, 1568], 0.12, t ); } },
 	research	: { gap : 0, play : function ( t ) { notes ( [784, 1175], 0.14, t ); } },
 	shelters	: { gap : 0, play : function ( t ) { notes ( [523, 659, 392], 0.2, t ); } }

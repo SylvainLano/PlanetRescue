@@ -42,6 +42,7 @@ function engine() {
 		instructions.style.display = "none";
 		countdown.style.display = "none";
 		showAchievementCount();
+		showAdventureList();	// the levels of the Adventure, with their stars (adventure.js)
 
 	} else if(state == "infos") {
 
@@ -210,7 +211,7 @@ function engine() {
 				countdownValue++;
 			}
 		} else if ( countdownValue == 214 )  {
-			addDebris(ctx,100,asteroidList[0].x,asteroidList[0].y,asteroidList[0].vx,asteroidList[0].vy,debrisList);
+			addDebris(ctx,100,asteroidList[0].x,asteroidList[0].y,asteroidList[0].vx,asteroidList[0].vy,debrisList,asteroidList[0].metal);
 			shotList[0] = '';
 			asteroidList[0] = '';
 			countdownValue++;
@@ -293,7 +294,8 @@ function engine() {
 		startMenu.style.display = "none";
 		gameOver.style.display = "none";
 		pauseScreen.style.display = "none";
-		initDefault(ctx,difficulty);
+		// a level of the Adventure starts with its own values, the Arcade with the difficulty level's (adventure.js)
+		initDefault(ctx,inAdventure() ? adventureLevels[adventure.level].values : difficulty);
 		// the countdown's banner is drawn on the game, at the top, and hidden until the countdown begins
 		// (the "countdown" element of the page only writes the tutorial's texts)
 		countdown.style.display = "none";
@@ -307,11 +309,14 @@ function engine() {
 			state = "playing";
 		}
 
-		var playedGames = localStorage[scoreKey('playedGames')];
-		if( playedGames === null || playedGames === undefined ){
-			localStorage[scoreKey('playedGames')] = 1;
-		} else {
-			localStorage[scoreKey('playedGames')]++;
+		// (the hi-scores are the Arcade's)
+		if ( !inAdventure() ) {
+			var playedGames = localStorage[scoreKey('playedGames')];
+			if( playedGames === null || playedGames === undefined ){
+				localStorage[scoreKey('playedGames')] = 1;
+			} else {
+				localStorage[scoreKey('playedGames')]++;
+			}
 		}
 		
 	} else if (state == "countdown"){
@@ -394,6 +399,7 @@ function engine() {
 		capsuleList = [];
 		laserCannon.firing = 0;
 		reboundList = [];
+		flashList = [];
 	} else if ( key[4] == 1 && pause == 0 ) {
 		pause++; pauseStep++;
 		refresh();
@@ -420,36 +426,19 @@ function engine() {
 		// The research going on advances with the time of play (researches.js)
 		advanceResearch();
 
-		// Creating an asteroid when the timer runs out, the timer getting shorter as time passes
 		gameTime++;
-		spawnTimer--;
-		if ( spawnTimer <= 0 ) {
-			spawnTimer = spawnInterval();
-
-			// Creation of an asteroid
-				var radius = gameSize / 2;
-				
-				// Determination of an angle
-				var angle = Math.random() * Math.PI * 2 ;
-				
-				// Determination of the corresponding coordinates
-				var AsterX = MyPlanet.x + (radius * Math.cos(angle));
-				var AsterY = MyPlanet.y + (radius * Math.sin(angle));
-				
-				// Determination of the moving vector
-				if ( asteroidList.length > 2 ) {
-					angle = angle - Math.PI / 4 + Math.random() * Math.PI / 2;
-				}
+		if ( inAdventure() ) {
+			// the level of the Adventure sends its waves (adventure.js)
+			advanceWaves(ctx);
+		} else {
+			// Creating an asteroid when the timer runs out, the timer getting shorter as time passes
+			spawnTimer--;
+			if ( spawnTimer <= 0 ) {
+				spawnTimer = spawnInterval();
 				// a giant now and then, after a while : much stronger, bigger, heavier and slower, a threat to destroy first
 				var giant = gameTime >= gameValues.giantFrom * framesPerSecond && Math.random() < gameValues.giantChance;
-				var velocity = (Math.random() * 2 + 1) * asteroidSpeedFactor() * asteroidBS * ( giant ? giantSpeed : 1 );
-				var vx = - velocity * Math.cos(angle);
-				var vy = - velocity * Math.sin(angle);
-
-			// its life grows as time passes
-			var life = ( giant ? gameValues.giantLife : gameValues.asteroidLife ) + asteroidExtraLife();
-			item = new Asteroid(ctx,life,asteroidBR * ( giant ? giantSize : 1 ),asteroidBM * ( giant ? giantMass : 1 ),AsterX,AsterY,vx,vy,giant);
-			asteroidList.push(item);
+				launchAsteroid(ctx,Math.random() * Math.PI * 2,giant);
+			}
 		}
 	}	// this is the pause bracket
 
@@ -463,14 +452,18 @@ function engine() {
 				checkAchievements();	// the ones of the game's end, before they are listed
 				status.style.display = "none";
 				gameOver.style.display = "block";
-				showGameOver(gameOver);	// its score, its numbers, its records and its achievements (gameover.js)
+				if ( inAdventure() ) {
+					showLevelEnd(gameOver,false);	// the level lost (adventure.js)
+				} else {
+					showGameOver(gameOver);	// its score, its numbers, its records and its achievements (gameover.js)
+				}
 				pauseStep = 0;
 			}
 		} else {
 			if ( pauseStep > 6 ) {
 			
 				for(i=0;i<asteroidList[0].life;i++){
-					addDebris(ctx,1,asteroidList[0].x,asteroidList[0].y,Math.random(),Math.random(),debrisList);
+					addDebris(ctx,1,asteroidList[0].x,asteroidList[0].y,Math.random(),Math.random(),debrisList,asteroidList[0].metal);
 				}
 				asteroidList.shift();
 				pauseStep = 0;
@@ -511,6 +504,9 @@ function engine() {
 		
 		// Calculating distance to the player's planet
 		var distance = distanceToPlanet(asteroidList[i].x, asteroidList[i].y);
+		if ( asteroidList[i].giant && distance < giantClosest ) {
+			giantClosest = distance;
+		}
 		// resolving gravitron's gravity !
 			// Calculating angle around the planet to the asteroid
 			var angle = angleAroundPlanet(asteroidList[i].x,asteroidList[i].y);		
@@ -547,11 +543,11 @@ function engine() {
 					if ( Math.abs ( distance - pulseList[p].radius ) < ( asteroidList[i].radius / 2 ) && intoArcField(angle,pulseList[p]) == false ) {
 						if ( pulseList[p].charge < asteroidList[i].life ) {
 							asteroidList[i].life -= pulseList[p].charge;
-							addDebris(ctx,pulseList[p].charge,asteroidList[i].x,asteroidList[i].y,asteroidList[i].vx,asteroidList[i].vy,debrisList);
+							addDebris(ctx,pulseList[p].charge,asteroidList[i].x,asteroidList[i].y,asteroidList[i].vx,asteroidList[i].vy,debrisList,asteroidList[i].metal);
 							pulseList[p].charge = 0;
 						} else {
 							pulseList[p].charge -= asteroidList[i].life;
-							addDebris(ctx,asteroidList[i].life,asteroidList[i].x,asteroidList[i].y,asteroidList[i].vx,asteroidList[i].vy,debrisList);
+							addDebris(ctx,asteroidList[i].life,asteroidList[i].x,asteroidList[i].y,asteroidList[i].vx,asteroidList[i].vy,debrisList,asteroidList[i].metal);
 							asteroidList[i].life = 0;
 						}
 					}
@@ -673,11 +669,11 @@ function engine() {
 							var iLife = asteroidList[i].life;
 							var jLife = asteroidList[j].life;
 							var iColl = Math.floor(asteroidList[j].life * CollisionSpeed / MaxCollSpd * slung(asteroidList[j]) );
-							addDebris(ctx,iColl,asteroidList[i].x,asteroidList[i].y,asteroidList[j].vx,asteroidList[j].vy,debrisList);
+							addDebris(ctx,iColl,asteroidList[i].x,asteroidList[i].y,asteroidList[j].vx,asteroidList[j].vy,debrisList,asteroidList[i].metal);
 							asteroidList[i].life -= iColl;
 
 							var jColl = Math.floor(asteroidList[i].life * CollisionSpeed / MaxCollSpd * slung(asteroidList[i]) );
-							addDebris(ctx,jColl,asteroidList[j].x,asteroidList[j].y,asteroidList[i].vx,asteroidList[i].vy,debrisList);
+							addDebris(ctx,jColl,asteroidList[j].x,asteroidList[j].y,asteroidList[i].vx,asteroidList[i].vy,debrisList,asteroidList[j].metal);
 							asteroidList[j].life -= jColl;
 
 							// an asteroid destroyed by another one which the GRAVITRON sent its way (Bank Shot achievement)
@@ -931,10 +927,14 @@ function engine() {
 							asteroidList[j].vy += tempVY * shotList[i].power / 15;
 						} else {
 							// debris creation from asteroids' life
-							addDebris(ctx,shotList[i].power,asteroidList[j].x,asteroidList[j].y,asteroidList[j].vx,asteroidList[j].vy,debrisList);
+							addDebris(ctx,shotList[i].power,asteroidList[j].x,asteroidList[j].y,asteroidList[j].vx,asteroidList[j].vy,debrisList,asteroidList[j].metal);
 							asteroidList[j].life -= shotList[i].power;
 							if ( asteroidList[j].life <= 0 ) {
 								allPassed = 1;
+							}
+							// a critical shot flashes red (bonuses.js)
+							if ( shotList[i].critical ) {
+								criticalHit(asteroidList[j]);
 							}
 						}
 						keepit = 0;
@@ -974,6 +974,7 @@ function engine() {
 		resolveBlasts();
 		resolveRebounds(ctx);
 		resolveSparks();
+		resolveFlashes();	// and the flashes of the critical shots (bonuses.js)
 	}
 
 
@@ -1085,6 +1086,7 @@ function drawGame ( blend ) {
 		} else if ( state == "playing" ) {
 			drawPlaying ( ctx );
 			drawBanner ( ctx );
+			drawWaveBanner ( ctx );		// the Adventure's waves (adventure.js)
 			// what the player should know about the researches, while playing (researches.js)
 			if ( pause == 0 ) {
 				drawResearchCorner ( ctx );
@@ -1153,6 +1155,8 @@ function drawPlaying ( ctx ) {
 		ctx.closePath();
 		ctx.fill();
 	}
+	// the critical shots over them, and their flashes (bonuses.js)
+	drawCriticals(ctx);
 	// the missiles, the capsules, the blasts, the laser's beam and the rebound shots, from under the planet (secondary.js)
 	drawMissiles(ctx);
 	drawCapsules(ctx);

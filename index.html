@@ -12,7 +12,7 @@
 <html>
 <head>
 	<meta charset="utf-8">
-	<title>Planet Rescue v0.36.0</title>
+	<title>Planet Rescue v0.37.0</title>
 
 	<link rel="stylesheet" type="text/css" href="css/main.css">
 
@@ -25,7 +25,9 @@
 	<script type="text/javascript" src="src/menu.js"></script>
 	<script type="text/javascript" src="src/achievements.js"></script>
 	<script type="text/javascript" src="src/researches.js"></script>
+	<script type="text/javascript" src="src/adventure.js"></script>
 	<script type="text/javascript" src="src/secondary.js"></script>
+	<script type="text/javascript" src="src/bonuses.js"></script>
 	<script type="text/javascript" src="src/gameover.js"></script>
 	<script type="text/javascript" src="src/prototypes.js"></script>
 	<script type="text/javascript" src="src/parameters.js"></script>
@@ -56,16 +58,17 @@
 	</div>
 	<div id="startMenu" class="ui">
 		<div class="title">
-			Planet Rescue <span class="version">v0.36.0</span>
+			Planet Rescue <span class="version">v0.37.0</span>
 		</div>
 		<div id="mainMenu">
-			<a href="#" class="button primary" onClick='state="init";'>Start</a>
+			<a href="#" class="button primary" onClick='playArcade();'>Start</a>
 			<div id="levels">
 				<a href="#" id="level_easy" class="level" onClick='chooseLevel("easy");'>Easy</a>
 				<a href="#" id="level_normal" class="level" onClick='chooseLevel("normal");'>Normal</a>
 				<a href="#" id="level_hard" class="level" onClick='chooseLevel("hard");'>Hard</a>
 			</div>
 			<div id="levelText"></div><!-- what the chosen level changes, written by showLevel() -->
+			<div id="adventureList"></div><!-- the levels of the Adventure, written by showAdventureList() (src/adventure.js) -->
 			<div id="moreLinks">
 				<a href="#" class="button" onClick='state="tutorial";'>Tutorial</a>
 				<a href="#" class="button" onClick='state="infos";'>Infos</a>

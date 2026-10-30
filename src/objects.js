@@ -69,7 +69,7 @@ function Pulse(context,angle,wideness,charge,gravRadius) {
 }
 
 // asteroids  pseudo-class
-function Asteroid(context,life,r,m,x,y,vx,vy,giant) {
+function Asteroid(context,life,r,m,x,y,vx,vy,giant,metal) {
 // elements from the function call
 	this.life=life;
 	this.context=context;
@@ -84,6 +84,7 @@ function Asteroid(context,life,r,m,x,y,vx,vy,giant) {
 	this.pass = 0;			// for the main structure to ignore this asteroid
 	this.turned = 0;		// how much the GRAVITRON has turned its way, in radians (Bank Shot achievement)
 	this.giant = giant || false;	// a giant asteroid : rarer, much stronger, and darker
+	this.metal = metal || false;	// the metal in its rock, if any : its veins shine, and its debris are worth more (bonuses.js)
 	this.burnt = false;		// burnt by the planet's Thick Atmosphere on this way, and the turns its flames still show (researches.js)
 	this.burning = 0;
 	shapeRock(this);		// its own rock, drawn by the game (prototypes.js)
@@ -93,13 +94,14 @@ function Asteroid(context,life,r,m,x,y,vx,vy,giant) {
 }
 
 // debris  pseudo-class
-function Debris(context,x,y,vx,vy) {
+function Debris(context,x,y,vx,vy,metal) {
 // elements from the function call
 	this.context=context;
 	this.x=x;
 	this.y=y;
 	this.vx=vx;
 	this.vy=vy;
+	this.metal=metal || false;	// made of a metal, it is worth more mat (bonuses.js)
 
 // object definition
 	this.type="Debris";

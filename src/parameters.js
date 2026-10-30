@@ -43,6 +43,8 @@
 		nitroW			: { delay : 200, power : 12, speed : 1.5, smart : 0, cannons : 0, blast : 40 },	// another one, its delay counted once its bomb is gone
 		laserW			: { delay : 350, power : 6, speed : 0, smart : 0, cannons : 0, duration : 50 },	// the laser : its power per second, its beam's duration and its cooldown in turns
 		reboundW		: { delay : 125, power : 3, speed : 6, smart : 0, cannons : 0, rebounds : 2 },	// and the rebound shot, with the rebounds it can make
+		critChance		: 0.05,		// the chance of a main weapon's shot to be critical (bonuses.js),
+		critDamage		: 3,		// and how many times its power it then does
 
 		// player's GRAVITRON
 		gravPower		: 1,
@@ -113,6 +115,7 @@
 	var boomerang		= false;	// an asteroid destroyed by a rebound shot the planet sent back (Boomerang achievement)
 	var bestPinball		= 0;		// the most asteroids hit by a single rebound shot (Pinball achievement)
 	var goliath			= false;	// a giant asteroid finished by a rebound shot after a ricochet (David and Goliath achievement)
+	var giantClosest	= gameSize;	// the closest a giant asteroid came to the planet's center (a challenge of the Adventure)
 
 	// player's planet parameters
 	var planetSkin		= earthMap;		// the map wrapped around the planet (img/earth.js)
@@ -159,6 +162,9 @@
 	var trickAngles		= 72;		// the angles the Trick Shot tries, all around the planet
 	var trickHorizon	= 100;		// and how far ahead it follows each way, in turns
 	var sparkList		= new Array();		// the sparks of their ricochets
+	var critChance		= startValues.critChance;	// the chance of a shot to be critical, and how many times its power it does (bonuses.js)
+	var critDamage		= startValues.critDamage;
+	var flashList		= new Array();		// the flashes of the critical shots hitting an asteroid
 
 	// player's GRAVITRON parameters
 	var key				= [0,0,0,0,0,0,0];		// counterclockwise, clockwise, close, open, pause, change target, erase target choice
@@ -184,6 +190,15 @@
 	var giantMass		= 3;		// heavier, for the GRAVITRON to move it less,
 	var giantSpeed		= 0.6;		// and slower, to give time to destroy it before it crashes with all its life
 	var bankShotTurn	= 20 * Math.PI / 180;	// how much the GRAVITRON must turn an asteroid's way for a Bank Shot
+	// the metals some asteroids have in their rock : their chance to come, what each one of their debris made of it is worth in mat,
+	// and their color (bonuses.js)
+	var metals = {
+		copper	: { chance : 0.08, value : 2, color : "#5fd3a8" },		// green, as verdigris
+		silver	: { chance : 0.04, value : 3, color : "#dfe6f0" },
+		gold	: { chance : 0.015, value : 5, color : "#f5c842" }
+	};
+	var metalShare		= 0.5;		// the part of the debris of an asteroid with a metal that are made of it
+	var prospectorBonus	= 0.5;		// how much each level of the Prospector raises the metals' chances
 	var targetedA		= false;
 	var aimedA			= false;	// the asteroid the main cannon aims at, circled on screen
 
@@ -221,7 +236,9 @@ function initDefault(context,level) {
 	boomerang		= false;
 	bestPinball		= 0;
 	goliath			= false;
+	giantClosest	= gameSize;
 	newAchievements	= [];		// the achievements obtained in this game (achievements.js)
+	newWaves();					// and the waves of the Adventure, if it is a level of it (adventure.js)
 
 	// player's planet parameters
 	MyPlanet.skin		= planetSkin;
@@ -277,6 +294,9 @@ function initDefault(context,level) {
 	reboundCannon.rebounds = gameValues.reboundW.rebounds;
 	reboundList		= [];
 	sparkList		= [];
+	critChance		= gameValues.critChance;
+	critDamage		= gameValues.critDamage;
+	flashList		= [];
 	newResearches();
 	
 	// player's GRAVITRON parameters
@@ -294,6 +314,7 @@ function initDefault(context,level) {
 	MyGravitron.slingshot	= 0;
 	MyGravitron.compactor	= 0;		// and the levels of its Compactor, an upgrade its research brings,
 	MyGravitron.compacted	= 0;		// with the part of a mat it has made from the debris
+	MyGravitron.prospector	= 0;		// the levels of its Prospector, drawing more asteroids with a metal (bonuses.js)
 	pulseList				= [];
 	gravColor				= '#666666';
 	gravRadius				= planetRadius * 1.1;
@@ -324,8 +345,9 @@ function newWeapon(context,type,color) {
 }
 
 // function to get the starting values of a difficulty level : the normal ones, changed by the level's own
+// (or by the ones given, those of a level of the Adventure : adventure.js)
 function levelValues(level) {
-	var changes = difficultyLevels[level] || {};
+	var changes = ( typeof level == "object" ) ? level : ( difficultyLevels[level] || {} );
 	var values = {};
 	for ( var name in startValues ) {
 		var start = startValues[name];

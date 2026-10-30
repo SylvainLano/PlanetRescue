@@ -186,7 +186,7 @@ function shapeRock ( asteroid ) {
 	var r = asteroid.radius;
 	asteroid.rockHalf = r * 1.2;
 	asteroid.outline = rockOutline ( r );
-	asteroid.rock = rockTexture ( asteroid.outline, asteroid.rockHalf, r, asteroid.context, asteroid.giant );
+	asteroid.rock = rockTexture ( asteroid.outline, asteroid.rockHalf, r, asteroid.context, asteroid.giant, asteroid.metal );
 	asteroid.spin = Math.random() * 2 * Math.PI;
 	asteroid.spinSpeed = ( 0.01 + Math.random() * 0.03 ) * ( Math.random() < 0.5 ? -1 : 1 );
 	asteroid.shade = rockShade ( r, asteroid.context );
@@ -223,8 +223,8 @@ function rockOutline ( r ) {
 	return path;
 }
 
-// function to draw the rock once, at the resolution of the game's canvas : its color, its grain and its craters
-function rockTexture ( outline, half, r, context, giant ) {
+// function to draw the rock once, at the resolution of the game's canvas : its color, its grain, its craters, and the veins of its metal
+function rockTexture ( outline, half, r, context, giant, metal ) {
 	var rock = document.createElement ( "canvas" );
 	rock.width = rock.height = Math.ceil ( half * 2 * Math.max ( 2, context.canvas.width / gameSize ) );
 	var ctx = rock.getContext ( "2d" );
@@ -271,6 +271,11 @@ function rockTexture ( outline, half, r, context, giant ) {
 		ctx.beginPath();
 		ctx.arc ( x - size * 0.1, y - size * 0.1, size * 0.9, 0, 2 * Math.PI );
 		ctx.fill();
+	}
+
+	// the veins of its metal, if it has one (bonuses.js)
+	if ( metal ) {
+		drawVeins ( ctx, r, metal );
 	}
 
 	// darker toward the edges, to give it some volume whatever its spin

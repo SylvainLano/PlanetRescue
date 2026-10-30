@@ -18,8 +18,8 @@ function emitPulse(ctx,pulseList) {
 	return pulseList;
 }
 
-// Function to create the debris
-function addDebris(ctx,nb,x,y,vx,vy,debrisList) {
+// Function to create the debris (half of them made of the asteroid's metal, if it has one : bonuses.js)
+function addDebris(ctx,nb,x,y,vx,vy,debrisList,metal) {
 	
 	var velocity = Math.sqrt(Math.pow(vx,2)+Math.pow(vy,2));
 	
@@ -35,7 +35,7 @@ function addDebris(ctx,nb,x,y,vx,vy,debrisList) {
 		var tempVelocity = Math.random() * velocity / 2;
 		var vx = velocity * Math.cos(tempAngle);
 		var vy = velocity * Math.sin(tempAngle);
-		var item = new Debris(ctx,x,y,vx,vy);
+		var item = new Debris(ctx,x,y,vx,vy,( metal && Math.random() < metalShare ) ? metal : false);
 		debrisList.push(item);
 	}
 	return debrisList;
@@ -140,10 +140,12 @@ function resolveDebris (debrisList,ctx,MyPlanet,pause,gravSuction,gravPower,grav
 				
 				// Debris collected, adding material and destroying it
 				if ( pause == 0 ) {
-					// (each level of the Compactor makes a part of a mat more, given once it makes a whole one)
-					MyGravitron.compacted += MyGravitron.compactor * compactorBonus;
-					var gathered = 1 + Math.floor ( MyGravitron.compacted + 1e-9 );
-					MyGravitron.compacted -= gathered - 1;
+					// (a debris made of a metal is worth more : bonuses.js ; each level of the Compactor makes a part more,
+					// given once it makes a whole mat)
+					var worth = debrisWorth(debrisList[i]);
+					MyGravitron.compacted += MyGravitron.compactor * compactorBonus * worth;
+					var gathered = worth + Math.floor ( MyGravitron.compacted + 1e-9 );
+					MyGravitron.compacted -= gathered - worth;
 					gathered = Math.min ( gathered, MyPlanet.maxMat - MyPlanet.mat );
 					if ( gathered > 0 ){
 						MyPlanet.mat += gathered;
@@ -163,15 +165,28 @@ function resolveDebris (debrisList,ctx,MyPlanet,pause,gravSuction,gravPower,grav
 	return tempList;
 }
 
-// Function to draw the debris, all at once
+// Function to draw the debris, all at once, then the ones made of each metal, a bit bigger, in its color (bonuses.js)
 function drawDebris (ctx) {
 	ctx.fillStyle = debrisColor;
 	ctx.beginPath();
 	for (var i in debrisList) {
-		ctx.moveTo(debrisList[i].x + 1,debrisList[i].y);
-		ctx.arc(debrisList[i].x,debrisList[i].y,1,0,2*Math.PI,false);
+		if ( !debrisList[i].metal ) {
+			ctx.moveTo(debrisList[i].x + 1,debrisList[i].y);
+			ctx.arc(debrisList[i].x,debrisList[i].y,1,0,2*Math.PI,false);
+		}
 	}
 	ctx.fill();
+	for (var metal in metals) {
+		ctx.fillStyle = metals[metal].color;
+		ctx.beginPath();
+		for (var i in debrisList) {
+			if ( debrisList[i].metal == metal ) {
+				ctx.moveTo(debrisList[i].x + 1.4,debrisList[i].y);
+				ctx.arc(debrisList[i].x,debrisList[i].y,1.4,0,2*Math.PI,false);
+			}
+		}
+		ctx.fill();
+	}
 }
 
 // Function to resolve the GRAVITRON
@@ -483,7 +498,7 @@ function slung(asteroid) {
 // Function to burn an asteroid coming into the planet's Thick Atmosphere, once on its way : its life burnt falls as debris (researches.js)
 function burnInAtmosphere(ctx,asteroid) {
 	var burnt = Math.min ( atmosphereBurn, asteroid.life );
-	addDebris(ctx,burnt,asteroid.x,asteroid.y,asteroid.vx,asteroid.vy,debrisList);
+	addDebris(ctx,burnt,asteroid.x,asteroid.y,asteroid.vx,asteroid.vy,debrisList,asteroid.metal);
 	asteroid.life -= burnt;
 	asteroid.burnt = true;
 	asteroid.burning = 12;
@@ -600,6 +615,23 @@ function spawnInterval() {
 	var seconds = gameTime / framesPerSecond;
 	var interval = gameValues.spawnMin + ( gameValues.spawnStart - gameValues.spawnMin ) * Math.exp( - seconds / gameValues.spawnSlowness );
 	return Math.round( interval * framesPerSecond );
+}
+
+// Function to send an asteroid toward the planet from the edge of the game area, at an angle around the planet (in radians) :
+// its speed and its life grow as time passes, and a giant is stronger, bigger, heavier and slower
+// (speed, if any, changes its speed : the Adventure's waves, adventure.js)
+function launchAsteroid(ctx,angle,giant,speed) {
+	var radius = gameSize / 2;
+	var x = MyPlanet.x + (radius * Math.cos(angle));
+	var y = MyPlanet.y + (radius * Math.sin(angle));
+	// with a few asteroids in game already, it may go beside the planet
+	if ( asteroidList.length > 2 ) {
+		angle = angle - Math.PI / 4 + Math.random() * Math.PI / 2;
+	}
+	var velocity = (Math.random() * 2 + 1) * asteroidSpeedFactor() * asteroidBS * ( giant ? giantSpeed : 1 ) * ( speed || 1 );
+	var life = ( giant ? gameValues.giantLife : gameValues.asteroidLife ) + asteroidExtraLife();
+	// and some have a metal in their rock (bonuses.js)
+	asteroidList.push(new Asteroid(ctx,life,asteroidBR * ( giant ? giantSize : 1 ),asteroidBM * ( giant ? giantMass : 1 ),x,y,- velocity * Math.cos(angle),- velocity * Math.sin(angle),giant,asteroidMetal()));
 }
 
 // Function to get the asteroids' speed factor, which grows as time passes
@@ -748,6 +780,8 @@ function shoot(ctx,weapon){
 			}
 			break;
 	}
+	// some of them are critical, red with more power (bonuses.js)
+	criticalShots ( weapon, shotsBefore );
 	nbrShots += shotList.length - shotsBefore;
 	if ( shotList.length > shotsBefore ) {
 		playSound ( "shot" );
@@ -984,6 +1018,11 @@ function showStatus(status) {
 		+ statusGauge ( "Mat", mat, matColor, MyPlanet.mat, MyPlanet.maxMat, 0 );
 	if ( MyGravitron.shield > 0 ) {
 		html += statusGauge ( "Shield", MyGravitron.charge / ( MyGravitron.shield * 10 ), gravColor, MyGravitron.charge, MyGravitron.shield * 10, 0 );
+	}
+	// and in the Adventure, the waves of the level come so far (adventure.js)
+	if ( inAdventure() ) {
+		var waves = adventureLevels[adventure.level].waves.length;
+		html += statusGauge ( "Wave", adventure.wave / waves, "#8fb8ff", adventure.wave, waves, 0 );
 	}
 	status.classList.toggle ( "digits", displayS == "digits" );
 	status.innerHTML = "<div class='stats'>" + html + "</div>";

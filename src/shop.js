@@ -35,6 +35,9 @@ var upgrades = {
 	gravScanner			: { name : "Field Scanner", tip : "Field Scanner - Level 1 shows the limits of the Gravitron's field. Level 2 colors the asteroids it pulls in red, and the ones it pushes away in green.",
 							max : 2, price : "plus1times50",
 							level : function () { return MyGravitron.scanner; }, raise : function () { MyGravitron.scanner++; } },
+	gravProspector		: { name : "Prospector", tip : "Prospector - Your Gravitron draws in more asteroids with a metal in their rock: copper, silver or gold. Half of their debris are made of it, and worth 2, 3 or 5 mat. Each level makes them 50% more frequent.",
+							max : 2, price : "plus1times50",
+							level : function () { return MyGravitron.prospector; }, raise : function () { MyGravitron.prospector++; } },
 	// brought by its research (researches.js)
 	compactor			: { name : "Compactor", tip : "Compactor - Each level makes 10% more mat from the debris your Gravitron gathers.",
 							max : 5, price : "plus1times100", appears : function () { return research.done.compactor ? true : false; },
@@ -50,6 +53,13 @@ var upgrades = {
 	MaxWAtATime			: { name : "Multiple weapon", tip : "Multiple weapon structure - Each level gives you one more weapon to activate at the same time.",
 							max : 2, price : "times250", appears : function () { return ownedWeapons() > 1; },
 							level : function () { return maxWAtATime; }, raise : function () { maxWAtATime++; } },
+	// the critical shots of the Basic, Spiral and Magnetic weapons (bonuses.js)
+	critChance			: { name : "Critical Chance", tip : "Critical Chance - The chance of a shot of your Basic, Spiral or Magnetic weapon to be critical: red, it does several times its power. Expressed in percents, 5 more at each level.",
+							max : 25, price : "times10",
+							level : function () { return Math.round ( critChance * 100 ); }, raise : function () { critChance = ( Math.round ( critChance * 100 ) + 5 ) / 100; } },
+	critDamage			: { name : "Critical Damage", tip : "Critical Damage - How many times its power a critical shot does.",
+							max : 5, price : "minus2times100",
+							level : function () { return critDamage; }, raise : function () { critDamage += 0.5; } },
 
 	// BASIC CANNON
 	mCNumber			: { name : "Cannons", tip : "Basic Cannons Number - Increased fire spread, and so fire rate as well.",
@@ -193,9 +203,9 @@ var upgrades = {
 // (a weapon's upgrades are shown once it is bought, and a tab with appears() stays hidden until then :
 // each weapon comes once the one before is bought, a secondary weapon once its research is validated)
 var shopLayout = [
-	{ title : "Upgrade Your Gravitron", upgrades : ["gravSort","gravPower","repulsion","gravShield","gravPulse","gravScanner","compactor"] },
+	{ title : "Upgrade Your Gravitron", upgrades : ["gravSort","gravPower","repulsion","gravShield","gravPulse","gravScanner","gravProspector","compactor"] },
 	{ title : "Build or upgrade your Weapons", panels : [
-		{ tab : "Structure", title : "Main Structure", upgrades : ["mCMSpeed","SMART","MaxWAtATime"] },
+		{ tab : "Structure", title : "Main Structure", upgrades : ["mCMSpeed","SMART","MaxWAtATime","critChance","critDamage"] },
 		{ tab : "Basic", title : "Basic Weapon", weapon : "basicW",
 			statusTip : "By making this weapon active, you could disactivate the current one.",
 			upgrades : ["mCNumber","mCFireRate","mainPow","mainSpeed"] },
@@ -407,10 +417,12 @@ function weaponOfType ( type ) {
 	}
 }
 
-// function to know if something of the menu is shown : its weapon tab and its line, which may wait for something else (appears)
+// function to know if something of the menu is shown : its weapon tab and its line, which may wait for something else (appears),
+// and in the Adventure, the level must bring it (adventure.js)
 function thingAppears ( thing ) {
 	var upgrade = upgrades[thing.upgrade];
-	return ( !thing.appears || thing.appears() ) && ( !upgrade || !upgrade.appears || upgrade.appears() );
+	return ( !thing.appears || thing.appears() ) && ( !upgrade || !upgrade.appears || upgrade.appears() )
+		&& adventureAllows ( thing.upgrade || thing.weapon );
 }
 
 // function to get the price of something of the menu, or false when it can't be bought now :
@@ -539,6 +551,12 @@ function calculate(type,ref) {
 			break;
 		case "times100" :
 			ref *= 100;
+			break;
+		case "times10" :
+			ref *= 10;
+			break;
+		case "minus2times100" :
+			ref = ( ref - 2 ) * 100;
 			break;
 		case "times150" :
 			ref *= 150;

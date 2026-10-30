@@ -112,7 +112,7 @@ function explodeMissile ( ctx, missile, touched ) {
 		var distance = Math.sqrt ( Math.pow ( asteroid.x - missile.x, 2 ) + Math.pow ( asteroid.y - missile.y, 2 ) );
 		if ( asteroid.life > 0 && distance < missile.blast + asteroid.radius ) {
 			var damage = ( asteroid == touched ) ? missile.power : Math.ceil ( missile.power / 2 );
-			addDebris ( ctx, damage, asteroid.x, asteroid.y, asteroid.vx, asteroid.vy, debrisList );
+			addDebris ( ctx, damage, asteroid.x, asteroid.y, asteroid.vx, asteroid.vy, debrisList, asteroid.metal );
 			asteroid.life -= damage;
 			if ( asteroid.life <= 0 ) {
 				allPassed = 1;
@@ -273,7 +273,7 @@ function touchBomb ( ctx, bomb, touched ) {
 // function to make a bomb explode by itself, against an asteroid or once the planet is in its blast, which spares the planet :
 // the bomb is spent, its life left turned into debris
 function detonateBomb ( ctx, bomb ) {
-	addDebris ( ctx, bomb.life, bomb.x, bomb.y, bomb.vx, bomb.vy, debrisList );
+	addDebris ( ctx, bomb.life, bomb.x, bomb.y, bomb.vx, bomb.vy, debrisList, bomb.metal );
 	bomb.life = 0;
 	explodeBomb ( ctx, bomb );
 }
@@ -289,7 +289,7 @@ function explodeBomb ( ctx, bomb ) {
 		var asteroid = asteroidList[a];
 		var distance = Math.sqrt ( Math.pow ( asteroid.x - bomb.x, 2 ) + Math.pow ( asteroid.y - bomb.y, 2 ) );
 		if ( asteroid != bomb && asteroid.life > 0 && distance < blast + asteroid.radius ) {
-			addDebris ( ctx, power, asteroid.x, asteroid.y, asteroid.vx, asteroid.vy, debrisList );
+			addDebris ( ctx, power, asteroid.x, asteroid.y, asteroid.vx, asteroid.vy, debrisList, asteroid.metal );
 			asteroid.life -= power;
 			if ( asteroid.life <= 0 ) {
 				allPassed = 1;
@@ -386,7 +386,7 @@ function fireLaser ( ctx ) {
 	laserCannon.heat += laserCannon.power / framesPerSecond;
 	while ( laserCannon.heat >= 1 && target.life > 0 ) {
 		laserCannon.heat--;
-		addDebris ( ctx, 1, target.x, target.y, target.vx, target.vy, debrisList );
+		addDebris ( ctx, 1, target.x, target.y, target.vx, target.vy, debrisList, target.metal );
 		target.life--;
 		if ( target.life <= 0 ) {
 			allPassed = 1;
@@ -401,7 +401,7 @@ function fireLaser ( ctx ) {
 			for ( var a in asteroidList ) {
 				var asteroid = asteroidList[a];
 				if ( asteroid.life > 0 && beamCrosses ( asteroid ) ) {
-					addDebris ( ctx, 1, asteroid.x, asteroid.y, asteroid.vx, asteroid.vy, debrisList );
+					addDebris ( ctx, 1, asteroid.x, asteroid.y, asteroid.vx, asteroid.vy, debrisList, asteroid.metal );
 					asteroid.life--;
 					if ( asteroid.life <= 0 ) {
 						allPassed = 1;
@@ -580,7 +580,7 @@ function ricochet ( ctx, shot ) {
 	var touched = contact.rock;
 	var rock = touched && touched != MyPlanet;
 	if ( rock ) {
-		addDebris ( ctx, shot.power, touched.x, touched.y, touched.vx, touched.vy, debrisList );
+		addDebris ( ctx, shot.power, touched.x, touched.y, touched.vx, touched.vy, debrisList, touched.metal );
 		touched.life -= shot.power;
 		if ( shot.hit.indexOf ( touched ) < 0 ) {
 			shot.hit.push ( touched );
