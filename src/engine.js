@@ -369,17 +369,11 @@ function engine() {
 	}
 	
 	// Managing the game-over and pause
-	if ( planetAutoHeal > 0 && pause == 0 && ( MyPlanet.life + planetHealPend ) < MyPlanet.maxLife ) {
-		var autoFact = ( maxUpgrade("autoHeal") - planetAutoHeal + 1 );
-		if ( MyPlanet.mat > autoFact ) {
-			MyPlanet.mat -= autoFact;
-			planetHealPend++;
-		}
-	}
+	// (the Auto-Healing adds inhabitants to heal as the planet gathers mat : autoHealing, functions.js)
 	if ( planetHealPend > 0 && pause == 0 ) {
 		planetHealTimer++;
 	}
-	if ( planetHealTimer >= ( 135 - ( 11 * planetHealFact ) ) ) {
+	if ( planetHealTimer >= healTurns() ) {
 		planetHealPend--;
 		planetHealTimer = 0;
 		MyPlanet.life++;

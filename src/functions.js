@@ -146,6 +146,7 @@ function resolveDebris (debrisList,ctx,MyPlanet,pause,gravSuction,gravPower,grav
 					MyGravitron.compacted += MyGravitron.compactor * compactorBonus * worth;
 					var gathered = worth + Math.floor ( MyGravitron.compacted + 1e-9 );
 					MyGravitron.compacted -= gathered - worth;
+					autoHealing ( gathered );	// (the Auto-Healing counts it, a full store or not)
 					gathered = Math.min ( gathered, MyPlanet.maxMat - MyPlanet.mat );
 					if ( gathered > 0 ){
 						MyPlanet.mat += gathered;
@@ -514,6 +515,29 @@ function crashDamage(life) {
 	var spared = Math.min ( life, Math.floor ( MyPlanet.spared + 1e-9 ) );
 	MyPlanet.spared -= spared;
 	return life - spared;
+}
+
+// Function to count the mat the planet gathers for its Auto-Healing, while some inhabitants are missing :
+// it heals one of them for every few mat gathered, without spending them (the mat a full store can't keep counts too)
+function autoHealing(gathered) {
+	if ( planetAutoHeal == 0 || MyPlanet.life + planetHealPend >= MyPlanet.maxLife ) {
+		return;
+	}
+	planetHealGathered += gathered;
+	while ( planetHealGathered >= autoHealMat() && MyPlanet.life + planetHealPend < MyPlanet.maxLife ) {
+		planetHealGathered -= autoHealMat();
+		planetHealPend++;
+	}
+}
+
+// Function to get the mat the Auto-Healing needs to heal an inhabitant, fewer at each of its levels
+function autoHealMat() {
+	return autoHealStep * ( maxUpgrade("autoHeal") - planetAutoHeal + 1 );
+}
+
+// Function to get the turns it takes to heal an inhabitant, fewer at each level of the Healing Factor
+function healTurns() {
+	return healSlowest - healFaster * ( planetHealFact - 1 );
 }
 
 // Function to open the planet's Shelters, once in a game, when a crash should end it : they save a part of its inhabitants (researches.js)
@@ -1008,7 +1032,7 @@ function displayStatus() {
 // (until 2026, the gauges were drawn with boxes of the page, and the digits written as a sentence)
 function showStatus(status) {
 	// the life counts the inhabitant being healed, and the ones waiting to be, lighter
-	var healing = planetHealTimer / ( 135 - ( 11 * planetHealFact ) );
+	var healing = planetHealTimer / healTurns();
 	var life = ( MyPlanet.life + healing ) / MyPlanet.maxLife;
 	var lifeColor = ( life <= 0.25 ) ? "#ff4747" : ( life <= 0.5 ) ? "#f2c94c" : "#5df45d";
 	// the mat turns yellow, then red, as the storage fills up

@@ -126,6 +126,10 @@
 	var planetHealFact	= startValues.planetHealFact;
 	var planetHealTimer	= 0;
 	var planetHealPend	= 0;
+	var planetHealGathered	= 0;	// the mat gathered toward the next inhabitant the Auto-Healing heals
+	var autoHealStep	= 2;		// the mat it needs for an inhabitant : 2 for each level it lacks (10 down to 2)
+	var healSlowest		= 124;		// the turns to heal an inhabitant with the first Healing Factor (5 seconds),
+	var healFaster		= 25;		// and the turns each level of it saves (a second)
 	var planetRecovery	= startValues.planetRecovery;
 	var planetRadius	= 50;
 	var planetMass		= 150;
@@ -255,6 +259,7 @@ function initDefault(context,level) {
 	planetHealFact		= gameValues.planetHealFact;
 	planetHealTimer		= 0;
 	planetHealPend		= 0;
+	planetHealGathered	= 0;
 	planetRecovery		= gameValues.planetRecovery;
 	MyPlanet.atmosphere	= 0;		// what its researches bring (researches.js)
 	MyPlanet.shelters	= 0;		// 1 once they are built, 2 once they have saved the planet
