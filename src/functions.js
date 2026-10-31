@@ -442,6 +442,8 @@ function changeKey(e, to){
 		key[5]=to;		// delete, or T (Target), for the keyboards without these keys
 	} else if ( name == "End" || place == "KeyR" ) {
 		key[6]=to;		// end, or R (Reset)
+	} else if ( place == "KeyF" && to == 1 && !e.repeat ) {
+		aimedKamikaze();	// F, a kamikaze to the asteroid the cannon aims at (kamikaze.js)
 	} else if ( ( name == "m" || name == "M" ) && to == 1 && !e.repeat ) {
 		toggleSound();	// M as Music, wherever it is on the keyboard (sound.js)
 	}

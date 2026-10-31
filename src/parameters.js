@@ -20,19 +20,19 @@
 		asteroidLife	: 10,
 		lifeGrowth		: 60,		// seconds for the asteroids to get one more point of life
 		asteroidSpeed	: 0.25,		// base speed for the asteroids, each one being 1 to 3 times faster
-		cometFrom		: 60,		// seconds before the first comet comes in the Arcade (threats.js),
-		splitFrom		: 120,		// and before the first splitting asteroid,
+		cometFrom		: 120,		// seconds before the first comet comes in the Arcade (threats.js), a new threat every two minutes,
+		splitFrom		: 240,		// and before the first splitting asteroid,
 		splitChance		: 0.15,		// part of the asteroids splitting after that
-		swarmFrom		: 240,		// seconds before the first swarm comes in the Arcade,
-		armorFrom		: 300,		// and the first group of armored asteroids
-		giantFrom		: 180,		// seconds before the first giant asteroid may come
+		swarmFrom		: 480,		// seconds before the first swarm comes in the Arcade,
+		armorFrom		: 600,		// and the first group of armored asteroids
+		giantFrom		: 360,		// seconds before the first giant asteroid may come
 		giantChance		: 0.1,		// part of the asteroids coming as giants after that
 		giantLife		: 40,		// a giant's life, growing with time as the others'
 
 		// player's planet
 		planetLife		: 20,
 		planetMat		: 20,
-		planetMaxMat	: 100,
+		planetMaxMat	: 200,
 		planetAutoHeal	: 0,
 		planetHealFact	: 1,
 		planetCrews		: 1,		// the inhabitants healed at a time, more with the Rebuilding Crews

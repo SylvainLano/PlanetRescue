@@ -488,15 +488,15 @@ kbd {
 	color: #fff;
 	font-family: 'MirageRegular';
 	font-size: 40px;
-	margin-bottom: 12px;
+	margin-bottom: 6px;
 }
 
 #achievementsText .medals {
 	display: grid;
 	grid-template-columns: repeat(6, 84px);	/* six by row, as many rows as needed */
-	gap: 12px 8px;
+	gap: 8px;
 	justify-content: center;
-	max-height: 345px;		/* four rows : more achievements scroll */
+	max-height: 328px;		/* four rows : more achievements scroll (the Main Menu button where the Infos page has it) */
 	overflow-y: auto;
 	padding: 4px 0;
 }
@@ -547,6 +547,12 @@ kbd {
 	position: absolute;
 	bottom: 5px;
 	right: 5px;
+}
+
+/* THE SCROLLBARS, shared by every screen (the achievements, the pause menu's sections) : thin and dark, not to catch the eye */
+#gameArea * {
+	scrollbar-width: thin;
+	scrollbar-color: rgba(255,255,255,0.22) transparent;
 }
 
 /* THE BUTTONS AND THE PILLS, shared by every screen */

@@ -476,7 +476,7 @@ function engine() {
 				var giant = gameTime >= gameValues.giantFrom * framesPerSecond && Math.random() < gameValues.giantChance;
 				arcadeKind(launchAsteroid(ctx,Math.random() * Math.PI * 2,giant));	// (or another threat now and then : threats.js)
 			}
-			// and the other threats, one more each minute (threats.js)
+			// and the other threats, one more every two minutes (threats.js)
 			arcadeThreats(ctx);
 		}
 		// the NAZA's announces count down to what they announce (threats.js)

@@ -10,7 +10,7 @@
 */
 
 
-// The threats coming after the asteroids, one more each minute in the Arcade (arcadeThreats) : the comets first,
+// The threats coming after the asteroids, one more every two minutes in the Arcade (arcadeThreats) : the comets first,
 // each new one announced by the NAZA, with a countdown to get ready, and mat given by the inhabitants for the worst ones
 
 // THE NAZA'S ANNOUNCES : a message at the top of the game, the seconds left before what it announces comes,
@@ -463,7 +463,7 @@ function drawPlates ( ctx, r ) {
 	ctx.restore();
 }
 
-// THE ARCADE'S THREATS, one more each minute : at each turn of an Arcade game (engine.js), the ones whose time has come
+// THE ARCADE'S THREATS, one more every two minutes : at each turn of an Arcade game (engine.js), the ones whose time has come
 //	- the comets, from cometFrom, announced announceTime seconds before the first one
 //	- the splitting asteroids, from splitFrom, announced too (arcadeKind makes them)
 //	- the swarms, from swarmFrom, each one announced with its side and with mat given

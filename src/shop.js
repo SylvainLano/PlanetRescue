@@ -72,7 +72,7 @@ var upgrades = {
 							picture : "turn", unit : "° / s", value : function () { return turnSpeed ( mainCanMovSpeed ); }, next : function () { return turnSpeed ( mainCanMovSpeed + 1 ); },
 							what : "degrees per second" },
 	SMART				: { name : "Main Structure SMART AI", tip : "Main Structure SMART AI - Next level of SMART AI will grant you anticipation, to make basic weapon more effective.",
-							max : 5, price : "times250",
+							max : 5, price : "times100",
 							level : function () { return mainCannon.smart; }, raise : function () { mainCannon.smart++; },
 							picture : "chip", unit : "AI level", what : "level of SMART AI" },
 	MaxWAtATime			: { name : "Multiple weapon", tip : "Multiple weapon structure - Each level gives you one more weapon to activate at the same time.",
@@ -93,7 +93,7 @@ var upgrades = {
 
 	// BASIC CANNON
 	mCNumber			: { name : "Cannons", tip : "Basic Cannons Number - Increased fire spread, and so fire rate as well.",
-							max : 5, price : "times250",
+							max : 5, price : "times150",
 							level : function () { return mainCannon.cannonNbr; }, raise : function () { mainCannon.cannonNbr++; },
 							picture : "cannons", unit : "cannons", what : "cannon" },
 	mCFireRate			: { name : "Fire Rate", tip : "Basic Weapon Fire Rate - Making the weapon to fire faster. Expressed in Shots Per Second.",
@@ -111,7 +111,7 @@ var upgrades = {
 
 	// SPIRAL AND ORBITAL CANNON
 	SaOCNumber			: { name : "Cannons", tip : "Spiral Cannons Number - Increased fire spread and unlock new modes.",
-							max : 5, price : "times250",
+							max : 5, price : "times150",
 							level : function () { return spiralCannon.cannonNbr; }, raise : function () { spiralCannon.cannonNbr++; },
 							picture : "cannons", unit : "cannons", what : "cannon" },
 	SaOCFireRate		: { name : "Fire Rate", tip : "Spiral Weapon Fire Rate - Making the weapon to fire faster. Expressed in Shots Per Second.",
@@ -130,7 +130,7 @@ var upgrades = {
 
 	// MAGNETIC CANNON
 	magneticCNumber		: { name : "Cannons", tip : "Magnetic Cannons Number - Increased fire spread.",
-							max : 5, price : "times250",
+							max : 5, price : "times150",
 							level : function () { return magneticCannon.cannonNbr; }, raise : function () { magneticCannon.cannonNbr++; },
 							picture : "cannons", unit : "cannons", what : "cannon" },
 	magneticCFireRate	: { name : "Fire Rate", tip : "Magnetic Weapon Fire Rate - Making the weapon to fire faster. Expressed in Shots Per Second.",
@@ -148,7 +148,7 @@ var upgrades = {
 
 	// HAMMER AND BROOM CANNON
 	HaBCNumber			: { name : "Cannons", tip : "Hammer Cannons Number - Increased fire spread.",
-							max : 5, price : "times250",
+							max : 5, price : "times150",
 							level : function () { return hammerCannon.cannonNbr; }, raise : function () { hammerCannon.cannonNbr++; },
 							picture : "cannons", unit : "cannons", what : "cannon" },
 	HaBCFireRate		: { name : "Fire Rate", tip : "Hammer Weapon Fire Rate - Making the weapon to fire faster. Expressed in Shots Per Second.",
