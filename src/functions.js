@@ -1126,6 +1126,95 @@ function meetingPoint ( asteroid, Vp, r0 ) {
 	return false;
 }
 
+// THE ASTEROIDS OUT OF REACH : from SMART 2, the main cannon knows when no shot can catch an asteroid on its way (meetingPoint) ;
+// it marks the asteroid with its way and the shots' speed then, and leaves it on its own (the player's choice is kept : the cannon
+// then shoots where its shot comes the closest) ; the mark stays until the asteroid's way changes (a collision, the GRAVITRON,
+// a kamikaze…) or the shots get faster ; the marked asteroids are ringed with grey dashes, and a mouse over one tells why
+var reachSpeedGap	= 0.05;					// how much an asteroid's speed may change, in part of it,
+var reachTurnGap	= 3 * Math.PI / 180;	// and how much its way may turn, before the cannon looks at it again
+var reachTip		= false;				// the tooltip tells about an asteroid out of reach
+
+// function to know if an asteroid is marked out of reach, its way and the shots' speed being the same as when it was marked
+// (the mark goes once one of them changes)
+function outOfReach ( asteroid ) {
+	var mark = asteroid.unreachable;
+	if ( !mark ) {
+		return false;
+	}
+	var speed = Math.sqrt ( asteroid.vx * asteroid.vx + asteroid.vy * asteroid.vy );
+	var before = Math.sqrt ( mark.vx * mark.vx + mark.vy * mark.vy );
+	var turn = Math.abs ( ( ( Math.atan2 ( asteroid.vy, asteroid.vx ) - Math.atan2 ( mark.vy, mark.vx ) + 3 * Math.PI ) % ( 2 * Math.PI ) ) - Math.PI );
+	if ( mainCannon.speed != mark.shot || Math.abs ( speed - before ) > reachSpeedGap * before || turn > reachTurnGap ) {
+		asteroid.unreachable = false;
+		return false;
+	}
+	return true;
+}
+
+// function to mark an asteroid out of reach (once : the mark keeps the way it had then) ; the ones the cannon leaves on its own
+// while they come closer, too fast for its shots, are counted for the tips of the game's end (gameover.js : the ones going away
+// are no threat)
+function markOutOfReach ( asteroid ) {
+	if ( outOfReach ( asteroid ) ) {
+		return;
+	}
+	asteroid.unreachable = { vx : asteroid.vx, vy : asteroid.vy, shot : mainCannon.speed };
+	var coming = ( asteroid.x - MyPlanet.x ) * asteroid.vx + ( asteroid.y - MyPlanet.y ) * asteroid.vy < 0;
+	if ( coming && asteroid != targetedA && !asteroid.leftOnce ) {
+		asteroid.leftOnce = true;
+		nbrOutOfReach++;
+	}
+}
+
+// function to find where a shot comes the closest to an asteroid it can't catch ; returns the angle to shoot toward : the asteroid's
+// place when the shot's distance from the planet is the closest to its own (SMART 2's best, at a target out of reach)
+function nearestShot ( asteroid, Vp, r0 ) {
+	var x = asteroid.x - MyPlanet.x;
+	var y = asteroid.y - MyPlanet.y;
+	var vx = asteroid.vx;
+	var vy = asteroid.vy;
+	var bestGap = Math.abs ( Math.sqrt(x*x + y*y) - r0 );
+	var bestX = x;
+	var bestY = y;
+	for ( var n = 1; ( r0 + n*Vp ) <= gameSize; n++ ) {
+		var angle = Math.atan2(y, x);
+		var pull = gravitronAcceleration(angle, asteroid.mass);
+		vx += pull * Math.cos(angle);
+		vy += pull * Math.sin(angle);
+		x += vx;
+		y += vy;
+		var gap = Math.abs ( Math.sqrt(x*x + y*y) - ( r0 + n*Vp ) );
+		if ( gap < bestGap ) {
+			bestGap = gap;
+			bestX = x;
+			bestY = y;
+		}
+	}
+	return Math.atan2 ( bestY, bestX );
+}
+
+// a mouse over an asteroid out of reach tells why in the tooltip, while playing
+// (the page reads it, the game's canvas not being there yet when this file is read)
+document.addEventListener ( "mousemove", function ( e ) {
+	var asteroid = false;
+	if ( e.target.id == "mainArea" && state == "playing" && pause == 0 ) {
+		var place = spacePlace ( e.clientX, e.clientY );
+		asteroid = pickAsteroid ( place.x, place.y );		// (kamikaze.js)
+	}
+	if ( asteroid && outOfReach ( asteroid ) ) {
+		shopTooltip.innerHTML = "";
+		newElement ( "h3", "", shopTooltip ).textContent = "Out of reach";
+		newElement ( "div", "", shopTooltip ).textContent = "No shot of your cannon can catch this asteroid on its way. Faster shots can (Fire Speed), "
+			+ "or a kamikaze: click the asteroid to send one, it changes its way.";
+		shopTooltip.style.display = "block";
+		placeTooltip ( e );
+		reachTip = true;
+	} else if ( reachTip ) {
+		hideTooltip();
+		reachTip = false;
+	}
+} );
+
 // function to know if an asteroid is going to crash on the planet ; returns the turns before the crash, or false
 // The asteroid is followed turn by turn like in meetingPoint, as if the GRAVITRON stays where it is.
 function crashTime ( asteroid ) {
@@ -1155,7 +1244,8 @@ function crashTime ( asteroid ) {
 }
 
 // function to choose the main cannon's target with its SMART AI, from level 3 ; returns false when no asteroid is worth a shot
-//	- SMART 3 skips the asteroids that the shots on their way will destroy, and the ones no shot can catch, then takes the closest
+//	- SMART 3 skips the asteroids that the shots on their way will destroy, and the ones no shot can catch (marked, or no more : the
+//	  whole list is looked at each time), then takes the closest
 //	- SMART 4 takes the asteroid it can hit the soonest, counting the time to turn toward it and the time for the shot to fly
 //	- SMART 5 takes first the asteroids going to crash on the planet, the soonest crash first
 function smartTarget ( cannon ) {
@@ -1181,8 +1271,12 @@ function smartTarget ( cannon ) {
 		}
 		var meeting = meetingPoint ( asteroid, cannon.speed, r0 );
 		if ( meeting == false ) {
+			if ( distanceToPlanet ( asteroid.x, asteroid.y ) > r0 ) {
+				markOutOfReach ( asteroid );		// (not the one already crashing, within the shot's start)
+			}
 			continue;
 		}
+		asteroid.unreachable = false;
 		var threat = false;
 		var score = distanceToPlanet ( asteroid.x, asteroid.y );
 		if ( cannon.smart >= 4 ) {

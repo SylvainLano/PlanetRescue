@@ -525,6 +525,8 @@ function engine() {
 	var tempList = new Array();
 	var closestA = false;
 	var closestD = gameSize;
+	var reachA = false;		// the closest asteroid within reach of the main cannon's shots (SMART 2's target : functions.js)
+	var reachD = gameSize;
 	var tempList = new Array();
 	var passedNbr = 0;
 	for (i in asteroidList) {
@@ -641,6 +643,10 @@ function engine() {
 		if( distance < closestD && asteroidList[i].pass == 0){
 			closestA = asteroidList[i];
 			closestD = distance;
+		}
+		if ( distance < reachD && asteroidList[i].pass == 0 && !outOfReach ( asteroidList[i] ) ) {
+			reachA = asteroidList[i];
+			reachD = distance;
 		}
 		
 		// Testing if asteroid still in game
@@ -806,6 +812,9 @@ function engine() {
 	var anyTarget = closestA;
 	if ( mainCannon.smart >= 3 && pause == 0 ) {
 		closestA = smartTarget(mainCannon);
+	} else if ( mainCannon.smart == 2 && passedNbr == 0 ) {
+		// SMART 2 leaves the asteroids out of reach of its shots, unless the player chooses one (T goes through them all)
+		closestA = reachA;
 	}
 	if ( targetedA.life <= 0 || key[6] == 1 ) {
 		// releasing the target : the passed asteroids are forgotten too, so that no new target gets locked at once
@@ -824,8 +833,14 @@ function engine() {
 		// Resolving the target changing
 		if ( key[5] == 1 && passedA == 0 ) {
 			passedA = 1;
-			closestA.pass = 1;
-			targetedA = false;
+			if ( closestA != false ) {
+				closestA.pass = 1;
+				targetedA = false;
+			} else if ( anyTarget != false ) {
+				// (SMART 2 having left every asteroid out of reach, the closest one is chosen)
+				targetedA = anyTarget;
+				closestA = anyTarget;
+			}
 		}
 		if ( key[5] == 0 && passedA == 1 ) {
 			passedA = 0;
@@ -842,9 +857,19 @@ function engine() {
 				if( weaponList[i].smart == 1 ){
 					var angle = angleAroundPlanet(closestA.x,closestA.y);
 				} else {
-					// the shot is at this distance from the planet's center after its first move
+					// the shot is at this distance from the planet's center after its first move ; out of reach, the asteroid is marked
+					// (to be left, unless the player chose it), and the shot goes where it comes the closest to it (functions.js)
 					var r0 = MyPlanet.radius + 5 + weaponList[i].speed;
-					var angle = interception ( closestA, weaponList[i].speed, r0 );
+					var meeting = meetingPoint ( closestA, weaponList[i].speed, r0 );
+					if ( meeting != false ) {
+						closestA.unreachable = false;
+						var angle = meeting.angle;
+					} else {
+						if ( distanceToPlanet ( closestA.x, closestA.y ) > r0 ) {
+							markOutOfReach ( closestA );		// (not the one already crashing, within the shot's start)
+						}
+						var angle = nearestShot ( closestA, weaponList[i].speed, r0 );
+					}
 				}
 
 				var testAngle = angle - weaponList[i].angle;
@@ -1214,14 +1239,39 @@ function drawPlaying ( ctx ) {
 			asteroidList[i].ShowLife();
 		}
 	}
-	// the weapons, and the asteroid the main cannon aims at, in red when chosen by the player
+	// the weapons, and the asteroid the main cannon aims at, in red when chosen by the player ; the asteroids out of reach of its
+	// shots are ringed with grey dashes, and the one the player chose with red ones, told under it (functions.js)
 	if ( pause == 0 ) {
+		ctx.save();
+		ctx.lineWidth = 1;
+		ctx.setLineDash ( [3, 3] );
+		ctx.strokeStyle = "rgba(170, 180, 195, 0.8)";
+		for ( var i in asteroidList ) {
+			if ( asteroidList[i] != aimedA && outOfReach ( asteroidList[i] ) ) {
+				ctx.beginPath();
+				ctx.arc(asteroidList[i].x,asteroidList[i].y,(asteroidList[i].radius + 4),0,2*Math.PI,true);
+				ctx.stroke();
+			}
+		}
+		ctx.restore();
 		if ( aimedA != false ) {
+			var away = outOfReach ( aimedA );
 			ctx.strokeStyle = ( aimedA == targetedA ) ? "rgba(255, 0, 0, 1)" : "rgba(255, 255, 255, 1)";
+			ctx.setLineDash ( away ? [3, 3] : [] );
 			ctx.beginPath();
 			ctx.arc(aimedA.x,aimedA.y,(aimedA.radius + 2),0,2*Math.PI,true);
 			ctx.closePath();
 			ctx.stroke();
+			ctx.setLineDash ( [] );
+			if ( away && aimedA == targetedA ) {
+				ctx.save();
+				ctx.fillStyle = "rgba(255, 90, 90, 0.95)";
+				ctx.font = "9px Arial";
+				ctx.textAlign = "center";
+				ctx.textBaseline = "top";
+				ctx.fillText ( "out of reach", aimedA.x, aimedA.y + aimedA.radius + 5 );
+				ctx.restore();
+			}
 		}
 		for ( var i in weaponList ) {
 			if ( weaponList[i].active >= 1 ) {

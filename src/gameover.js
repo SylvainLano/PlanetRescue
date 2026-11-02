@@ -24,7 +24,9 @@ var tipAccuracy	= 70;		// the accuracy under which the SMART AI is advised (over
 var tipTurning	= 35;		// the part of the time turning over which the Move Speed is (37 to 47 % at first, 28 to 39 % with one more level),
 var tipBounces	= 15;		// the hits bounced off armored asteroids that make a tip,
 var tipFull		= 20;		// the seconds with the store full that do,
-var tipPace		= 45;		// and the mat a minute under which the Gravitron is advised (30 to 50 without steering it)
+var tipPace		= 45;		// the mat a minute under which the Gravitron is advised (30 to 50 without steering it),
+var tipReach	= 3;		// and the asteroids coming too fast for the cannon's shots that make the Fire Speed advised
+						// (over 3 minutes : 0 to 3 with the first shots' speed, none at 3)
 
 // the tips of a game lost, in their order : the first one true is shown (or the next one, when it was the game before's) ;
 // each one has its name, the numbers it lights up (of the Arcade's screen or of the Adventure's), its picture (tiles.js or
@@ -60,6 +62,11 @@ var lossTips = [
 			return false;
 		}
 		return "Your cannon missed " + ( 100 - gameAccuracy() ) + "% of its shots. SMART AI level 2 aims ahead of the asteroids, where they will be."; } },
+	{ id : "reach", tiles : [ "Accuracy" ], picture : "speed", text : function () {
+		if ( nbrOutOfReach < tipReach || !tipCan ( "mainSpeed" ) ) {
+			return false;
+		}
+		return "Your cannon let " + nbrOutOfReach + " asteroids go by, too fast for its shots. Fire Speed makes them faster, and a kamikaze slows one down."; } },
 	{ id : "move", tiles : [ "Destroyed" ], picture : "turn", text : function () {
 		var turning = Math.round ( turningTurns / Math.max ( 1, gameTime ) * 100 );
 		if ( turning < tipTurning || mainCanMovSpeed > gameValues.mainCanMovSpeed || !tipCan ( "mCMSpeed" ) ) {

@@ -119,6 +119,7 @@
 	var nbrBounces		= 0;		// the hits bounced off an armored asteroid (the tips of the game's end : gameover.js),
 	var fullTurns		= 0;		// the turns played with the store full, the Gravitron gathering nothing more,
 	var turningTurns	= 0;		// the turns the main cannon turned toward its target instead of firing,
+	var nbrOutOfReach	= 0;		// the asteroids it left on its own, out of reach of its shots (functions.js),
 	var lastCrash		= false;	// and the asteroid crashed last on the planet : "giant", "armored" or "rock"
 	var calmSince		= 0;		// the turn of the last asteroid crashed on the planet (Untouchable achievement)
 	var bankShot		= false;	// an asteroid destroyed by another one the GRAVITRON deflected (Bank Shot achievement)
@@ -250,6 +251,7 @@ function initDefault(context,level) {
 	nbrBounces		= 0;
 	fullTurns		= 0;
 	turningTurns	= 0;
+	nbrOutOfReach	= 0;
 	lastCrash		= false;
 	calmSince		= 0;
 	bankShot		= false;
