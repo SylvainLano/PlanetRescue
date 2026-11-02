@@ -408,6 +408,7 @@ function armorDamage ( asteroid, power, x, y ) {
 	}
 	flashList.push ( { x : x, y : y, radius : 1, age : 0, color : "225,235,245" } );
 	playSound ( "ricochet" );
+	nbrBounces++;		// (the tips of the game's end : gameover.js)
 	return 0;
 }
 

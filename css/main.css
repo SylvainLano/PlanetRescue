@@ -404,6 +404,49 @@ kbd {
 	font-weight: bold;
 }
 
+/* the NAZA's tip of a game's end, in the blue of its announces, and the numbers it is about lit up (src/gameover.js) */
+#gameOver .over .tile.hot {
+	border-color: rgba(120,180,255,0.9);
+	box-shadow: inset 0 0 0 1px rgba(120,180,255,0.9);
+	background: rgba(15,32,56,0.92);
+}
+
+#gameOver .over .tile.hot .label {
+	color: #8fc4ff;
+}
+
+#gameOver .over .tip {
+	display: flex;
+	align-items: center;
+	gap: 12px;
+	width: 496px;
+	margin: 10px auto 0;
+	padding: 6px 10px;
+	text-align: left;
+	background: rgba(15,32,56,0.92);
+	border: 2px solid rgba(120,180,255,0.9);
+	border-radius: 8px;
+}
+
+#gameOver .over .tip svg {
+	flex: none;
+	width: 36px;
+	height: 36px;
+}
+
+#gameOver .over .tip .advice {
+	font-size: 12px;
+	line-height: 1.4;
+	color: #e6edf5;
+}
+
+#gameOver .over .tip .label {
+	margin-right: 8px;
+	font-weight: bold;
+	letter-spacing: 2px;
+	color: #8fc4ff;
+}
+
 #gameOver .over .unlocked {
 	margin-top: 12px;
 }
@@ -796,7 +839,7 @@ a.level.current {
 	height: 340px;
 }
 
-#adventureMap .road svg {
+#adventureMap .road > svg {
 	position: absolute;
 	left: 0;
 	top: 0;
@@ -817,7 +860,7 @@ a.level.current {
 	stroke-width: 4;
 }
 
-/* a level's spot, centered on its place : its number, and its stars under it */
+/* a level's spot, centered on its place : the picture of its type, its number under it, and its stars under the spot */
 #adventureMap .spot {
 	position: absolute;
 	width: 50px;
@@ -830,11 +873,18 @@ a.level.current {
 	color: #fff;
 }
 
+#adventureMap .spot .type {
+	display: block;
+	width: 24px;
+	height: 24px;
+	margin: 6px auto 0;
+}
+
 #adventureMap .spot .number {
 	display: block;
-	line-height: 50px;
+	line-height: 14px;
 	font-family: 'MirageRegular';
-	font-size: 24px;
+	font-size: 14px;
 }
 
 #adventureMap .spot .stars {
@@ -873,9 +923,15 @@ a.level.current {
 	border-width: 3px;
 }
 
+#adventureMap .spot.boss .type {
+	width: 34px;
+	height: 34px;
+	margin-top: 9px;
+}
+
 #adventureMap .spot.boss .number {
-	line-height: 72px;
-	font-size: 32px;
+	line-height: 20px;
+	font-size: 18px;
 }
 
 #adventureMap .spot.boss .stars {

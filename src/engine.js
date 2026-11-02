@@ -464,6 +464,10 @@ function engine() {
 		advanceResearch();
 
 		gameTime++;
+		// the time with the store full, the Gravitron gathering nothing more, for the tips of the game's end (gameover.js)
+		if ( MyPlanet.mat >= MyPlanet.maxMat ) {
+			fullTurns++;
+		}
 		if ( inAdventure() ) {
 			// the level of the Adventure sends its waves (adventure.js)
 			advanceWaves(ctx);
@@ -674,6 +678,7 @@ function engine() {
 				asteroidList[i].crashed = true;
 			}
 			countCrash(asteroidList[i]);		// (the parts of a splitting asteroid are counted : threats.js)
+			lastCrash = asteroidList[i].giant ? "giant" : ( asteroidList[i].armored ? "armored" : "rock" );	// (the tips : gameover.js)
 			MyPlanet.life -= damage;
 			nbrDamage += damage;
 			if( MyPlanet.life < 0 ){
@@ -856,6 +861,9 @@ function engine() {
 				weaponList[i].angle += 3 * Math.PI;
 				weaponList[i].angle = weaponList[i].angle % ( Math.PI * 2 );
 				weaponList[i].angle -= Math.PI;
+				if ( !weaponList[i].aligned ) {
+					turningTurns++;		// (the time it turns instead of firing, for the tips of the game's end : gameover.js)
+				}
 			}
 			if ( weaponList[i].active >= 1 ) {
 				if ( weaponList[i].type == "magneticW" || weaponList[i].type == "HaBW" ) {

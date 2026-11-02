@@ -116,6 +116,10 @@
 	var nbrDamage		= 0;
 	var nbrUpgrades		= 0;
 	var nbrCost			= 0;
+	var nbrBounces		= 0;		// the hits bounced off an armored asteroid (the tips of the game's end : gameover.js),
+	var fullTurns		= 0;		// the turns played with the store full, the Gravitron gathering nothing more,
+	var turningTurns	= 0;		// the turns the main cannon turned toward its target instead of firing,
+	var lastCrash		= false;	// and the asteroid crashed last on the planet : "giant", "armored" or "rock"
 	var calmSince		= 0;		// the turn of the last asteroid crashed on the planet (Untouchable achievement)
 	var bankShot		= false;	// an asteroid destroyed by another one the GRAVITRON deflected (Bank Shot achievement)
 	var bestBomb		= 0;		// the most asteroids destroyed by a bomb and the ones of its Chain Reaction (Fireworks achievement)
@@ -243,6 +247,10 @@ function initDefault(context,level) {
 	nbrDamage		= 0;
 	nbrUpgrades		= 0;
 	nbrCost			= 0;
+	nbrBounces		= 0;
+	fullTurns		= 0;
+	turningTurns	= 0;
+	lastCrash		= false;
 	calmSince		= 0;
 	bankShot		= false;
 	bestBomb		= 0;

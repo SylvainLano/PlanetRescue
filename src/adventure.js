@@ -16,6 +16,7 @@
 
 // the levels : what they change from the starting values (as the difficulty levels do : parameters.js),
 // what they bring to the pause menu (upgrades and weapons, kept by the next levels), their waves and their challenge
+// (with the NAZA's tip to win it, its picture and the numbers of the level's end it lights up : gameover.js)
 //	- a wave : its asteroids, the seconds between two of them, the sides they come from (in degrees around the planet,
 //	  0 being the right and 90 the bottom ; from everywhere when not told), their speed (1 being the Arcade's), its splitting asteroids
 //	  and comets mixed with them, its giants, coming last, and a swarm or a group of armored asteroids announced first (threats.js)
@@ -25,47 +26,67 @@ var adventureLevels = [
 	{ name : "First Light", values : { planetMat : 20 },
 		brings : [ "gravPower", "gravSort", "mCMSpeed", "mainPow", "mainSpeed" ],
 		waves : [ { count : 2, gap : 4 }, { count : 3, gap : 4 }, { count : 4, gap : 3 } ],
-		challenge : { text : "Gather 100 mat", test : function () { return MyPlanet.totalMat >= 100; } } },
+		challenge : { text : "Gather 100 mat", test : function () { return MyPlanet.totalMat >= 100; },
+			hint : "Turn your Gravitron's opening toward the debris (&larr; &rarr;) and widen it (&darr;): the more it pulls in, the more mat you gather.",
+			picture : "pull", tiles : [ "Mat gathered" ] } },
 	{ name : "Crossfire", values : { planetMat : 40 },
 		brings : [ "gravShield", "gravScanner", "mCFireRate", "SMART", "kamikazeNbr", "kamikazeBuilding" ],
 		waves : [ { count : 3, gap : 3 }, { count : 4, gap : 3 }, { count : 5, gap : 2.5, from : [0, 180] }, { count : 6, gap : 2, from : [90, 270] } ],
-		challenge : { text : "Win in less than 1 minute 45", test : function () { return gameTime <= 105 * framesPerSecond; } } },
+		challenge : { text : "Win in less than 1 minute 45", test : function () { return gameTime <= 105 * framesPerSecond; },
+			hint : "The next wave comes as soon as the last asteroid is gone: Fire Power and Fire Rate shorten every wave.",
+			picture : "bolt", tiles : [ "Time" ] } },
 	{ name : "Heavy Metal", values : { planetMat : 80 },
 		brings : [ "SaOW", "SaOCNumber", "SaOCFireRate", "SaOPow", "SaOSpeed", "MaxWAtATime", "healing", "healFact", "autoHeal", "maxMat" ],
 		waves : [ { count : 3, gap : 3.5 }, { count : 4, gap : 3 }, { count : 5, gap : 3, from : [45, 225] }, { count : 5, gap : 2.5 }, { count : 3, gap : 3, giants : 1 } ],
 		challenge : { text : "Destroy the giant before it travels a third of the way to your planet",
-			test : function () { return giantClosest > gameSize / 2 - ( gameSize / 2 - MyPlanet.radius ) / 3; } } },
+			test : function () { return giantClosest > gameSize / 2 - ( gameSize / 2 - MyPlanet.radius ) / 3; },
+			hint : "Raise your Fire Power before the last wave, and aim at the giant with T as soon as it shows up.",
+			picture : "flame", tiles : [ "Destroyed" ] } },
 	{ name : "Comet Shower", type : "hunt", time : 150, goal : 15, values : { planetMat : 60 },
 		brings : [ "critChance", "critDamage", "mCNumber" ],
 		flow : { every : [6, 3], comets : 7 },
-		challenge : { text : "Destroy 25 asteroids", test : function () { return nbrDestroyed >= 25; } } },
+		challenge : { text : "Destroy 25 asteroids", test : function () { return nbrDestroyed >= 25; },
+			hint : "The comets break in one shot: more Cannons and more critical shots destroy more of everything in the same time.",
+			picture : "cannons", tiles : [ "Hunt" ] } },
 	{ name : "Shatterpoint", values : { planetMat : 100 },
 		brings : [ "magneticW", "magneticCNumber", "magneticCFireRate", "magneticPow", "magneticSpeed", "gravPulse", "repulsion" ],
 		waves : [ { count : 2, splitters : 3, gap : 3 }, { count : 3, splitters : 4, gap : 2.5 }, { count : 2, splitters : 5, gap : 2.5, from : [0, 180] },
 			{ count : 4, splitters : 4, comets : 2, gap : 2 }, { count : 2, splitters : 7, gap : 2, from : [90, 270] } ],
-		challenge : { text : "Let no splinter touch your planet", test : function () { return splinterHits == 0; } } },
+		challenge : { text : "Let no splinter touch your planet", test : function () { return splinterHits == 0; },
+			hint : "Break the splitting asteroids far from your planet: aim at them with T as soon as they come, before their splinters are close.",
+			picture : "burst", tiles : [ "Inhabitants" ] } },
 	{ name : "Hold the Line", type : "survival", time : 180, values : { planetMat : 100 },
 		brings : [ "crews", "maxHealth", "recovery", "gravProspector" ],
 		flow : { every : [5, 2.5], comets : 12, split : 0.2 },
-		challenge : { text : "Lose fewer than 5 million inhabitants", test : function () { return nbrDamage < 5; } } },
+		challenge : { text : "Lose fewer than 5 million inhabitants", test : function () { return nbrDamage < 5; },
+			hint : "Every hit counts, even healed: the Gravitron Shield and more Cannons stop the asteroids before they land.",
+			picture : "shield", tiles : [ "Inhabitants" ] } },
 	{ name : "Swarm Season", values : { planetMat : 80 },
 		brings : [ "lab", "missiles", "missileFireRate", "missilePow", "missileBlast" ],
 		waves : [ { count : 6, gap : 2 }, { count : 6, swarm : true, gap : 2 }, { count : 7, splitters : 3, gap : 1.8, speed : 1.2 },
 			{ count : 6, comets : 3, swarm : true, gap : 1.8 }, { count : 8, giants : 2, gap : 1.6, speed : 1.2 } ],
-		challenge : { text : "Win in less than 3 minutes 20", test : function () { return gameTime <= 200 * framesPerSecond; } } },
+		challenge : { text : "Win in less than 3 minutes 20", test : function () { return gameTime <= 200 * framesPerSecond; },
+			hint : "The next wave comes as soon as the last asteroid is gone: research the missiles, whose blasts clear the swarms fast.",
+			picture : "blast", tiles : [ "Time" ] } },
 	{ name : "Iron Rain", values : { planetMat : 60 },
 		brings : [ "lasers", "laserPow", "laserDuration", "laserCooldown", "earlyWarning" ],
 		waves : [ { count : 7, gap : 2, speed : 1.2 }, { count : 5, armored : true, gap : 1.8 }, { count : 8, splitters : 3, gap : 1.6, speed : 1.2 },
 			{ count : 6, comets : 3, armored : true, gap : 1.6 }, { count : 8, giants : 2, armored : true, gap : 1.5, speed : 1.3 } ],
 		challenge : { text : "Destroy every armored asteroid before it gets halfway to your planet",
-			test : function () { return armorClosest > ( gameSize / 2 + MyPlanet.radius ) / 2; } } },
+			test : function () { return armorClosest > ( gameSize / 2 + MyPlanet.radius ) / 2; },
+			hint : "Under 3 of Fire Power, your shots bounce off the plates: raise it early, and research the laser, which burns through.",
+			picture : "flame", tiles : [ "Destroyed" ] } },
 	{ name : "The Gauntlet", type : "survival", time : 240, values : { planetMat : 100 },
 		brings : [ "explosives", "nitroReload", "nitroPow", "nitroBlast" ],
 		flow : { every : [6, 2.5], comets : 12, split : 0.15, giants : [110, 180, 225], swarms : [80, 200], armored : [140] },
-		challenge : { text : "Lose fewer than 10 million inhabitants", test : function () { return nbrDamage < 10; } } },
+		challenge : { text : "Lose fewer than 10 million inhabitants", test : function () { return nbrDamage < 10; },
+			hint : "Push the nitroglycerine bombs into the swarms and the giants with your Gravitron: their blasts clear them before they land.",
+			picture : "blast", tiles : [ "Inhabitants" ] } },
 	{ name : "The Colossus", type : "boss", values : { planetMat : 100 }, brings : [],
 		challenge : { text : "Destroy the Colossus before it travels a third of the way to your planet",
-			test : function () { return colossusClosest > colossusPost - ( colossusPost - MyPlanet.radius ) / 3; } } }
+			test : function () { return colossusClosest > colossusPost - ( colossusPost - MyPlanet.radius ) / 3; },
+			hint : "Fire when its bare rock faces you, and push nitroglycerine bombs into it with your Gravitron: they hurt it a lot.",
+			picture : "rock", tiles : [ "Colossus" ] } }
 ];
 // the Adventure is shown on the start menu once it is ready ; until then, opening the game as index.html?adventure shows it, to test it
 var adventureReady	= /adventure/.test ( location.search );
@@ -239,7 +260,8 @@ function startWave ( level ) {
 	adventure.banner = { text : "Wave " + adventure.wave + "/" + level.waves.length, from : gameTime, time : 2.5 };
 }
 
-// function to launch what comes next in a wave : an asteroid, a giant, a splitting one or a comet (the wait of an announce : nothing)
+// function to launch what comes next in a wave : an asteroid, a giant, a splitting one or a comet (the wait of an announce : nothing) ;
+// a giant comes straight at the planet, not to fly by : the level ends once it is destroyed, or pushed away
 function launchWaveItem ( ctx, item, wave ) {
 	if ( item == "comet" ) {
 		launchComet ( ctx );
@@ -247,6 +269,11 @@ function launchWaveItem ( ctx, item, wave ) {
 		var asteroid = launchAsteroid ( ctx, waveAngle ( wave ), item == "giant", wave.speed );
 		if ( item == "splitter" ) {
 			makeSplitter ( asteroid );
+		} else if ( item == "giant" ) {
+			var speed = Math.sqrt ( asteroid.vx * asteroid.vx + asteroid.vy * asteroid.vy );
+			var angle = Math.atan2 ( MyPlanet.y - asteroid.y, MyPlanet.x - asteroid.x );
+			asteroid.vx = speed * Math.cos ( angle );
+			asteroid.vy = speed * Math.sin ( angle );
 		}
 	}
 }
@@ -383,6 +410,7 @@ function showLevelEnd ( holder, won ) {
 		localStorage["adventure"] = JSON.stringify ( levelStars );
 	}
 	var seconds = Math.floor ( gameTime / framesPerSecond );
+	var tip = won ? missedStarTip ( level ) : lossTip();		// (chosen first, for its numbers to light up : gameover.js)
 	var reasons = [ "Win the level", "Save more than half of your inhabitants", level.challenge.text ];
 	var html = "<div class='over'><div class='title'>" + ( won ? "Level complete" : "Level failed" ) + "</div>"
 		+ "<div class='subtitle'>Level " + levelLabel ( adventure.level ) + " &middot; <strong>" + level.name + "</strong>"
@@ -398,7 +426,7 @@ function showLevelEnd ( holder, won ) {
 		+ gameOverTile ( "Destroyed", nbrDestroyed, nbrGiants > 0 ? "with " + nbrGiants + ( nbrGiants > 1 ? " giants" : " giant" ) : "asteroids", false )
 		+ gameOverTile ( "Mat gathered", MyPlanet.totalMat, "mat", false )
 		+ gameOverTile ( "Upgrades", nbrUpgrades, nbrCost + " mat spent", false )
-		+ "</div>";
+		+ "</div>" + tipCard ( tip );
 	// the achievements of the game, with their medals (achievements.js)
 	if ( newAchievements.length > 0 ) {
 		html += "<div class='unlocked'><div class='label'>Achievements unlocked</div>";
@@ -414,6 +442,24 @@ function showLevelEnd ( holder, won ) {
 	html += "<a href='#' class='button' onClick='state=\"map\";'>Map</a></div></div>";
 	holder.innerHTML = html;
 	achievementQueue = [];		// their banners would go on behind this screen, which shows their medals
+}
+
+// function to choose the tip of a level won without all its stars : how to win the first one missed, if it was never won
+// (the second star's tip is the same in every level, healing being there or not ; the third one's is its challenge's)
+function missedStarTip ( level ) {
+	var owned = levelStars[adventure.level];
+	var found = [];
+	if ( !owned[1] ) {
+		found.push ( adventureAllows ( "healing" )
+			? { id : "star2", tiles : [ "Inhabitants" ], picture : "heal",
+				text : "To save more than half of your inhabitants, heal as you play: Healing turns mat into inhabitants, Auto-Healing heals with the mat you gather." }
+			: { id : "star2", tiles : [ "Inhabitants" ], picture : "kamikaze",
+				text : "To save more than half of your inhabitants, stop the asteroids before they land: click one your cannon can't catch, or press F, to send a kamikaze." } );
+	}
+	if ( !owned[2] ) {
+		found.push ( { id : "star3-" + adventure.level, tiles : level.challenge.tiles, picture : level.challenge.picture, text : level.challenge.hint } );
+	}
+	return chooseTip ( found );
 }
 
 // function to write the level end's tile of the level's goal : the waves destroyed, the asteroids of a hunt, or the time survived
@@ -516,6 +562,16 @@ document.addEventListener ( "keydown", function ( e ) {
 var mapSpots = [ [70, 270], [180, 290], [290, 262], [400, 282], [500, 222], [420, 150], [300, 166], [185, 142], [95, 84], [290, 50] ];
 var mapChoice = false;		// the level chosen on the map, told under it (false : the next one to play)
 
+// the pictures of the levels' types on their spots, drawn like the medals' (achievements.js) : in a 64 x 64 square, with lines
+// of the color "INK" ; the waves (a level without a type) are a falling asteroid, a hunt a crosshair, a survival an hourglass
+var levelPictures = {
+	waves		: '<circle cx="39" cy="39" r="9"/><path d="M32.6 32.6L16 16M39 30L27 18M30 39L18 27" stroke-width="2.5"/>',
+	hunt		: '<circle cx="32" cy="32" r="14"/><path d="M32 10v12M32 42v12M10 32h12M42 32h12"/><circle fill="INK" stroke="none" cx="32" cy="32" r="2.5"/>',
+	survival	: medalPictures.hourglass,
+	boss		: '<path d="M23 48v-7c-5-3-8-8-8-14 0-10 8-16 17-16s17 6 17 16c0 6-3 11-8 14v7z"/><circle fill="INK" stroke="none" cx="25.5" cy="28" r="4.5"/>'
+		+ '<circle fill="INK" stroke="none" cx="38.5" cy="28" r="4.5"/><path fill="INK" stroke="none" d="M32 34l-3 5h6z"/><path d="M29 48v-4M35 48v-4" stroke-width="2"/>'
+};
+
 // function to show the map : its bar, its road, a spot for each level with its stars, and the level chosen under it,
 // with its challenge and the button to play it
 function showMap ( holder ) {
@@ -534,11 +590,19 @@ function showMap ( holder ) {
 	for ( var n = 0; n < mapSpots.length; n++ ) {
 		html += "<a href='#' class='spot " + spotState ( n ) + ( n == mapSpots.length - 1 ? " boss" : "" ) + ( n == mapChoice ? " chosen" : "" ) + "'"
 			+ " style='left:" + mapSpots[n][0] + "px;top:" + mapSpots[n][1] + "px' onClick='chooseSpot(" + n + ");'>"
-			+ "<span class='number'>" + ( n + 1 ) + "</span>"
+			+ levelPicture ( n ) + "<span class='number'>" + ( n + 1 ) + "</span>"
 			+ "<span class='stars'>" + ( n < adventureLevels.length ? starsText ( levelStars[n] ) : ( n == mapSpots.length - 1 ? "Boss" : "" ) ) + "</span></a>";
 	}
 	html += "</div><div class='spotInfo'>" + spotInfo ( mapChoice ) + "</div></div>";
 	holder.innerHTML = html;
+}
+
+// function to draw the picture of a level's type, on its spot (the last spot is the boss's, even before it is made),
+// in the spot's color
+function levelPicture ( n ) {
+	var type = ( n < adventureLevels.length ) ? adventureLevels[n].type : ( n == mapSpots.length - 1 ? "boss" : false );
+	return "<svg class='type' viewBox='0 0 64 64'><g fill='none' stroke='currentColor' stroke-width='3' stroke-linecap='round' stroke-linejoin='round'>"
+		+ levelPictures[type || "waves"].replace ( /INK/g, "currentColor" ) + "</g></svg>";
 }
 
 // function to choose a level on the map, to read its challenge and play it
