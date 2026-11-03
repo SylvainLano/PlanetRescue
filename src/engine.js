@@ -703,7 +703,7 @@ function engine() {
 				nbrDamage += MyPlanet.life;
 			}
 			if ( planetRecovery > 0 && MyPlanet.mat < MyPlanet.maxMat ) {
-				var temp = Math.floor ( asteroidList[i].life / 5 * planetRecovery );
+				var temp = Math.floor ( asteroidList[i].life * recoveryShare * planetRecovery );
 				if ( ( MyPlanet.mat + temp ) > MyPlanet.maxMat ) {
 					temp = MyPlanet.maxMat - MyPlanet.mat;
 				}

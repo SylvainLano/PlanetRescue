@@ -12,7 +12,8 @@
 
 // The upgrades of the pause menu : adding one only takes a new line here, and its place in shopLayout
 //	- name and tip are shown in the menu (the tip's text follows its title, after " - ")
-//	- max is the maximum level, price the name of its formula in calculate()
+//	- max is the maximum level, price the name of its formula in calculate(), or the list of its prices, one by level
+//	  from priceFrom (its level before any is bought)
 //	- level() reads the current level, raise() buys the next one
 //	- appears(), if any, tells when it is worth buying : its tile stays hidden until then
 //	- its tile (tiles.js) shows its picture (tilePictures), its value as the player reads it (value(), or else its level) and its unit ;
@@ -21,12 +22,12 @@
 var upgrades = {
 	// GRAVITRON
 	gravSort			: { name : "Sorting", tip : "Sorting the asteroids - This means your Gravitron will attract asteroids less and debris more.",
-							max : 5, price : "5powtimes4",
+							max : 5, price : [20, 60, 150, 400], priceFrom : 1,
 							level : function () { return MyGravitron.sort; }, raise : function () { MyGravitron.sort++; },
 							picture : "sort", unit : "on rocks", value : function () { return rockPull ( MyGravitron.sort, MyGravitron.power ) + "%"; },
 							change : function () { return "the asteroids feel " + rockPull ( MyGravitron.sort, MyGravitron.power ) + "% → " + rockPull ( MyGravitron.sort + 1, MyGravitron.power ) + "% of the pull on the debris"; } },
 	gravPower			: { name : "Gravity Generator", tip : "Gravity Generator - This represent the suction power of the opened part of the Gravitron.",
-							max : 5, price : "5powtimes4",
+							max : 5, price : [20, 80, 200, 500], priceFrom : 1,
 							level : function () { return MyGravitron.power; }, raise : function () { MyGravitron.power++; },
 							picture : "pull", unit : "pull", value : function () { return "×" + MyGravitron.power; },
 							change : function () { return "×" + MyGravitron.power + " → ×" + ( MyGravitron.power + 1 ) + " pull on the debris, the asteroids feeling "
@@ -64,8 +65,8 @@ var upgrades = {
 							picture : "crystal", unit : "metals", value : function () { return "×" + ( 1 + prospectorBonus * MyGravitron.prospector ); },
 							change : function () { return "×" + ( 1 + prospectorBonus * MyGravitron.prospector ) + " → ×" + ( 1 + prospectorBonus * ( MyGravitron.prospector + 1 ) ) + " asteroids with a metal"; } },
 	// brought by its research (researches.js)
-	compactor			: { name : "Compactor", tip : "Compactor - Each level makes 10% more mat from the debris your Gravitron gathers.",
-							max : 5, price : "plus1times100", appears : function () { return research.done.compactor ? true : false; },
+	compactor			: { name : "Compactor", tip : "Compactor - Each level makes 20% more mat from the debris your Gravitron gathers.",
+							max : 3, price : "plus1times100", appears : function () { return research.done.compactor ? true : false; },
 							level : function () { return MyGravitron.compactor; }, raise : function () { MyGravitron.compactor++; },
 							picture : "press", unit : "mat", value : function () { return "+" + Math.round ( MyGravitron.compactor * compactorBonus * 100 ) + "%"; },
 							change : function () { return "+" + Math.round ( MyGravitron.compactor * compactorBonus * 100 ) + "% → +" + Math.round ( ( MyGravitron.compactor + 1 ) * compactorBonus * 100 )
@@ -73,7 +74,7 @@ var upgrades = {
 
 	// MAIN STRUCTURE
 	mCMSpeed			: { name : "Main Structure Move Speed", tip : "Main Structure Move Speed - Making the Main Structure to move faster.",
-							max : 5, price : "5powtimes4",
+							max : 5, price : [100, 200, 400], priceFrom : 2,
 							level : function () { return mainCanMovSpeed; }, raise : function () { mainCanMovSpeed++; },
 							picture : "turn", unit : "° / s", value : function () { return turnSpeed ( mainCanMovSpeed ); }, next : function () { return turnSpeed ( mainCanMovSpeed + 1 ); },
 							what : "degrees per second" },
@@ -93,8 +94,9 @@ var upgrades = {
 							level : function () { return Math.round ( critChance * 100 ); }, raise : function () { critChance = ( Math.round ( critChance * 100 ) + 5 ) / 100; },
 							picture : "dice", unit : "of shots", value : function () { return Math.round ( critChance * 100 ) + "%"; },
 							change : function () { return Math.round ( critChance * 100 ) + "% → " + ( Math.round ( critChance * 100 ) + 5 ) + "% of the shots critical"; } },
+	// (worth it only with enough critical shots : it comes with the second level of the Critical Chance)
 	critDamage			: { name : "Critical Damage", tip : "Critical Damage - How many times its power a critical shot does.",
-							max : 5, price : "minus2times100",
+							max : 5, price : "minus2times100", appears : function () { return Math.round ( critChance * 100 ) >= 15; },
 							level : function () { return critDamage; }, raise : function () { critDamage += 0.5; },
 							picture : "burst", unit : "power", value : function () { return "×" + critDamage; },
 							change : function () { return "×" + critDamage + " → ×" + ( critDamage + 0.5 ) + " power for a critical shot"; } },
@@ -184,9 +186,9 @@ var upgrades = {
 							level : function () { return missileLauncher.power; }, raise : function () { missileLauncher.power++; },
 							picture : "flame", unit : "damage", what : "damage" },
 	missileBlast		: { name : "Blast Radius", tip : "Missile Blast Radius - To catch more asteroids in each blast.",
-							max : 50, price : "times10plus50",
-							level : function () { return missileLauncher.blast; }, raise : function () { missileLauncher.blast+=5; },
-							picture : "blast", unit : "radius", step : 5, what : "blast radius" },
+							max : 55, price : "times10plus50",
+							level : function () { return missileLauncher.blast; }, raise : function () { missileLauncher.blast+=10; },
+							picture : "blast", unit : "radius", step : 10, what : "blast radius" },
 
 	// NITROGLYCERINE LAUNCHER : another secondary weapon, given by its research
 	// (this one goes down : the seconds it waits for a new capsule, once the bomb before is gone)
@@ -200,15 +202,15 @@ var upgrades = {
 							picture : "flame", unit : "damage", step : 2, what : "damage" },
 	nitroBlast			: { name : "Blast Radius", tip : "Nitroglycerine Blast Radius - To catch more asteroids in each blast.",
 							max : 80, price : "times10plus50",
-							level : function () { return nitroLauncher.blast; }, raise : function () { nitroLauncher.blast+=5; },
-							picture : "blast", unit : "radius", step : 5, what : "blast radius" },
+							level : function () { return nitroLauncher.blast; }, raise : function () { nitroLauncher.blast+=10; },
+							picture : "blast", unit : "radius", step : 10, what : "blast radius" },
 
 	// LASER : one more secondary weapon, given by its research
 	// (its cooldown goes down, in seconds as its beam's duration)
 	laserPow			: { name : "Beam Power", tip : "Laser Beam Power - The damages done by the beam each second.",
-							max : 24, price : "squaredtimes3",
-							level : function () { return laserCannon.power; }, raise : function () { laserCannon.power+=2; },
-							picture : "flame", unit : "damage / s", step : 2, what : "damage per second" },
+							max : 26, price : "squaredtimes3",
+							level : function () { return laserCannon.power; }, raise : function () { laserCannon.power+=4; },
+							picture : "flame", unit : "damage / s", step : 4, what : "damage per second" },
 	laserDuration		: { name : "Beam Duration", tip : "Laser Beam Duration - How long the beam burns, before it cools down. Expressed in seconds.",
 							max : 5, price : "times100",
 							level : function () { return laserCannon.duration / framesPerSecond; }, raise : function () { laserCannon.duration+=framesPerSecond/2; },
@@ -253,9 +255,10 @@ var upgrades = {
 							max : 3, price : "times50",
 							level : function () { return planetCrews; }, raise : function () { planetCrews++; },
 							picture : "crews", unit : "at a time", what : "inhabitant healed at a time" },
-	maxHealth			: { name : "Maximum Health", tip : "Maximum Health - It's the maximum amount of inhabitants your planet can have on.",
-							max : 50, price : "times5",
-							level : function () { return MyPlanet.maxLife; }, raise : function () { MyPlanet.maxLife+=10; },
+	// (the inhabitants come with the room : out of the shelters, they don't wait to be healed)
+	maxHealth			: { name : "Maximum Health", tip : "Maximum Health - Ten million more inhabitants come out of the shelters to live on your planet, at once.",
+							max : 50, price : "times10",
+							level : function () { return MyPlanet.maxLife; }, raise : function () { MyPlanet.maxLife+=10; MyPlanet.life+=10; },
 							picture : "people", unit : "M inhab.", next : function () { return MyPlanet.maxLife + 10; }, what : "million inhabitants at most" },
 	maxMat				: { name : "Maximum Mat", tip : "Maximum Mat - It's the maximum amount of material your planet can store.",
 							max : 1000, price : "times0.75",
@@ -268,12 +271,13 @@ var upgrades = {
 							value : function () { return planetAutoHeal ? autoHealMat() : "off"; },
 							change : function () { return planetAutoHeal ? autoHealMat() + " → " + ( autoHealMat() - autoHealStep ) + " mat gathered per inhabitant healed"
 								: "an inhabitant healed for every " + ( autoHealStep * maxUpgrade("autoHeal") ) + " mat gathered"; } },
-	// (a crash gives back a fifth of its asteroid's life as mat by level : engine.js)
+	// (a crash gives back half of its asteroid's life as mat by level : recoveryShare, engine.js)
 	recovery			: { name : "Recovery", tip : "Recovery - With this upgrade, your citizens will be able to get mat from the asteroids crashing on their planet.",
-							max : 5, price : "plus1times50",
+							max : 2, price : [50, 150], priceFrom : 0,
 							level : function () { return planetRecovery; }, raise : function () { planetRecovery++; },
-							picture : "recovery", unit : "of a crash", value : function () { return planetRecovery * 20 + "%"; },
-							change : function () { return planetRecovery * 20 + "% → " + ( planetRecovery + 1 ) * 20 + "% of the inhabitants a crash takes, given back as mat"; } },
+							picture : "recovery", unit : "of a crash", value : function () { return Math.round ( planetRecovery * recoveryShare * 100 ) + "%"; },
+							change : function () { return Math.round ( planetRecovery * recoveryShare * 100 ) + "% → " + Math.round ( ( planetRecovery + 1 ) * recoveryShare * 100 )
+								+ "% of the inhabitants a crash takes, given back as mat"; } },
 	// brought by its research (researches.js), or by a level of the Adventure (adventure.js)
 	// THE KAMIKAZES : the ships sent with a click on an asteroid, to stop it (kamikaze.js)
 	// (the building time goes down, five seconds at a time)
@@ -285,8 +289,8 @@ var upgrades = {
 							max : 15, decreasing : true, price : "from45times5",
 							level : function () { return kamikazes.building; }, raise : function () { kamikazes.building -= 5; },
 							picture : "hourglass", unit : "s to build", step : -5, what : "seconds to build one" },
-	earlyWarning		: { name : "Early Warning", tip : "Early Warning - Each level evacuates 5% of the inhabitants an asteroid's crash would take away.",
-							max : 5, price : "plus1times100", appears : function () { return research.done.earlyWarning || inAdventure() ? true : false; },	// (in the Adventure, a level brings it)
+	earlyWarning		: { name : "Early Warning", tip : "Early Warning - Each level evacuates 10% of the inhabitants an asteroid's crash would take away.",
+							max : 3, price : "plus1times100", appears : function () { return research.done.earlyWarning || inAdventure() ? true : false; },	// (in the Adventure, a level brings it)
 							level : function () { return MyPlanet.warning; }, raise : function () { MyPlanet.warning++; },
 							picture : "warning", unit : "evacuated", value : function () { return Math.round ( MyPlanet.warning * warningShare * 100 ) + "%"; },
 							change : function () { return Math.round ( MyPlanet.warning * warningShare * 100 ) + "% → " + Math.round ( ( MyPlanet.warning + 1 ) * warningShare * 100 )
@@ -629,6 +633,9 @@ function priceToPay(what) {
 	if ( item.toPay ) {
 		return calculate(item.price,item.toPay());
 	}
+	if ( Array.isArray ( item.price ) ) {
+		return item.price[Math.max ( 0, translate(what) - item.priceFrom )];
+	}
 	return calculate(item.price,translate(what));
 }
 
@@ -640,9 +647,6 @@ function translate(that) {
 // function to determine a price
 function calculate(type,ref) {
 	switch (type) {
-		case "5powtimes4" :
-			ref = 4 * Math.pow(5,ref);
-			break;
 		case "times10plus50" :
 			ref = ( 10 * ref ) + 50;
 			break;

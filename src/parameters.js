@@ -151,7 +151,8 @@
 	var planetY			= 300;
 	var atmosphereDepth	= 25;		// how far the Thick Atmosphere goes above the planet's ground
 	var atmosphereBurn	= 2;		// and the life an asteroid loses coming into it
-	var warningShare	= 0.05;		// the part of the inhabitants each level of the Early Warning evacuates before a crash
+	var warningShare	= 0.1;		// the part of the inhabitants each level of the Early Warning evacuates before a crash,
+	var recoveryShare	= 0.5;		// the part of a crashing asteroid's life each level of the Recovery gives back as mat,
 	var shelterShare	= 0.1;		// the part of the inhabitants the Shelters save, once in a game
 	var shelterNote		= 0;		// the turn until which the game tells the Shelters saved the planet
 	
@@ -197,7 +198,7 @@
 	var pulseList		= new Array();
 	var wideNetMargin	= 20 * Math.PI / 180;	// how much the Wide Net widens the GRAVITRON's field for the debris, on each side
 	var brakeRate		= 0.01;		// the speed an asteroid of base mass loses at each turn in the opening, with the Gravity Brake
-	var compactorBonus	= 0.1;		// the mat more for each debris gathered, at each level of the Compactor
+	var compactorBonus	= 0.2;		// the mat more for each debris gathered, at each level of the Compactor
 	var slingshotHit	= 2;		// how much harder an asteroid the GRAVITRON has turned hits another one, with the Slingshot
 	
 	// asteroids parameters
