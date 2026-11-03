@@ -14,7 +14,8 @@
 // and three stars to win in each one : the level won, more than half of the inhabitants saved, and its own challenge
 // (a star stays won once won, and winning a level opens the next one : the browser remembers it)
 
-// the levels : what they change from the starting values (as the difficulty levels do : parameters.js),
+// the levels : their line of the NAZA's log, the rain they are in the story (shown on the map : story.js),
+// what they change from the starting values (as the difficulty levels do : parameters.js),
 // what they bring to the pause menu (upgrades and weapons, kept by the next levels), their waves and their challenge
 // (with the NAZA's tip to win it, its picture and the numbers of the level's end it lights up : gameover.js)
 //	- a wave : its asteroids, the seconds between two of them, the sides they come from (in degrees around the planet,
@@ -23,52 +24,60 @@
 //	- a hunt or a survival (type) has no waves, but a time, a flow of asteroids (advanceFlow) and, for a hunt, the asteroids to destroy ;
 //	  the boss (type) has its own fight (boss.js)
 var adventureLevels = [
-	{ name : "First Light", values : { planetMat : 20 },
+	{ name : "First Light", log : "Rain 41. A small one, they say. A good one to learn on.",
+		values : { planetMat : 20 },
 		brings : [ "gravPower", "gravSort", "mCMSpeed", "mainPow", "mainSpeed" ],
 		waves : [ { count : 2, gap : 4 }, { count : 3, gap : 4 }, { count : 4, gap : 3 } ],
 		challenge : { text : "Gather 100 mat", test : function () { return MyPlanet.totalMat >= 100; },
 			hint : "Turn your Gravitron's opening toward the debris (&larr; &rarr;) and widen it (&darr;): the more it pulls in, the more mat you gather.",
 			picture : "pull", tiles : [ "Mat gathered" ] } },
-	{ name : "Crossfire", values : { planetMat : 40 },
+	{ name : "Crossfire", log : "Rain 42. From two sides at once, this time. As if they were aimed.",
+		values : { planetMat : 40 },
 		brings : [ "gravShield", "gravScanner", "mCFireRate", "SMART", "kamikazeNbr", "kamikazeBuilding" ],
 		waves : [ { count : 3, gap : 3 }, { count : 4, gap : 3 }, { count : 5, gap : 2.5, from : [0, 180] }, { count : 6, gap : 2, from : [90, 270] } ],
 		challenge : { text : "Win in less than 1 minute 45", test : function () { return gameTime <= 105 * framesPerSecond; },
-			hint : "The next wave comes as soon as the last asteroid is gone: Fire Power and Fire Rate shorten every wave.",
+			hint : "The next wave comes as soon as the last asteroid is gone: more Fire Power and a shorter Cooldown shorten every wave.",
 			picture : "bolt", tiles : [ "Time" ] } },
-	{ name : "Heavy Metal", values : { planetMat : 80 },
+	{ name : "Heavy Metal", log : "Rain 43. One of them is huge and slow. If it lands, there will be little left to save.",
+		values : { planetMat : 80 },
 		brings : [ "SaOW", "SaOCNumber", "SaOCFireRate", "SaOPow", "SaOSpeed", "MaxWAtATime", "healing", "healFact", "autoHeal", "maxMat" ],
 		waves : [ { count : 3, gap : 3.5 }, { count : 4, gap : 3 }, { count : 5, gap : 3, from : [45, 225] }, { count : 5, gap : 2.5 }, { count : 3, gap : 3, giants : 1 } ],
 		challenge : { text : "Destroy the giant before it travels a third of the way to your planet",
 			test : function () { return giantClosest > gameSize / 2 - ( gameSize / 2 - MyPlanet.radius ) / 3; },
 			hint : "Raise your Fire Power before the last wave, and aim at the giant with T as soon as it shows up.",
 			picture : "flame", tiles : [ "Destroyed" ] } },
-	{ name : "Comet Shower", type : "hunt", time : 150, goal : 15, values : { planetMat : 60 },
+	{ name : "Comet Shower", log : "Rain 44. Ice, this time. The inhabitants call it the cold rain, and its debris are worth a lot.",
+		type : "hunt", time : 150, goal : 15, values : { planetMat : 60 },
 		brings : [ "critChance", "critDamage", "mCNumber" ],
 		flow : { every : [6, 3], comets : 7 },
 		challenge : { text : "Destroy 25 asteroids", test : function () { return nbrDestroyed >= 25; },
 			hint : "The comets break in one shot: more Cannons and more critical shots destroy more of everything in the same time.",
 			picture : "cannons", tiles : [ "Hunt" ] } },
-	{ name : "Shatterpoint", values : { planetMat : 100 },
+	{ name : "Shatterpoint", log : "Rain 45. Cracked rocks, glowing red. They burst when they break: keep them far.",
+		values : { planetMat : 100 },
 		brings : [ "magneticW", "magneticCNumber", "magneticCFireRate", "magneticPow", "magneticSpeed", "gravPulse", "repulsion" ],
 		waves : [ { count : 2, splitters : 3, gap : 3 }, { count : 3, splitters : 4, gap : 2.5 }, { count : 2, splitters : 5, gap : 2.5, from : [0, 180] },
 			{ count : 4, splitters : 4, comets : 2, gap : 2 }, { count : 2, splitters : 7, gap : 2, from : [90, 270] } ],
 		challenge : { text : "Let no splinter touch your planet", test : function () { return splinterHits == 0; },
 			hint : "Break the splitting asteroids far from your planet: aim at them with T as soon as they come, before their splinters are close.",
 			picture : "burst", tiles : [ "Inhabitants" ] } },
-	{ name : "Hold the Line", type : "survival", time : 180, values : { planetMat : 100 },
+	{ name : "Hold the Line", log : "Rain 46. The longest one yet. No waves, no rest: just hold on.",
+		type : "survival", time : 180, values : { planetMat : 100 },
 		brings : [ "crews", "maxHealth", "recovery", "gravProspector" ],
 		flow : { every : [5, 2.5], comets : 12, split : 0.2 },
 		challenge : { text : "Lose fewer than 5 million inhabitants", test : function () { return nbrDamage < 5; },
 			hint : "Every hit counts, even healed: the Gravitron Shield and more Cannons stop the asteroids before they land.",
 			picture : "shield", tiles : [ "Inhabitants" ] } },
-	{ name : "Swarm Season", values : { planetMat : 80 },
+	{ name : "Swarm Season", log : "Rain 47. Pebbles flying together, in swarms. The lab is ready to help, at last.",
+		values : { planetMat : 80 },
 		brings : [ "lab", "missiles", "missileFireRate", "missilePow", "missileBlast" ],
 		waves : [ { count : 6, gap : 2 }, { count : 6, swarm : true, gap : 2 }, { count : 7, splitters : 3, gap : 1.8, speed : 1.2 },
 			{ count : 6, comets : 3, swarm : true, gap : 1.8 }, { count : 8, giants : 2, gap : 1.6, speed : 1.2 } ],
 		challenge : { text : "Win in less than 3 minutes 20", test : function () { return gameTime <= 200 * framesPerSecond; },
 			hint : "The next wave comes as soon as the last asteroid is gone: research the missiles, whose blasts clear the swarms fast.",
 			picture : "blast", tiles : [ "Time" ] } },
-	{ name : "Iron Rain", values : { planetMat : 60 },
+	{ name : "Iron Rain", log : "Rain 48. Steel plates, rivets, seams. Rocks don't grow rivets.",
+		values : { planetMat : 60 },
 		brings : [ "lasers", "laserPow", "laserDuration", "laserCooldown", "earlyWarning" ],
 		waves : [ { count : 7, gap : 2, speed : 1.2 }, { count : 5, armored : true, gap : 1.8 }, { count : 8, splitters : 3, gap : 1.6, speed : 1.2 },
 			{ count : 6, comets : 3, armored : true, gap : 1.6 }, { count : 8, giants : 2, armored : true, gap : 1.5, speed : 1.3 } ],
@@ -76,13 +85,15 @@ var adventureLevels = [
 			test : function () { return armorClosest > ( gameSize / 2 + MyPlanet.radius ) / 2; },
 			hint : "Under 3 of Fire Power, your shots bounce off the plates: raise it early, and research the laser, which burns through.",
 			picture : "flame", tiles : [ "Destroyed" ] } },
-	{ name : "The Gauntlet", type : "survival", time : 240, values : { planetMat : 100 },
+	{ name : "The Gauntlet", log : "Rain 49. Everything at once. The NAZA has never seen a rain like this one.",
+		type : "survival", time : 240, values : { planetMat : 100 },
 		brings : [ "explosives", "nitroReload", "nitroPow", "nitroBlast" ],
 		flow : { every : [6, 2.5], comets : 12, split : 0.15, giants : [110, 180, 225], swarms : [80, 200], armored : [140] },
 		challenge : { text : "Lose fewer than 10 million inhabitants", test : function () { return nbrDamage < 10; },
 			hint : "Push the nitroglycerine bombs into the swarms and the giants with your Gravitron: their blasts clear them before they land.",
 			picture : "blast", tiles : [ "Inhabitants" ] } },
-	{ name : "The Colossus", type : "boss", values : { planetMat : 100 }, brings : [],
+	{ name : "The Colossus", log : "Rain 50. Something as big as a moon is coming.",
+		type : "boss", values : { planetMat : 100 }, brings : [],
 		challenge : { text : "Destroy the Colossus before it travels a third of the way to your planet",
 			test : function () { return colossusClosest > colossusPost - ( colossusPost - MyPlanet.radius ) / 3; },
 			hint : "Fire when its bare rock faces you, and push nitroglycerine bombs into it with your Gravitron: they hurt it a lot.",
@@ -122,6 +133,15 @@ function inAdventure () {
 // function to know if a level can be played : the first one, and the ones after a level won
 function levelOpen ( number ) {
 	return number == 0 || ( levelStars[number - 1] && levelStars[number - 1][0] ) ? true : false;
+}
+
+// function to know how many levels are open, one after the other : the map shows them alone, the next rains staying unknown
+function levelsOpen () {
+	var count = 1;
+	while ( count < adventureLevels.length && levelOpen ( count ) ) {
+		count++;
+	}
+	return count;
 }
 
 // function to play a level of the Adventure, from the start menu or the level's end
@@ -438,6 +458,9 @@ function showLevelEnd ( holder, won ) {
 	html += "<div class='buttons'><a href='#' class='button' onClick='state=\"init\";'>Retry</a>";
 	if ( won && adventure.level + 1 < adventureLevels.length ) {
 		html += "<a href='#' class='button' onClick='playLevel(" + ( adventure.level + 1 ) + ");'>Next Level</a>";
+	} else if ( won ) {
+		// (the last level won : the end of the world's story, then the map : story.js)
+		html += "<a href='#' class='button' onClick='tellStories([\"world1End\"]);'>Continue</a>";
 	}
 	html += "<a href='#' class='button' onClick='state=\"map\";'>Map</a></div></div>";
 	holder.innerHTML = html;
@@ -504,8 +527,11 @@ function showMenuPages () {
 	var allWon = levelStars[next] && levelStars[next][0];		// (every level made so far is won)
 	writeOnce ( document.getElementById("adventureNext"), !started ? "Save the Earth, level after level"
 		: allWon ? "Every level won so far: more are coming" : "Next level: " + levelLabel ( next ) + " · " + adventureLevels[next].name );
-	writeOnce ( document.getElementById("adventureStars"), started ? "★ " + starsCount() + " / " + mapSpots.length * 3 : "" );
+	writeOnce ( document.getElementById("adventureStars"), started ? "★ " + starsCount() + " / " + levelsOpen() * 3 : "" );
 	showBonusIcons();		// and the bonuses bought with the stars (starshop.js)
+	if ( adventureReady ) {
+		preloadStories();	// and the story's pictures, before it is told (story.js)
+	}
 }
 
 // function to name a level by its world and its place in it : 1-5 for the fifth level of the first world
@@ -557,8 +583,8 @@ document.addEventListener ( "keydown", function ( e ) {
 	}
 } );
 
-// THE MAP : the first world's levels on a winding path, the boss last and bigger ; the levels not made yet are on it, coming soon
-// (the spots' centers, in the pixels of the map's road, under its bar)
+// THE MAP : the first world's levels on a winding path, the boss last and bigger ; only the levels open are on it, the next rains
+// staying unknown (the spots' centers, in the pixels of the map's road, under its bar)
 var mapSpots = [ [70, 270], [180, 290], [290, 262], [400, 282], [500, 222], [420, 150], [300, 166], [185, 142], [95, 84], [290, 50] ];
 var mapChoice = false;		// the level chosen on the map, told under it (false : the next one to play)
 
@@ -572,35 +598,31 @@ var levelPictures = {
 		+ '<circle fill="INK" stroke="none" cx="38.5" cy="28" r="4.5"/><path fill="INK" stroke="none" d="M32 34l-3 5h6z"/><path d="M29 48v-4M35 48v-4" stroke-width="2"/>'
 };
 
-// function to show the map : its bar, its road, a spot for each level with its stars, and the level chosen under it,
-// with its challenge and the button to play it
+// function to show the map : its bar, the stars won out of the ones of the levels open, its road lit through them, a spot for each
+// one with its stars, and the level chosen under it, with its challenge and the button to play it
 function showMap ( holder ) {
 	if ( mapChoice === false ) {
 		mapChoice = nextLevel();
 	}
-	var open = 0;	// the last level open : the road is lit up to it
-	while ( open + 1 < adventureLevels.length && levelOpen ( open + 1 ) ) {
-		open++;
-	}
-	var html = "<div class='map'><div class='bar'><a href='#' class='level' onClick='state=\"menu\";'>&lsaquo; Menu</a>"
-		+ "<span class='world'>World 1</span><span class='count'>&#9733; " + starsCount() + " / " + mapSpots.length * 3
+	var open = levelsOpen();
+	var html = "<div class='map'><div class='bar'><span class='side'><a href='#' class='level' onClick='state=\"menu\";'>&lsaquo; Menu</a>"
+		+ "<a href='#' class='level' onClick='tellStories(storyList());'>Story</a></span>"
+		+ "<span class='world'>World 1</span><span class='count'>&#9733; " + starsCount() + " / " + open * 3
 		+ " <a href='#' class='level" + ( starsLeft() > 0 ? " spend" : "" ) + "' onClick='state=\"upgrades\";'>Upgrades" + ( starsLeft() > 0 ? " (" + starsLeft() + " &#9733;)" : "" ) + "</a></span></div>"
-		+ "<div class='road'><svg viewBox='0 0 566 340'><path class='way' d='" + mapRoad ( mapSpots ) + "'/>"
-		+ "<path class='lit' d='" + mapRoad ( mapSpots.slice ( 0, open + 1 ) ) + "'/></svg>";
-	for ( var n = 0; n < mapSpots.length; n++ ) {
+		+ "<div class='road'><svg viewBox='0 0 566 340'><path class='lit' d='" + mapRoad ( mapSpots.slice ( 0, open ) ) + "'/></svg>";
+	for ( var n = 0; n < open; n++ ) {
 		html += "<a href='#' class='spot " + spotState ( n ) + ( n == mapSpots.length - 1 ? " boss" : "" ) + ( n == mapChoice ? " chosen" : "" ) + "'"
 			+ " style='left:" + mapSpots[n][0] + "px;top:" + mapSpots[n][1] + "px' onClick='chooseSpot(" + n + ");'>"
 			+ levelPicture ( n ) + "<span class='number'>" + ( n + 1 ) + "</span>"
-			+ "<span class='stars'>" + ( n < adventureLevels.length ? starsText ( levelStars[n] ) : ( n == mapSpots.length - 1 ? "Boss" : "" ) ) + "</span></a>";
+			+ "<span class='stars'>" + starsText ( levelStars[n] ) + "</span></a>";
 	}
 	html += "</div><div class='spotInfo'>" + spotInfo ( mapChoice ) + "</div></div>";
 	holder.innerHTML = html;
 }
 
-// function to draw the picture of a level's type, on its spot (the last spot is the boss's, even before it is made),
-// in the spot's color
+// function to draw the picture of a level's type, on its spot, in the spot's color
 function levelPicture ( n ) {
-	var type = ( n < adventureLevels.length ) ? adventureLevels[n].type : ( n == mapSpots.length - 1 ? "boss" : false );
+	var type = adventureLevels[n].type;
 	return "<svg class='type' viewBox='0 0 64 64'><g fill='none' stroke='currentColor' stroke-width='3' stroke-linecap='round' stroke-linejoin='round'>"
 		+ levelPictures[type || "waves"].replace ( /INK/g, "currentColor" ) + "</g></svg>";
 }
@@ -618,37 +640,21 @@ function nextLevel () {
 			return n;
 		}
 	}
-	var last = 0;
-	while ( last + 1 < adventureLevels.length && levelOpen ( last + 1 ) ) {
-		last++;
-	}
-	return last;
+	return levelsOpen() - 1;
 }
 
-// function to know how a level's spot looks : "soon" (not made yet), "locked", "won", or "open"
+// function to know how an open level's spot looks : "won", or "open"
 function spotState ( n ) {
-	if ( n >= adventureLevels.length ) {
-		return "soon";
-	}
-	if ( !levelOpen ( n ) ) {
-		return "locked";
-	}
 	return ( levelStars[n] && levelStars[n][0] ) ? "won" : "open";
 }
 
-// function to tell about the level chosen on the map : its name and stars, its challenge and the button to play it,
-// or what opens it
+// function to tell about the level chosen on the map : its name and stars, its line of the log, its challenge and the button
+// to play it
 function spotInfo ( n ) {
-	var boss = ( n == mapSpots.length - 1 );
-	if ( n >= adventureLevels.length ) {
-		return "<div class='name'>Level " + levelLabel ( n ) + ( boss ? " &middot; Boss" : "" ) + "</div><div class='text'>Coming soon" + ( boss ? ": the first boss of the Adventure." : "." ) + "</div>";
-	}
 	var level = adventureLevels[n];
-	var html = "<div class='name'>Level " + levelLabel ( n ) + " &middot; " + level.name + " <span class='stars'>" + starsText ( levelStars[n] ) + "</span></div>";
-	if ( !levelOpen ( n ) ) {
-		return html + "<div class='text'>Win level " + levelLabel ( n - 1 ) + " to open it.</div>";
-	}
-	return html + "<div class='text'>" + levelGoal ( level ) + " &middot; Challenge: " + level.challenge.text + "</div>"
+	return "<div class='name'>Level " + levelLabel ( n ) + " &middot; " + level.name + " <span class='stars'>" + starsText ( levelStars[n] ) + "</span></div>"
+		+ "<div class='log'>" + level.log + "</div>"
+		+ "<div class='text'>" + levelGoal ( level ) + " &middot; Challenge: " + level.challenge.text + "</div>"
 		+ "<a href='#' class='button' onClick='playLevel(" + n + ");'>Play</a>";
 }
 
@@ -665,6 +671,7 @@ function mapRoad ( spots ) {
 }
 
 // function to draw the banner of the waves, and the one of the level won, over the game for a few seconds
+// (in the bottom half when the duel's camera puts the planet in the top one : boss.js)
 function drawWaveBanner ( ctx ) {
 	if ( !adventure.banner ) {
 		return;
@@ -678,6 +685,6 @@ function drawWaveBanner ( ctx ) {
 	ctx.textAlign = 'center';
 	ctx.textBaseline = 'alphabetic';
 	ctx.fillStyle = 'rgba(255,71,71,' + Math.min ( 1, age * 4, ( adventure.banner.time - age ) * 2 ) + ')';
-	ctx.fillText ( adventure.banner.text, gameSize / 2, 170 );
+	ctx.fillText ( adventure.banner.text, gameSize / 2, ( cameraView ( camera.share ).y < gameSize / 2 - 1 ) ? gameSize - 150 : 170 );
 	ctx.restore();
 }

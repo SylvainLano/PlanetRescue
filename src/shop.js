@@ -96,10 +96,11 @@ var upgrades = {
 							max : 5, price : "times150",
 							level : function () { return mainCannon.cannonNbr; }, raise : function () { mainCannon.cannonNbr++; },
 							picture : "cannons", unit : "cannons", what : "cannon" },
-	mCFireRate			: { name : "Fire Rate", tip : "Basic Weapon Fire Rate - Making the weapon to fire faster. Expressed in Shots Per Second.",
-							max : 5, price : "expFrom26times1000squared",
-							level : function () { return Math.floor(2500/mainCannon.fireRate)/100; }, raise : function () { mainCannon.fireRate-=2; },
-							picture : "bolt", unit : "shots / s", next : function () { return fireRateAfter ( mainCannon, 2 ); }, what : "shots per second" },
+	// (its cooldown goes down, in seconds, a fifth shorter at each level : cooldownAt)
+	mCFireRate			: { name : "Cooldown", tip : "Basic Weapon Cooldown - The time the weapon waits between two shots, a fifth shorter at each level. Expressed in seconds.",
+							max : function () { return cooldownSeconds ( mainCannon, 5 ); }, decreasing : true, price : "cooldown", toPay : function () { return cooldownLevel ( mainCannon ); },
+							level : function () { return mainCannon.fireRate / framesPerSecond; }, raise : function () { shortenCooldown ( mainCannon ); },
+							picture : "bolt", unit : "s cooldown", next : function () { return cooldownSeconds ( mainCannon, cooldownLevel ( mainCannon ) + 1 ); }, what : "seconds of cooldown" },
 	mainPow				: { name : "Fire Power", tip : "Basic Shots Power - To cause more damages.",
 							max : 10, price : "times3pow2",
 							level : function () { return mainCannon.power; }, raise : function () { mainCannon.power++; },
@@ -114,10 +115,10 @@ var upgrades = {
 							max : 5, price : "times150",
 							level : function () { return spiralCannon.cannonNbr; }, raise : function () { spiralCannon.cannonNbr++; },
 							picture : "cannons", unit : "cannons", what : "cannon" },
-	SaOCFireRate		: { name : "Fire Rate", tip : "Spiral Weapon Fire Rate - Making the weapon to fire faster. Expressed in Shots Per Second.",
-							max : 5, price : "expFrom26times1000squared",
-							level : function () { return Math.floor(2500/spiralCannon.fireRate)/100; }, raise : function () { spiralCannon.fireRate-=2; },
-							picture : "bolt", unit : "shots / s", next : function () { return fireRateAfter ( spiralCannon, 2 ); }, what : "shots per second" },
+	SaOCFireRate		: { name : "Cooldown", tip : "Spiral Weapon Cooldown - The time the weapon waits between two shots, a fifth shorter at each level. Expressed in seconds.",
+							max : function () { return cooldownSeconds ( spiralCannon, 5 ); }, decreasing : true, price : "cooldown", toPay : function () { return cooldownLevel ( spiralCannon ); },
+							level : function () { return spiralCannon.fireRate / framesPerSecond; }, raise : function () { shortenCooldown ( spiralCannon ); },
+							picture : "bolt", unit : "s cooldown", next : function () { return cooldownSeconds ( spiralCannon, cooldownLevel ( spiralCannon ) + 1 ); }, what : "seconds of cooldown" },
 	SaOPow				: { name : "Fire Power", tip : "Spiral Shots Power - To cause more damages.",
 							max : 10, price : "plus1times50",
 							level : function () { return spiralCannon.power; }, raise : function () { spiralCannon.power++; },
@@ -133,10 +134,10 @@ var upgrades = {
 							max : 5, price : "times150",
 							level : function () { return magneticCannon.cannonNbr; }, raise : function () { magneticCannon.cannonNbr++; },
 							picture : "cannons", unit : "cannons", what : "cannon" },
-	magneticCFireRate	: { name : "Fire Rate", tip : "Magnetic Weapon Fire Rate - Making the weapon to fire faster. Expressed in Shots Per Second.",
-							max : 5, price : "expFrom26times1000squared",
-							level : function () { return Math.floor(2500/magneticCannon.fireRate)/100; }, raise : function () { magneticCannon.fireRate-=2; },
-							picture : "bolt", unit : "shots / s", next : function () { return fireRateAfter ( magneticCannon, 2 ); }, what : "shots per second" },
+	magneticCFireRate	: { name : "Cooldown", tip : "Magnetic Weapon Cooldown - The time the weapon waits between two shots, a fifth shorter at each level. Expressed in seconds.",
+							max : function () { return cooldownSeconds ( magneticCannon, 5 ); }, decreasing : true, price : "cooldown", toPay : function () { return cooldownLevel ( magneticCannon ); },
+							level : function () { return magneticCannon.fireRate / framesPerSecond; }, raise : function () { shortenCooldown ( magneticCannon ); },
+							picture : "bolt", unit : "s cooldown", next : function () { return cooldownSeconds ( magneticCannon, cooldownLevel ( magneticCannon ) + 1 ); }, what : "seconds of cooldown" },
 	magneticPow			: { name : "Fire Power", tip : "Magnetic Shots Power - To cause more damages.",
 							max : 10, price : "plus1times3pow2",
 							level : function () { return magneticCannon.power; }, raise : function () { magneticCannon.power++; },
@@ -151,10 +152,10 @@ var upgrades = {
 							max : 5, price : "times150",
 							level : function () { return hammerCannon.cannonNbr; }, raise : function () { hammerCannon.cannonNbr++; },
 							picture : "cannons", unit : "cannons", what : "cannon" },
-	HaBCFireRate		: { name : "Fire Rate", tip : "Hammer Weapon Fire Rate - Making the weapon to fire faster. Expressed in Shots Per Second.",
-							max : 5, price : "expFrom26times1000squared2",
-							level : function () { return Math.floor(2500/hammerCannon.fireRate)/100; }, raise : function () { hammerCannon.fireRate-=2; },
-							picture : "bolt", unit : "shots / s", next : function () { return fireRateAfter ( hammerCannon, 2 ); }, what : "shots per second" },
+	HaBCFireRate		: { name : "Cooldown", tip : "Hammer Weapon Cooldown - The time the weapon waits between two shots, a fifth shorter at each level. Expressed in seconds.",
+							max : function () { return cooldownSeconds ( hammerCannon, 5 ); }, decreasing : true, price : "cooldown", toPay : function () { return cooldownLevel ( hammerCannon ); },
+							level : function () { return hammerCannon.fireRate / framesPerSecond; }, raise : function () { shortenCooldown ( hammerCannon ); },
+							picture : "bolt", unit : "s cooldown", next : function () { return cooldownSeconds ( hammerCannon, cooldownLevel ( hammerCannon ) + 1 ); }, what : "seconds of cooldown" },
 	HaBPow				: { name : "Fire Power", tip : "Hammer Shots Power - To cause more damages.",
 							max : 10, price : "plus1times3pow2",
 							level : function () { return hammerCannon.power; }, raise : function () { hammerCannon.power++; },
@@ -165,10 +166,11 @@ var upgrades = {
 							picture : "spread", unit : "spread", what : "spread, to keep the shots longer" },
 
 	// MISSILE LAUNCHER : a secondary weapon, given by its research (researches.js)
-	missileFireRate		: { name : "Fire Rate", tip : "Missile Fire Rate - Making the launcher to fire faster. Expressed in Missiles Per Second.",
-							max : 0.5, price : "times600",
-							level : function () { return Math.floor(2500/missileLauncher.fireRate)/100; }, raise : function () { missileLauncher.fireRate-=10; },
-							picture : "bolt", unit : "missiles / s", next : function () { return fireRateAfter ( missileLauncher, 10 ); }, what : "missiles per second" },
+	// (its reload time goes down as the cannons' cooldown, three levels at most)
+	missileFireRate		: { name : "Reload Time", tip : "Missile Reload Time - The time the launcher waits between two missiles, a fifth shorter at each level. Expressed in seconds.",
+							max : function () { return cooldownSeconds ( missileLauncher, 3 ); }, decreasing : true, price : "cooldownMissile", toPay : function () { return cooldownLevel ( missileLauncher ); },
+							level : function () { return missileLauncher.fireRate / framesPerSecond; }, raise : function () { shortenCooldown ( missileLauncher ); },
+							picture : "hourglass", unit : "s reload", next : function () { return cooldownSeconds ( missileLauncher, cooldownLevel ( missileLauncher ) + 1 ); }, what : "seconds of reload" },
 	missilePow			: { name : "Blast Power", tip : "Missile Blast Power - The damages done to the asteroid touched, and half of them to the others caught in the blast.",
 							max : 8, price : "times3pow2",
 							level : function () { return missileLauncher.power; }, raise : function () { missileLauncher.power++; },
@@ -349,6 +351,35 @@ var labNextLevel = [
 	"Research Lab - Its next level, the Automation, validates each research once complete, and starts the next one by itself : the one to be done the soonest. You can still stop it, and choose another one.",
 	"Research Lab - Your lab does the researches by itself : no more level available."
 ];
+
+// the cooldown of a cannon or of the missiles, a fifth shorter at each level of its upgrade : 1 second, then 0.8, 0.64…
+var cooldownStep = 0.8;
+
+// function to get a weapon's cooldown, in turns, after some levels of its upgrade, from its starting one (parameters.js)
+function cooldownAt ( weapon, levels ) {
+	var delay = gameValues[weapon.type].delay;
+	for ( var l = 0; l < levels; l++ ) {
+		delay = Math.round ( delay * cooldownStep );
+	}
+	return delay;
+}
+
+// function to know the levels of cooldown a weapon has (ten at most, its cooldown no longer going down after)
+function cooldownLevel ( weapon ) {
+	var levels = 0;
+	while ( levels < 10 && cooldownAt ( weapon, levels ) > weapon.fireRate ) {
+		levels++;
+	}
+	return levels;
+}
+
+// function to shorten a weapon's cooldown by a level, and to get it in seconds as its tile writes it
+function shortenCooldown ( weapon ) {
+	weapon.fireRate = cooldownAt ( weapon, cooldownLevel ( weapon ) + 1 );
+}
+function cooldownSeconds ( weapon, levels ) {
+	return cooldownAt ( weapon, levels ) / framesPerSecond;
+}
 
 // function to activate a weapon
 function activate ( weapon ) {
@@ -603,11 +634,12 @@ function calculate(type,ref) {
 		case "plus1times3pow2" :
 			ref = Math.pow(((ref+1)*3),2);
 			break;
-		case "expFrom26times1000squared" :
-			ref = Math.floor(Math.sqrt(Math.exp(26-(25/ref))*1000));
+		// the cooldowns, from the levels already bought : 60, 138, 317, 730, 1679 for a cannon, 150, 300, 600 for the missiles
+		case "cooldown" :
+			ref = Math.round ( 60 * Math.pow ( 2.3, ref ) );
 			break;
-		case "expFrom26times1000squared2" :
-			ref = Math.floor(Math.sqrt(Math.exp(26-(12.5/ref))*1000));
+		case "cooldownMissile" :
+			ref = 150 * Math.pow ( 2, ref );
 			break;
 		case "times250" :
 			ref *= 250;
@@ -629,9 +661,6 @@ function calculate(type,ref) {
 			break;
 		case "plus1times100" :
 			ref = ( ref + 1 ) * 100;
-			break;
-		case "times600" :
-			ref = Math.round ( ref * 600 );
 			break;
 		case "times0.75" :
 			ref *= 0.75;

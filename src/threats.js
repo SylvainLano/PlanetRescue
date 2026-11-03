@@ -343,7 +343,7 @@ function drawCracks ( ctx, r ) {
 }
 
 // THE SWARMS : a cloud of small pebbles coming together from one side, announced with that side and with mat given to get ready
-// (a fire rate, the shield turned to them, the Spiral…) ; each pebble takes its life away when it crashes
+// (a shorter cooldown, the shield turned to them, the Spiral…) ; each pebble takes its life away when it crashes
 var swarmSize		= 12;		// the pebbles of a swarm,
 var swarmLife		= 2;		// their life, at most (1 or 2),
 var swarmRadius		= 3.5;		// their size,
@@ -357,7 +357,7 @@ var swarmAt			= 0;		// the turn the next swarm comes in the Arcade (0 : not plan
 function announceSwarm ( seconds ) {
 	var side = Math.random() * 2 * Math.PI;
 	var news = announce ( "Swarm from the " + compassSide ( side ), "An asteroid swarm is coming from the " + compassSide ( side )
-		+ "! A cloud of small rocks: raise your fire rate, turn your shield to them, or use your Spiral.", seconds, swarmGift,
+		+ "! A cloud of small rocks: shorten your cooldown, turn your shield to them, or use your Spiral.", seconds, swarmGift,
 		function ( ctx ) { launchSwarm ( ctx, side ); } );
 	news.side = side;
 }

@@ -203,8 +203,3 @@ function shieldSeconds ( level ) {
 function turnSpeed ( level ) {
 	return Math.round ( level * 180 / 256 * framesPerSecond );
 }
-
-// function to get the shots per second of a weapon once its fire rate is raised, firing a few turns sooner (as its level, shop.js)
-function fireRateAfter ( weapon, sooner ) {
-	return Math.floor ( 2500 / ( weapon.fireRate - sooner ) ) / 100;
-}

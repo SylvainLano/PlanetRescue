@@ -91,6 +91,18 @@ function engine() {
 		showMap(adventureMap);
 		state = "stand";
 
+	} else if(state == "story") {
+
+		// Telling the Adventure's story, from the start menu, the map or the Colossus's end, over everything (story.js)
+		startMenu.style.display = "none";
+		gameOver.style.display = "none";
+		pauseScreen.style.display = "none";
+		status.style.display = "none";
+		var storyScreen = document.getElementById("story");
+		storyScreen.style.display = "block";
+		showStory(storyScreen);
+		state = "stand";
+
 	} else if(state == "upgrades") {
 
 		// Displaying the bonuses bought with the Adventure's stars, from its map (starshop.js)
