@@ -582,7 +582,11 @@ function engine() {
 			var angle = angleAroundPlanet(asteroidList[i].x,asteroidList[i].y);		
 			
 			// Pulling the asteroid if it is into the gravitron's field, or pushing it away with the repulsion
-			var pull = gravitronAcceleration(angle, asteroidList[i].mass);
+			// (not a frozen one, held by the Cryo : cryo.js)
+			var pull = asteroidList[i].frozen ? 0 : gravitronAcceleration(angle, asteroidList[i].mass);
+			if ( asteroidList[i].frozen ) {
+				holdFrozen(asteroidList[i]);
+			}
 			var heading = Math.atan2(asteroidList[i].vy, asteroidList[i].vx);
 			asteroidList[i].vx += pull * Math.cos(angle);
 			asteroidList[i].vy += pull * Math.sin(angle);
@@ -931,9 +935,16 @@ function engine() {
 				weaponList[i].currentDelay++;
 				if(weaponList[i].currentDelay >= weaponList[i].fireRate){
 					switch(weaponList[i].type){
-						// the Harvester's rays, at once, need an asteroid in front of the GRAVITRON's opening (functions.js)
+						// the Harvester's rays, at once, need an asteroid in front of the GRAVITRON's opening (functions.js),
+						// and the Cryo's shards an asteroid not frozen yet (cryo.js)
 						case "harvestW":
 							if ( harvestTargets().length > 0 ) {
+								weaponList[i].currentDelay = 0;
+								shoot(ctx,weaponList[i]);
+							}
+							break;
+						case "cryoW":
+							if ( cryoTargets().length > 0 ) {
 								weaponList[i].currentDelay = 0;
 								shoot(ctx,weaponList[i]);
 							}
@@ -1092,6 +1103,7 @@ function engine() {
 	// Resolving the missiles, the capsules, the blasts, the rebound shots and their sparks (secondary.js)
 	if ( pause == 0 ) {
 		resolveMissiles(ctx);
+		resolveShards(ctx);		// (the Cryo's : cryo.js)
 		resolveCapsules(ctx);
 		resolveBlasts();
 		resolveRebounds(ctx);
@@ -1256,6 +1268,9 @@ function drawPlaying ( ctx ) {
 	// the asteroids, tinted with the GRAVITRON's effect at Field Scanner level 2
 	for ( var i in asteroidList ) {
 		asteroidList[i].Draw();
+		if ( asteroidList[i].frozen ) {
+			drawFrozen(ctx,asteroidList[i]);		// (its ice, and the time it stays frozen : cryo.js)
+		}
 		if ( MyGravitron.scanner > 1 && pause == 0 ) {
 			drawFieldTint(ctx,asteroidList[i]);
 		}
@@ -1315,7 +1330,8 @@ function drawPlaying ( ctx ) {
 		ctx.closePath();
 		ctx.fill();
 	}
-	// the Harvester's rays, fading
+	// the Cryo's shards (cryo.js), and the Harvester's rays, fading
+	drawShards(ctx);
 	ctx.save();
 	ctx.lineWidth = 1.5;
 	for ( var i in rayList ) {

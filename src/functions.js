@@ -854,6 +854,12 @@ function shoot(ctx,weapon){
 				playSound ( "shot" );
 			}
 			break;
+		case "cryoW" :
+			// ice shards, one by cannon, each one flying to its own asteroid to freeze it (cryo.js)
+			if ( fireShards ( weapon ) > 0 ) {
+				playSound ( "shot" );
+			}
+			break;
 	}
 	// some of them are critical, red with more power (bonuses.js)
 	criticalShots ( weapon, shotsBefore );
@@ -987,6 +993,15 @@ function displayWeapon(ctx,weapon) {
 			ctx.beginPath();
 			ctx.arc(MyPlanet.x,MyPlanet.y,MyPlanet.radius+2,0,2*Math.PI,true);
 			ctx.stroke();
+			break;
+		case "cryoW" :
+			// a dotted ring of frost around the planet, its shards leaving from anywhere on it
+			ctx.strokeStyle = "rgba(160,220,255,0.7)";
+			ctx.setLineDash([2,4]);
+			ctx.beginPath();
+			ctx.arc(MyPlanet.x,MyPlanet.y,MyPlanet.radius+3,0,2*Math.PI,true);
+			ctx.stroke();
+			ctx.setLineDash([]);
 			break;
 	}
 }

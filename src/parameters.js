@@ -46,6 +46,7 @@
 		magneticW		: { delay : 50, power : 3, speed : 1, smart : 0, cannons : 0 },	// (its shots go to the asteroids near them : slower)
 		HaBW			: { delay : 50, power : 1, speed : 1, smart : 0, cannons : 0 },
 		harvestW		: { delay : 25, power : 1, speed : 0, smart : 0, cannons : 0, yield : 2 },	// the Harvester : its rays' power, and the debris torn off by point of damage
+		cryoW			: { delay : 75, power : 1, speed : 0, smart : 0, cannons : 0, freeze : 5 },	// the Cryo cannon : its shards' power, and the seconds they freeze an asteroid
 		missileW		: { delay : 100, power : 3, speed : 1.5, smart : 0, cannons : 0, blast : 25 },	// a secondary weapon, given by its research
 		nitroW			: { delay : 200, power : 12, speed : 1.5, smart : 0, cannons : 0, blast : 40 },	// another one, its delay counted once its bomb is gone
 		laserW			: { delay : 350, power : 6, speed : 0, smart : 0, cannons : 0, duration : 50 },	// the laser : its power per second, its beam's duration and its cooldown in turns
@@ -166,6 +167,7 @@
 	weaponCost["basicW"]= 50;
 	weaponCost["SaOW"]	= 150;
 	weaponCost["harvestW"]	= 250;
+	weaponCost["cryoW"]	= 300;
 	weaponCost["magneticW"]	= 400;
 	weaponCost["HaBW"]	= 450;
 	var mainCanMovSpeed	= startValues.mainCanMovSpeed;
@@ -221,7 +223,8 @@
 		copper	: { chance : 0.08, value : 2, color : "#5fd3a8" },		// green, as verdigris
 		silver	: { chance : 0.04, value : 3, color : "#dfe6f0" },
 		gold	: { chance : 0.015, value : 5, color : "#f5c842" },
-		ice		: { chance : 0, value : 4, color : "#a8e4ff", share : 1 }		// the comets' (threats.js) : no asteroid gets it, all their debris are made of it
+		ice		: { chance : 0, value : 4, color : "#a8e4ff", share : 1 },		// the comets' (threats.js) : no asteroid gets it, all their debris are made of it
+		frost	: { chance : 0, value : 1, color : "#d4f1ff", share : 1 }		// the one of an asteroid while the Cryo freezes it (cryo.js) : a look, worth no more
 	};
 	var metalShare		= 0.5;		// the part of the debris of an asteroid with a metal that are made of it, unless its metal tells its own
 	var prospectorBonus	= 0.5;		// how much each level of the Prospector raises the metals' chances
@@ -307,11 +310,15 @@ function initDefault(context,level) {
 	spiralCannon	= newWeapon(context,"SaOW","#00FFFF");
 	harvester		= newWeapon(context,"harvestW","#FFC83D");
 	harvester.yield	= gameValues.harvestW.yield;
+	cryo			= newWeapon(context,"cryoW","#a0dcff");
+	cryo.freeze		= gameValues.cryoW.freeze;
+	shardList		= [];
 	magneticCannon	= newWeapon(context,"magneticW","#964514");
 	hammerCannon	= newWeapon(context,"HaBW","#0099CC");
 	weaponList.push(mainCannon);
 	weaponList.push(spiralCannon);
 	weaponList.push(harvester);
+	weaponList.push(cryo);
 	weaponList.push(magneticCannon);
 	weaponList.push(hammerCannon);
 	activate("basicW");

@@ -155,6 +155,21 @@ var upgrades = {
 							picture : "crystal", unit : "debris / ray", value : function () { return "×" + harvester.yield; },
 							change : function () { return harvester.yield + " → " + ( harvester.yield + 1 ) + " debris torn off by each ray"; } },
 
+	// CRYO CANNON : ice shards flying to the asteroids nearest to the planet, freezing them (cryo.js)
+	cryoShards			: { name : "Shards", tip : "Cryo Shards - One more shard at each shot, freezing one more asteroid.",
+							max : 2, price : "times150",
+							level : function () { return cryo.cannonNbr; }, raise : function () { cryo.cannonNbr++; },
+							picture : "cold", unit : "shards", what : "shard" },
+	cryoCooldown		: { name : "Cooldown", tip : "Cryo Cooldown - The time the Cryo cannon waits between two shots, a fifth shorter at each level. Expressed in seconds.",
+							max : function () { return cooldownSeconds ( cryo, 5 ); }, decreasing : true, price : "cooldown", toPay : function () { return cooldownLevel ( cryo ); },
+							level : function () { return cryo.fireRate / framesPerSecond; }, raise : function () { shortenCooldown ( cryo ); },
+							picture : "bolt", unit : "s cooldown", next : function () { return cooldownSeconds ( cryo, cooldownLevel ( cryo ) + 1 ); }, what : "seconds of cooldown" },
+	// (a second more at each level)
+	cryoFreeze			: { name : "Freeze Time", tip : "Cryo Freeze Time - How long an asteroid stays frozen. Expressed in seconds.",
+							max : 8, price : "plus1times100", toPay : function () { return cryo.freeze - gameValues.cryoW.freeze; },
+							level : function () { return cryo.freeze; }, raise : function () { cryo.freeze++; },
+							picture : "hourglass", unit : "s frozen", what : "second frozen" },
+
 	// MAGNETIC CANNON
 	magneticCNumber		: { name : "Cannons", tip : "Magnetic Cannons Number - Increased fire spread.",
 							max : 5, price : "times150",
@@ -339,8 +354,13 @@ var shopLayout = [
 			about : "Its golden rays strike the asteroids in front of your Gravitron's opening, the nearest first: little damage, but twice the debris, falling right into the opening. Turn the opening toward the asteroids to mine them... it pulls them in too, unless your Sorting is high.",
 			statusTip : "One weapon can be active next to your basic cannon, two with the Multiple weapon : making this one active may disactivate another one.",
 			upgrades : ["harvestRays","harvestCooldown","harvestYield"] },
-		{ tab : "Magnet", title : "Magnetic Weapon", weapon : "magneticW", modes : true,
+		{ tab : "Cryo", title : "Cryo Cannon", weapon : "cryoW",
 			appears : function () { return harvester.cannonNbr > 0; },
+			about : "Its ice shards fly to the asteroid nearest to your planet and freeze it: stopped at once, your Gravitron no longer pulls it, a shock only makes it slide a little, and it stops the asteroids hitting it. Once thawed, it stays where it is, without any speed... nor brakes: a shock sends it flying again.",
+			statusTip : "One weapon can be active next to your basic cannon, two with the Multiple weapon : making this one active may disactivate another one.",
+			upgrades : ["cryoShards","cryoCooldown","cryoFreeze"] },
+		{ tab : "Magnet", title : "Magnetic Weapon", weapon : "magneticW", modes : true,
+			appears : function () { return cryo.cannonNbr > 0; },
 			statusTip : "One weapon can be active next to your basic cannon, two with the Multiple weapon : making this one active may disactivate another one.",
 			upgrades : ["magneticCNumber","magneticCFireRate","magneticPow","magneticSpeed"] },
 		{ tab : "Hammer", title : "Hammer and Broom Weapon", weapon : "HaBW", modes : true,

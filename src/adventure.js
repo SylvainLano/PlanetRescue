@@ -55,7 +55,7 @@ var adventureLevels = [
 			picture : "cannons", tiles : [ "Hunt" ] } },
 	{ name : "Shatterpoint", log : "Rain 45. Cracked rocks, glowing red. They burst when they break: keep them far.",
 		values : { planetMat : 100 },
-		brings : [ "magneticW", "magneticCNumber", "magneticCFireRate", "magneticPow", "magneticSpeed", "MaxWAtATime", "gravPulse", "repulsion" ],
+		brings : [ "cryoW", "cryoShards", "cryoCooldown", "cryoFreeze", "magneticW", "magneticCNumber", "magneticCFireRate", "magneticPow", "magneticSpeed", "MaxWAtATime", "gravPulse", "repulsion" ],
 		waves : [ { count : 2, splitters : 3, gap : 3 }, { count : 3, splitters : 4, gap : 2.5 }, { count : 2, splitters : 5, gap : 2.5, from : [0, 180] },
 			{ count : 4, splitters : 4, comets : 2, gap : 2 }, { count : 2, splitters : 7, gap : 2, from : [90, 270] } ],
 		challenge : { text : "Let no splinter touch your planet", test : function () { return splinterHits == 0; },
