@@ -18,9 +18,13 @@ function emitPulse(ctx,pulseList) {
 	return pulseList;
 }
 
-// Function to create the debris (half of them made of the asteroid's metal, if it has one : bonuses.js)
+// Function to create the debris (half of them made of the asteroid's metal, if it has one : bonuses.js ; fewer while the Colossus
+// is there, all that comes from it crumbling, even fewer at a denser difficulty level : boss.js)
 function addDebris(ctx,nb,x,y,vx,vy,debrisList,metal) {
-	
+	if ( colossus && bossPhase < 4 ) {
+		nb = Math.floor ( nb * Math.min ( 1, colossusDebris / levelDensity() ) + Math.random() );
+	}
+
 	var velocity = Math.sqrt(Math.pow(vx,2)+Math.pow(vy,2));
 	
 	// Calculating angle
@@ -479,13 +483,17 @@ function intoArcField(angle,arc) {
 	}
 }
 
-// Function to get the GRAVITRON's acceleration on an asteroid, along the line from the planet's center to the asteroid
-// (negative when the asteroid is pulled toward the planet, positive when the repulsion pushes it away)
-function gravitronAcceleration(angle,mass) {
+// Function to get the GRAVITRON's acceleration on an asteroid going its way (vx, vy), along the line from the planet's center to
+// the asteroid : negative when the asteroid is pulled toward the planet, positive when the Gravity Cushion brakes it, coming at the
+// closed part : never more than the speed it comes at the planet with, braking it without pushing it away
+function gravitronAcceleration(angle,mass,vx,vy) {
 	if (intoArcField(angle,MyGravitron) == true) {
 		return - gravSuction * MyGravitron.power / Math.pow(MyGravitron.sort, MyGravitron.power) / mass;
 	} else if ( MyGravitron.repulsion > 0 ) {
-		return gravSuction * Math.pow(MyGravitron.sort, MyGravitron.power) / mass;
+		var coming = - ( vx * Math.cos(angle) + vy * Math.sin(angle) );
+		if ( coming > 0 ) {
+			return Math.min ( coming, gravSuction * MyGravitron.power * cushionShare / mass );
+		}
 	}
 	return 0;
 }
@@ -649,9 +657,9 @@ function drawFieldLimits(ctx,color) {
 	ctx.setLineDash([]);
 }
 
-// Function to tint an asteroid with the GRAVITRON's effect on it (Field Scanner level 2) : red when pulled in, green when pushed away
+// Function to tint an asteroid with the GRAVITRON's effect on it (Field Scanner level 2) : red when pulled in, green when braked
 function drawFieldTint(ctx,asteroid) {
-	var pull = gravitronAcceleration(angleAroundPlanet(asteroid.x,asteroid.y), asteroid.mass);
+	var pull = gravitronAcceleration(angleAroundPlanet(asteroid.x,asteroid.y), asteroid.mass, asteroid.vx, asteroid.vy);
 	if ( pull == 0 ) {
 		return;
 	}
@@ -1165,13 +1173,15 @@ function interception ( asteroid, Vp, r0 ) {
 // before they meet, or false if no shot can catch it
 // A shot leaves the planet radially : it is at the distance r0 from the planet's center after its
 // first move, then goes Vp further at each turn. The asteroid is followed turn by turn, moved
-// like the engine does with the GRAVITRON's pull, until the shot's distance catches up with its own.
+// like the engine does with the GRAVITRON's pull (and on its arc, curled by the Colossus : boss.js),
+// until the shot's distance catches up with its own.
 function meetingPoint ( asteroid, Vp, r0 ) {
 	// asteroid's position relative to the planet, and speed
 	var x = asteroid.x - MyPlanet.x;
 	var y = asteroid.y - MyPlanet.y;
 	var vx = asteroid.vx;
 	var vy = asteroid.vy;
+	var curling = asteroid.curlTurns || 0;
 
 	// how far the asteroid is beyond the shot
 	var gap = Math.sqrt(x*x + y*y) - r0;
@@ -1179,9 +1189,14 @@ function meetingPoint ( asteroid, Vp, r0 ) {
 	for ( var n = 1; gap > 0 && ( r0 + n*Vp ) <= gameSize; n++ ) {
 		// moving the asteroid one turn ahead, as if the GRAVITRON stays where it is
 		var angle = Math.atan2(y, x);
-		var pull = gravitronAcceleration(angle, asteroid.mass);
+		var pull = gravitronAcceleration(angle, asteroid.mass, vx, vy);
 		vx += pull * Math.cos(angle);
 		vy += pull * Math.sin(angle);
+		if ( curling-- > 0 ) {
+			var turned = curlSpeed(asteroid, vx, vy);
+			vx = turned.vx;
+			vy = turned.vy;
+		}
 		var nextGap = Math.sqrt((x+vx)*(x+vx) + (y+vy)*(y+vy)) - ( r0 + n*Vp );
 		if ( nextGap <= 0 ) {
 			// the shot catches up during this turn : aiming at the matching point of the asteroid's move
@@ -1244,14 +1259,20 @@ function nearestShot ( asteroid, Vp, r0 ) {
 	var y = asteroid.y - MyPlanet.y;
 	var vx = asteroid.vx;
 	var vy = asteroid.vy;
+	var curling = asteroid.curlTurns || 0;
 	var bestGap = Math.abs ( Math.sqrt(x*x + y*y) - r0 );
 	var bestX = x;
 	var bestY = y;
 	for ( var n = 1; ( r0 + n*Vp ) <= gameSize; n++ ) {
 		var angle = Math.atan2(y, x);
-		var pull = gravitronAcceleration(angle, asteroid.mass);
+		var pull = gravitronAcceleration(angle, asteroid.mass, vx, vy);
 		vx += pull * Math.cos(angle);
 		vy += pull * Math.sin(angle);
+		if ( curling-- > 0 ) {
+			var turned = curlSpeed(asteroid, vx, vy);
+			vx = turned.vx;
+			vy = turned.vy;
+		}
 		x += vx;
 		y += vy;
 		var gap = Math.abs ( Math.sqrt(x*x + y*y) - ( r0 + n*Vp ) );
@@ -1293,6 +1314,7 @@ function crashTime ( asteroid ) {
 	var y = asteroid.y - MyPlanet.y;
 	var vx = asteroid.vx;
 	var vy = asteroid.vy;
+	var curling = asteroid.curlTurns || 0;
 	var crash = MyPlanet.radius + asteroid.radius;
 
 	// looking 40 seconds ahead at most
@@ -1305,9 +1327,14 @@ function crashTime ( asteroid ) {
 			return false;
 		}
 		var angle = Math.atan2(y, x);
-		var pull = gravitronAcceleration(angle, asteroid.mass);
+		var pull = gravitronAcceleration(angle, asteroid.mass, vx, vy);
 		vx += pull * Math.cos(angle);
 		vy += pull * Math.sin(angle);
+		if ( curling-- > 0 ) {
+			var turned = curlSpeed(asteroid, vx, vy);
+			vx = turned.vx;
+			vy = turned.vy;
+		}
 		x += vx;
 		y += vy;
 	}

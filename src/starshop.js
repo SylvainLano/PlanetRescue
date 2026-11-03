@@ -18,8 +18,8 @@
 //	- each cell : its place (in columns and rows from the Earth, the north up), its price in stars (a list for its levels), the cells
 //	  it opens from ("earth" : at once), its name, its tile (tilePictures, tiles.js) and the value written on it (one for each level),
 //	  what it does, what the Adventure must have shown first for it to be seen (an upgrade sold in an open level of the path, or
-//	  brought by a bonus level won : metInAdventure, adventure.js), the weapon it builds or upgrades (not in the bonus level where
-//	  that weapon is to be built), and how it changes the start of a level, with its levels bought (applyStarBonuses, engine.js)
+//	  brought by a bonus level won : metInAdventure, adventure.js), the weapon it builds or upgrades (not in the simulation testing
+//	  that weapon's prototype), and how it changes the start of a level, with its levels bought (applyStarBonuses, engine.js)
 // (the first world's tree costs 74 stars, the world giving 33 at most : the player chooses ; the next worlds will grow it outward)
 var starTree = [
 	// north, the basic cannon : its power, then its AI and its turning, or its critical shots and its cooldown
@@ -79,12 +79,13 @@ var treeCell	= 44;		// and its size, its frame included
 var treeEarth	= { radius : 20, skin : earthMap, spin : 0.6, globe : false };		// the Earth in the middle, painted as the scenes' (menuscenes.js)
 var starBonuses = loadStarBonuses();	// the levels bought in each cell, by its id
 
-// function to read the cells bought, saved by the browser (the bonuses of the tracks before the tree, saved under another name,
-// are forgotten : their stars come back to be spent ; a cell saved as bought before the levels has its first one)
+// function to read the cells bought at the Adventure's difficulty level, saved by the browser (adventureKey, adventure.js ; the
+// bonuses of the tracks before the tree, saved under another name, are forgotten : their stars come back to be spent ; a cell saved
+// as bought before the levels has its first one)
 function loadStarBonuses () {
 	try {
 		delete localStorage["adventureBonuses"];
-		var saved = JSON.parse ( localStorage["adventureTree"] || "{}" );
+		var saved = JSON.parse ( localStorage[adventureKey ( "adventureTree" )] || "{}" );
 		if ( !saved || typeof saved != "object" ) {
 			return {};
 		}
@@ -100,7 +101,7 @@ function loadStarBonuses () {
 // function to save the cells bought
 function saveStarBonuses () {
 	try {
-		localStorage["adventureTree"] = JSON.stringify ( starBonuses );
+		localStorage[adventureKey ( "adventureTree" )] = JSON.stringify ( starBonuses );
 	} catch ( e ) {}
 }
 
@@ -198,12 +199,12 @@ function resetStarBonuses () {
 }
 
 // function to give its cells bought to a level of the Adventure, at its start (engine.js, after initDefault) : in the order of the
-// tree, the Spiral built before it is upgraded ; not the weapon a bonus level is about, which is to be built there
+// tree, the Spiral built before it is upgraded ; not the weapon a simulation tests, there as its prototype (adventure.js)
 function applyStarBonuses () {
 	var level = adventureLevels[adventure.level];
 	for ( var c in starTree ) {
 		var cell = starTree[c];
-		if ( cellBought ( cell.id ) && !( level.bonus && cell.weapon == level.weapon ) ) {
+		if ( cellBought ( cell.id ) && !( cell.weapon && cell.weapon == level.prototype ) ) {
 			cell.apply ( cellLevel ( cell.id ) );
 		}
 	}

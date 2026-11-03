@@ -687,7 +687,7 @@ function futureWays () {
 			way.xs.push ( MyPlanet.x + x );
 			way.ys.push ( MyPlanet.y + y );
 			var angle = Math.atan2 ( y, x );
-			var pull = gravitronAcceleration ( angle, asteroid.mass );
+			var pull = gravitronAcceleration ( angle, asteroid.mass, vx, vy );
 			vx += pull * Math.cos ( angle );
 			vy += pull * Math.sin ( angle );
 			x += vx;

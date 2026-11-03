@@ -54,6 +54,7 @@ function engine() {
 		startMenu.style.display = "block";
 		mainMenu.style.display = "none";
 		infoText.style.display = "block";
+		infoText.classList.toggle("adventure", adventureReady && menuPage == "adventure");	// (the Adventure's mission, opened from its page)
 		achievementsText.style.display = "none";
 		adventureMap.style.display = "none";
 		starShop.style.display = "none";
@@ -347,7 +348,8 @@ function engine() {
 		// a level of the Adventure starts with its own values, the Arcade with the difficulty level's (adventure.js)
 		initDefault(ctx,inAdventure() ? adventureLevels[adventure.level].values : difficulty);
 		if ( inAdventure() ) {
-			applyStarBonuses();		// and the bonuses bought with its stars (starshop.js)
+			applyStarBonuses();		// and the bonuses bought with its stars (starshop.js),
+			startLevel();			// then what the level gives at its start (adventure.js)
 		}
 		// the countdown's banner is drawn on the game, at the top, and hidden until the countdown begins
 		// (the "countdown" element of the page only writes the tutorial's texts)
@@ -581,9 +583,9 @@ function engine() {
 			// Calculating angle around the planet to the asteroid
 			var angle = angleAroundPlanet(asteroidList[i].x,asteroidList[i].y);		
 			
-			// Pulling the asteroid if it is into the gravitron's field, or pushing it away with the repulsion
+			// Pulling the asteroid if it is into the gravitron's field, or braking it with the repulsion
 			// (not a frozen one, held by the Cryo : cryo.js)
-			var pull = asteroidList[i].frozen ? 0 : gravitronAcceleration(angle, asteroidList[i].mass);
+			var pull = asteroidList[i].frozen ? 0 : gravitronAcceleration(angle, asteroidList[i].mass, asteroidList[i].vx, asteroidList[i].vy);
 			if ( asteroidList[i].frozen ) {
 				holdFrozen(asteroidList[i]);
 			}
@@ -650,6 +652,11 @@ function engine() {
 				}
 			}
 			
+		// (an asteroid curled by the Colossus turning on its arc : boss.js)
+		if ( asteroidList[i].trail ) {
+			curlTurn(asteroidList[i]);
+		}
+
 		// Calculating positions
 		asteroidList[i].x += asteroidList[i].vx;
 		asteroidList[i].y += asteroidList[i].vy;
@@ -1031,9 +1038,9 @@ function engine() {
 				for (j in asteroidList) {
 					var distance = Math.floor( Math.sqrt( Math.pow((shotList[i].x - asteroidList[j].x),2) + Math.pow((shotList[i].y - asteroidList[j].y),2) ) );
 					if ( distance < asteroidList[j].radius ) {
-						// debris creation from asteroids' life (none from a shot too weak for an armored one : threats.js)
+						// debris creation from asteroids' life (less from a shot on an armored one, a critical one aside : threats.js)
 						// (the Hammer's waves, which push, are not shots : hammer.js)
-						var damage = armorDamage(asteroidList[j],shotList[i].power,shotList[i].x,shotList[i].y);
+						var damage = armorDamage(asteroidList[j],shotList[i].power,shotList[i].x,shotList[i].y,shotList[i].critical);
 						addDebris(ctx,damage,asteroidList[j].x,asteroidList[j].y,asteroidList[j].vx,asteroidList[j].vy,debrisList,asteroidList[j].metal);
 						asteroidList[j].life -= damage;
 						if ( asteroidList[j].life <= 0 ) {
@@ -1185,8 +1192,10 @@ function drawGame ( blend ) {
 	ctx.setTransform(scale,0,0,scale,0,0);
 	ctx.clearRect(0,0,gameSize,gameSize);
 
-	// the background's stars twinkling, under everything
-	drawStars ( ctx );
+	// the background's stars twinkling, under everything ; in a simulation of the Adventure, the simulator's grid instead (adventure.js)
+	if ( !drawSimulation ( ctx ) ) {
+		drawStars ( ctx );
+	}
 	// behind the start menu, the scenes of its two pages (menuscenes.js)
 	if ( state == "menu" ) {
 		drawMenuScenes ( ctx );
@@ -1197,7 +1206,12 @@ function drawGame ( blend ) {
 		if ( state == "tutorialSteps" ) {
 			drawTutorial ( ctx );
 		} else if ( state == "countdown" ) {
-			MyPlanet.Draw();
+			if ( simulating() ) {
+				drawHologramPlanet ( ctx );		// (a simulation of the Adventure : adventure.js)
+				drawSimulationOverlay ( ctx );
+			} else {
+				MyPlanet.Draw();
+			}
 			drawBanner ( ctx );
 		} else if ( state == "playing" ) {
 			// the Red Effect, when the planet is hit, over the whole game area
@@ -1214,7 +1228,8 @@ function drawGame ( blend ) {
 			ctx.setTransform(scale,0,0,scale,0,0);
 			drawKamikazeGauge ( ctx );
 			drawBanner ( ctx );
-			drawWaveBanner ( ctx );		// the Adventure's waves (adventure.js)
+			drawSimulationOverlay ( ctx );	// the simulator's screen over a simulation of the Adventure (adventure.js),
+			drawWaveBanner ( ctx );		// and its waves
 			drawAnnounce ( ctx );		// and the NAZA's announces of the threats coming (threats.js)
 			// what the player should know about the researches, while playing (researches.js)
 			if ( pause == 0 ) {
@@ -1241,13 +1256,23 @@ function drawPlaying ( ctx ) {
 	}
 	// the planet's Thick Atmosphere, under everything (functions.js)
 	drawAtmosphere(ctx);
-	drawDebris(ctx);
+	// (a simulation of the Adventure shows its world as holograms : adventure.js)
+	var holograms = simulating();
+	if ( holograms ) {
+		asHologram(ctx,function () { drawDebris(ctx); });
+	} else {
+		drawDebris(ctx);
+	}
 	// the bombs' glow and the flames of the asteroids burning in the atmosphere, under their rock (secondary.js, functions.js)
 	drawBombs(ctx);
 	drawBurning(ctx);
 	// the asteroids, tinted with the GRAVITRON's effect at Field Scanner level 2
 	for ( var i in asteroidList ) {
-		asteroidList[i].Draw();
+		if ( holograms ) {
+			drawHologram(ctx,asteroidList[i]);
+		} else {
+			asteroidList[i].Draw();
+		}
 		if ( asteroidList[i].frozen ) {
 			drawFrozen(ctx,asteroidList[i]);		// (its ice, and the time it stays frozen : cryo.js)
 		}
@@ -1329,7 +1354,11 @@ function drawPlaying ( ctx ) {
 	drawCapsules(ctx);
 	drawLaser(ctx);
 	drawRebounds(ctx);
-	MyPlanet.Draw();
+	if ( holograms ) {
+		drawHologramPlanet(ctx);
+	} else {
+		MyPlanet.Draw();
+	}
 	// the shield's energy, vanishing when hit
 	if ( MyGravitron.shield > 0 && pause == 0 && shieldHit[0] != 0 ) {
 		ctx.strokeStyle = 'rgba('+shieldHit[5]+','+shieldHit[6]+','+shieldHit[7]+','+shieldHit[8]+')';

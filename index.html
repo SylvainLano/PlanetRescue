@@ -12,7 +12,7 @@
 <html>
 <head>
 	<meta charset="utf-8">
-	<title>Planet Rescue v0.51.1</title>
+	<title>Planet Rescue v0.52.0</title>
 
 	<link rel="stylesheet" type="text/css" href="css/main.css">
 
@@ -68,7 +68,7 @@
 	</div>
 	<div id="startMenu" class="ui">
 		<div class="title">
-			Planet Rescue <span class="version">v0.51.1</span>
+			Planet Rescue <span class="version">v0.52.0</span>
 		</div>
 		<div id="mainMenu">
 			<!-- the two pages of the start menu, sliding one after the other : the Adventure's, then the Arcade's (src/adventure.js) -->
@@ -76,8 +76,15 @@
 				<div id="menuTrack">
 					<div id="adventurePage" class="page">
 						<a href="#" id="adventureStart" class="button primary" onClick='openAdventure();'>Start</a>
+						<div id="adventureLevels"><!-- each difficulty level an adventure of its own (src/adventure.js) -->
+							<a href="#" id="adventure_easy" class="level" onClick='chooseAdventureLevel("easy");'>Easy</a>
+							<a href="#" id="adventure_normal" class="level" onClick='chooseAdventureLevel("normal");'>Normal</a>
+							<a href="#" id="adventure_hard" class="level" onClick='chooseAdventureLevel("hard");'>Hard</a>
+						</div>
+						<div id="adventureLevelText">Each difficulty is an adventure of its own, with its own stars.</div>
 						<div id="adventureText"><span id="adventureNext"></span><span id="adventureStars"></span></div><!-- the next level and the stars won, written by showMenuPages() -->
 						<div id="adventureBonuses"></div><!-- the cells of the stars' tree bought, written by showBonusIcons() (src/starshop.js) -->
+						<div id="adventureRestart"><a href="#" onClick='restartAdventure();'>restart this adventure</a></div><!-- once it is started (src/adventure.js) -->
 					</div>
 					<div id="arcadePage" class="page">
 						<a href="#" class="button primary" onClick='playArcade();'>Start</a>
@@ -103,7 +110,20 @@
 		</div>
 		<div id="infoText">
 			<div class="columns">
-				<div>
+				<!-- on the left, the Adventure's or the Arcade's, as the start menu's page it is opened from (engine.js) -->
+				<div class="adventureInfo">
+					<h3>The Adventure</h3>
+					<p>For twenty years, rains of asteroids have fallen on the Earth. Win the levels of the map one after the other, each one a rain of its own, up to the Colossus at the end of the first world.</p>
+					<h3>Good to know</h3>
+					<ul>
+						<li>Each level has three stars: win it, save more than half of your inhabitants, and meet its challenge, told on the map.</li>
+						<li>Your stars buy bonuses kept from a level to the next, in the map's Upgrades. Take them back to spend them again.</li>
+						<li>Each level's pause menu sells a few upgrades, to learn them one at a time.</li>
+						<li>A level lost, or won without all its stars: the NAZA gives you a tip.</li>
+						<li>Easy, Normal or Hard: each difficulty is an adventure of its own, with its own stars.</li>
+					</ul>
+				</div>
+				<div class="arcadeInfo">
 					<h3>Your mission</h3>
 					<p>Asteroids rain on the Earth from every direction. Your weapons fire on their own: you steer the Gravitron, gather the debris it pulls in as mat, and spend your mat on upgrades in the pause menu.</p>
 					<h3>Good to know</h3>

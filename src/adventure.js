@@ -24,8 +24,9 @@
 //	  and comets mixed with them, its giants, coming last, and a swarm or a group of armored asteroids announced first (threats.js)
 //	- a hunt or a survival (type) has no waves, but a time, a flow of asteroids (advanceFlow) and, for a hunt, the asteroids to destroy ;
 //	  the boss (type) has its own fight (boss.js)
-//	- a bonus level is off the path, open once the level it follows (after) is won, on its own spot of the map : its prize is a weapon
-//	  to build (weapon), winning it, and the upgrades it brings to every level's shop once won (unlocks)
+//	- a bonus level is off the path, open once the level it follows (after) is won, on its own spot of the map : a simulation, in the
+//	  NAZA's simulator (its own look : drawSimulation), testing the prototype of a weapon, there from the start ; won, the prototype goes
+//	  into production, and its upgrades come to every level's shop (unlocks)
 // (the first world opens little : the basic weapon, the Gravitron, the planet and the kamikazes, the Spiral in its bonus level ;
 // the other weapons and the researches wait for the next worlds ; the wide shop of its last levels, as a final exam, sells all of it)
 var wideShop = [ "mainPow", "mCNumber", "mCFireRate", "mainSpeed", "mCMSpeed", "SMART", "critChance", "critDamage",
@@ -65,39 +66,42 @@ var adventureLevels = [
 	{ name : "Shatterpoint", log : "Rain 45. Cracked rocks, glowing red. They burst when they break: keep them far.",
 		values : { planetMat : 100 },
 		shop : [ "mainPow", "mainSpeed", "gravPower", "gravShield", "repulsion" ],
-		waves : [ { count : 2, splitters : 3, gap : 3 }, { count : 3, splitters : 4, gap : 2.5 }, { count : 2, splitters : 5, gap : 2.5, from : [0, 180] },
-			{ count : 4, splitters : 4, comets : 2, gap : 2 }, { count : 2, splitters : 7, gap : 2, from : [90, 270] } ],
+		waves : [ { count : 3, splitters : 5, gap : 2.3, speed : 1.1 }, { count : 5, splitters : 7, gap : 1.9, speed : 1.1 },
+			{ count : 3, splitters : 9, gap : 1.9, from : [0, 180], speed : 1.1 }, { count : 7, splitters : 7, comets : 3, gap : 1.5, speed : 1.1 },
+			{ count : 3, splitters : 12, gap : 1.5, from : [90, 270], speed : 1.1 } ],
 		challenge : { text : "Let no splinter touch your planet", test : function () { return splinterHits == 0; },
 			hint : "Break the splitting asteroids far from your planet: aim at them with T as soon as they come, before their splinters are close.",
 			picture : "burst", tiles : [ "Inhabitants" ] } },
 	{ name : "Hold the Line", log : "Rain 46. The longest one yet. No waves, no rest: just hold on.",
 		type : "survival", time : 180, values : { planetMat : 100 },
 		shop : [ "gravShield", "gravPulse", "healing", "healFact", "crews", "maxHealth" ],
-		flow : { every : [5, 2.5], comets : 12, split : 0.2 },
+		flow : { every : [3, 1.5], speed : 1.1, comets : 7.3, split : 0.2 },
 		challenge : { text : "Lose fewer than 5 million inhabitants", test : function () { return nbrDamage < 5; },
 			hint : "Every hit counts, even healed: the Gravitron Shield and its Pulse stop the asteroids before they land.",
 			picture : "shield", tiles : [ "Inhabitants" ] } },
 	{ name : "Swarm Season", log : "Rain 47. Pebbles flying together, in swarms, like birds. Small ones, but so many.",
 		values : { planetMat : 80 },
 		shop : [ "mainPow", "mCNumber", "mCFireRate", "SMART", "gravShield" ],
-		waves : [ { count : 6, gap : 2 }, { count : 6, swarm : true, gap : 2 }, { count : 7, splitters : 3, gap : 1.8, speed : 1.2 },
-			{ count : 6, comets : 3, swarm : true, gap : 1.8 }, { count : 8, giants : 2, gap : 1.6, speed : 1.2 } ],
+		waves : [ { count : 10, gap : 1.5, speed : 1.1 }, { count : 10, swarm : true, gap : 1.5, speed : 1.1 },
+			{ count : 12, splitters : 5, gap : 1.4, speed : 1.3 }, { count : 10, comets : 5, swarm : true, gap : 1.4, speed : 1.1 },
+			{ count : 14, giants : 2, gap : 1.2, speed : 1.3 } ],
 		challenge : { text : "Win in less than 3 minutes 20", test : function () { return gameTime <= 200 * framesPerSecond; },
 			hint : "The next wave comes as soon as the last asteroid is gone: more Cannons and a shorter Cooldown clear the swarms fast.",
 			picture : "blast", tiles : [ "Time" ] } },
 	{ name : "Iron Rain", log : "Rain 48. Steel plates, rivets, seams. Rocks don't grow rivets.",
 		values : { planetMat : 60 },
 		shop : [ "mainPow", "SMART", "mCFireRate", "critChance", "critDamage", "kamikazeNbr" ],
-		waves : [ { count : 5, gap : 2.5 }, { count : 3, armored : true, gap : 2.5 }, { count : 6, splitters : 2, gap : 2.2, speed : 1.1 },
-			{ count : 4, comets : 2, armored : true, gap : 2.2 }, { count : 6, giants : 1, armored : true, gap : 2, speed : 1.1 } ],
+		waves : [ { count : 9, gap : 1.9, speed : 1.1 }, { count : 5, armored : true, gap : 1.9, speed : 1.1 },
+			{ count : 10, splitters : 3, gap : 1.7, speed : 1.2 }, { count : 7, comets : 3, armored : true, gap : 1.7, speed : 1.1 },
+			{ count : 10, giants : 1, armored : true, gap : 1.5, speed : 1.2 } ],
 		challenge : { text : "Destroy every armored asteroid before it gets halfway to your planet",
 			test : function () { return armorClosest > ( gameSize / 2 + MyPlanet.radius ) / 2; },
-			hint : "Under 3 of Fire Power, your shots bounce off the plates: raise it early, and the critical shots break through.",
+			hint : "Their plates absorb 3 of each shot's power: raise your Fire Power early, and the critical shots go through whole.",
 			picture : "flame", tiles : [ "Destroyed" ] } },
 	{ name : "The Gauntlet", log : "Rain 49. Everything at once. The NAZA has never seen a rain like this one.",
 		type : "survival", time : 240, values : { planetMat : 100 },
 		shop : wideShop,
-		flow : { every : [6, 2.5], comets : 12, split : 0.15, giants : [110, 180, 225], swarms : [80, 200], armored : [140] },
+		flow : { every : [3.1, 1.3], speed : 1.15, comets : 6.2, split : 0.15, giants : [110, 180, 225], swarms : [80, 200], armored : [140] },
 		challenge : { text : "Lose fewer than 10 million inhabitants", test : function () { return nbrDamage < 10; },
 			hint : "The giants come at 1:50, 3:00 and 3:45: raise your Fire Power before, and aim at each one with T as soon as it shows up.",
 			picture : "blast", tiles : [ "Inhabitants" ] } },
@@ -106,18 +110,19 @@ var adventureLevels = [
 		shop : wideShop,
 		challenge : { text : "Destroy the Colossus before it travels a third of the way to your planet",
 			test : function () { return colossusClosest > colossusPost - ( colossusPost - MyPlanet.radius ) / 3; },
-			hint : "Fire when its bare rock faces you: its plates halve the hits under 8 of power, but not the critical shots that pass it.",
+			hint : "Send a kamikaze into the Colossus: the blow spins it half a turn, its bare rock toward you. Its plates stop most of the hits under 8 of power.",
 			picture : "rock", tiles : [ "Colossus" ] } },
 	// the bonus levels
-	{ name : "The Prototype", log : "Rain 43 left metal rocks behind it. Enough mat for a new cannon.",
-		bonus : true, after : 2, spot : [232, 205], icon : "spiral", type : "bonus", time : 180, weapon : "SaOW", metals : 4,
+	{ name : "The Prototype", log : "The engineers have built a new cannon. Before it goes into production, it must pass the NAZA's simulator.",
+		bonus : true, after : 2, spot : [232, 205], icon : "spiral", simulation : true, prototype : "SaOW",
 		unlocks : [ "SaOW", "SaOCNumber", "SaOCFireRate", "SaOPow", "SaOSpeed" ],
-		values : { planetMat : 20 },
-		shop : [ "SaOW" ],
-		flow : { every : [8, 6], speed : 0.7 },
-		challenge : { text : "Win in less than 1 minute 30", test : function () { return gameTime <= 90 * framesPerSecond; },
-			hint : "The metal rocks' debris are worth 2 to 5 mat: turn your Gravitron's opening toward them as soon as a rock breaks, before they drift away.",
-			picture : "crystal", tiles : [ "Time" ] } }
+		values : { planetMat : 100 },
+		shop : [ "SaOCNumber", "SaOCFireRate", "SaOPow", "SaOSpeed" ],
+		waves : [ { count : 8, gap : 1.8 }, { count : 6, swarm : true, gap : 2 }, { count : 6, splitters : 4, gap : 1.8 },
+			{ count : 6, comets : 3, swarm : true, gap : 1.8 } ],
+		challenge : { text : "Let no swarm pebble touch your planet", test : function () { return pebbleHits == 0; },
+			hint : "The Spiral's shots turn around your planet: with three Cannons, its Orbital mode makes a wall that the pebbles can't cross.",
+			picture : "spread", tiles : [ "Inhabitants" ] } }
 ];
 // the Adventure is shown on the start menu once it is ready ; until then, opening the game as index.html?adventure shows it, to test it
 var adventureReady	= /adventure/.test ( location.search );
@@ -126,11 +131,82 @@ var waveBreak	= 2;		// seconds between a wave destroyed (or going away) and the 
 var waveWait	= 20;		// and at most since its last asteroid came, when some of them are still there
 var levelEnd	= 3;		// seconds of play once the last asteroid is gone, for its debris to be gathered
 var cometDelay	= 4;		// seconds before the first comet of a hunt's or a survival's flow
+var waveAnnounce	= 15;		// seconds between the announce of a wave's swarm or armored group and its coming, the wave coming meanwhile
+							// (the Arcade's announces give 30 : threats.js)
 
 // the level being played (its number in adventureLevels, null in the Arcade), its waves, and the banner telling them
 //	- wave : the waves come so far ; queue : the asteroids of the wave still to come (true for a giant) ; timer : the turns until the next one
 //	- calm : the turns since the last one came ; rest : the turns since the asteroids are all gone or going away ; ending : the turns until the level's end
 var adventure = { level : null, wave : 0, queue : [], timer : 0, calm : 0, rest : 0, ending : 0, banner : false };
+
+// the Adventure's difficulty level, remembered by the browser : each one is an adventure of its own, with its own levels won, stars
+// and bonuses of the stars' tree, saved under its own names (adventureKey) ; the stories seen are the same for all (story.js)
+var adventureDifficulty = /^(easy|normal|hard)$/.test ( localStorage["adventureDifficulty"] ) ? localStorage["adventureDifficulty"] : "normal";
+
+// function to get the name a save of the Adventure has at its difficulty level, the normal one keeping the original names
+// (as the hi-scores of the Arcade : scoreKey, functions.js)
+function adventureKey ( name ) {
+	return ( adventureDifficulty == "normal" ) ? name : name + "_" + adventureDifficulty;
+}
+
+// what the difficulty level changes, the same in every level : its density, the asteroids of the waves and of the flows that many
+// times as many (closer, a bit faster), the Colossus's throws, charge and debris as much (boss.js) ; a hunt's asteroids only go
+// faster or slower, as many coming, for its goal to stay the same
+var adventureDensity = { easy : 0.6, normal : 1, hard : 1.3 };
+
+// function to get the density of the level being played, at the Adventure's difficulty level (1 in the Arcade)
+function levelDensity () {
+	return inAdventure() ? adventureDensity[adventureDifficulty] : 1;
+}
+
+// function to get how much faster the asteroids go at a density
+function densitySpeed ( dense ) {
+	return 1 + ( dense - 1 ) * 0.15;
+}
+
+// function to get a wave as the difficulty level plays it : that many times as many asteroids, splitting ones and comets (one at
+// least of each kind it has), closer by the square root of it and a bit faster ; its giants, swarm or armored group the same
+function denseWave ( wave ) {
+	var dense = levelDensity(), copy = {};
+	for ( var field in wave ) {
+		copy[field] = wave[field];
+	}
+	var kinds = [ "count", "splitters", "comets" ];
+	for ( var k in kinds ) {
+		if ( wave[kinds[k]] ) {
+			copy[kinds[k]] = Math.max ( 1, Math.round ( wave[kinds[k]] * dense ) );
+		}
+	}
+	copy.gap = ( wave.gap || 2 ) / Math.sqrt ( dense );
+	copy.speed = ( wave.speed || 1 ) * densitySpeed ( dense );
+	return copy;
+}
+
+// function to choose the Adventure's difficulty level, on the start menu : its own adventure, its stars and bonuses read
+function chooseAdventureLevel ( level ) {
+	adventureDifficulty = level;
+	try {
+		localStorage["adventureDifficulty"] = level;
+	} catch ( e ) {}
+	levelStars = loadLevelStars();
+	starBonuses = loadStarBonuses();		// (starshop.js)
+	mapChoice = false;
+}
+
+// function to restart the Adventure at its difficulty level from its first level, once the player confirms it : its stars and
+// bonuses forgotten (the other difficulty levels' adventures, the achievements obtained and the stories seen kept)
+function restartAdventure () {
+	if ( !confirm ( "Restart the " + levelName ( adventureDifficulty ) + " adventure? Its stars and bonuses will be lost." ) ) {
+		return;
+	}
+	try {
+		localStorage.removeItem ( adventureKey ( "adventure" ) );
+		localStorage.removeItem ( adventureKey ( "adventureTree" ) );
+	} catch ( e ) {}
+	levelStars = [];
+	starBonuses = {};
+	mapChoice = false;
+}
 
 // the stars won in each level, saved by the browser : three for each level, the ones won being true
 var levelStars = loadLevelStars();
@@ -138,7 +214,7 @@ var levelStars = loadLevelStars();
 // function to read the stars won, saved by the browser
 function loadLevelStars () {
 	try {
-		var saved = JSON.parse ( localStorage["adventure"] || "[]" );
+		var saved = JSON.parse ( localStorage[adventureKey ( "adventure" )] || "[]" );
 		return Array.isArray ( saved ) ? saved : [];
 	} catch ( e ) {
 		return [];
@@ -232,6 +308,17 @@ function newWaves () {
 	adventure.failed = false;		// why a level was lost before the planet was destroyed (a hunt whose time is up)
 }
 
+// function to give a level what it starts with, after the bonuses of the stars (engine.js) : the prototype a simulation tests,
+// built and active next to the basic cannon
+function startLevel () {
+	var level = adventureLevels[adventure.level];
+	if ( level.prototype ) {
+		var weapon = weaponOfType ( level.prototype );
+		weapon.cannonNbr = Math.max ( weapon.cannonNbr, 1 );
+		activate ( level.prototype );
+	}
+}
+
 // function to know if the shop of the level being played sells something in the pause menu : an upgrade, a weapon or a branch of
 // the research tree, its own shop only, and what the bonus levels won bring to every level (anything in the Arcade)
 function adventureAllows ( name ) {
@@ -273,7 +360,7 @@ function advanceWaves ( ctx ) {
 	if ( adventure.queue.length > 0 ) {
 		adventure.timer--;
 		if ( adventure.timer <= 0 ) {
-			var wave = level.waves[adventure.wave - 1];
+			var wave = denseWave ( level.waves[adventure.wave - 1] );
 			launchWaveItem ( ctx, adventure.queue.shift(), wave );
 			adventure.timer = Math.round ( ( wave.gap || 2 ) * framesPerSecond );
 		}
@@ -290,7 +377,7 @@ function advanceWaves ( ctx ) {
 	if ( adventure.wave == level.waves.length ) {
 		if ( adventure.rest > 0 ) {
 			adventure.ending = levelEnd * framesPerSecond;
-			adventure.banner = { text : "Level complete", from : gameTime, time : levelEnd };
+			adventure.banner = { text : level.simulation ? "Test passed" : "Level complete", from : gameTime, time : levelEnd };
 		}
 	} else if ( adventure.rest >= waveBreak * framesPerSecond || adventure.calm >= waveWait * framesPerSecond ) {
 		startWave ( level );
@@ -312,9 +399,9 @@ function noThreatLeft () {
 
 // function to start the next wave of the level : its asteroids, splitting ones and comets mixed, then its giants ;
 // a swarm or a group of armored asteroids is announced at once, and comes once its countdown is over (threats.js), the rest of
-// the wave coming meanwhile (the wave isn't over before it has come : advanceWaves)
+// the wave coming meanwhile (the wave isn't over before it has come : advanceWaves) ; as dense as the difficulty level makes it
 function startWave ( level ) {
-	var wave = level.waves[adventure.wave];
+	var wave = denseWave ( level.waves[adventure.wave] );
 	adventure.wave++;
 	var mixed = [];
 	for ( var n = 0; n < ( wave.count || 0 ); n++ ) {
@@ -330,9 +417,9 @@ function startWave ( level ) {
 	adventure.queue = mixed;
 	adventure.timer = 0;
 	if ( wave.swarm ) {
-		announceSwarm ( announceTime );
+		announceSwarm ( waveAnnounce );
 	} else if ( wave.armored ) {
-		announceArmored ( announceTime );
+		announceArmored ( waveAnnounce );
 	}
 	for ( var g = 0; g < ( wave.giants || 0 ); g++ ) {
 		adventure.queue.push ( "giant" );
@@ -360,19 +447,19 @@ function launchWaveItem ( ctx, item, wave ) {
 	}
 }
 
-// THE HUNTS, THE SURVIVALS AND THE BONUS LEVELS : a level of one of these types has a flow of asteroids coming on a timer, faster
-// and faster, instead of waves ; a survival is won once its time is over, a hunt if enough asteroids were destroyed by then,
-// a bonus level as soon as its weapon is built (bought in the pause menu), before its time is over
+// THE HUNTS AND THE SURVIVALS : a level of one of these types has a flow of asteroids coming on a timer, faster and faster,
+// instead of waves ; a survival is won once its time is over, a hunt if enough asteroids were destroyed by then
 //	- the flow : the seconds between two asteroids, at the start and at the end, their speed (1 being the Arcade's), the part of them splitting ones,
 //	  the seconds between two comets, and the times of the giants, of the swarms and of the groups of armored asteroids
-//	  (these two announced before)
+//	  (these two announced before) ; the asteroids and the comets as dense as the difficulty level makes them, but a hunt's
 function advanceFlow ( ctx, level ) {
 	var flow = level.flow;
+	var dense = ( level.type == "hunt" ) ? 1 : levelDensity();
 	adventure.timer--;
 	if ( adventure.timer <= 0 ) {
 		var share = Math.min ( 1, gameTime / ( level.time * framesPerSecond ) );
-		adventure.timer = Math.round ( ( flow.every[0] + ( flow.every[1] - flow.every[0] ) * share ) * framesPerSecond );
-		var asteroid = launchAsteroid ( ctx, Math.random() * 2 * Math.PI, false, flow.speed );
+		adventure.timer = Math.round ( ( flow.every[0] + ( flow.every[1] - flow.every[0] ) * share ) / dense * framesPerSecond );
+		var asteroid = launchAsteroid ( ctx, Math.random() * 2 * Math.PI, false, ( flow.speed || 1 ) * densitySpeed ( levelDensity() ) );
 		if ( Math.random() < ( flow.split || 0 ) ) {
 			makeSplitter ( asteroid );
 		}
@@ -383,19 +470,13 @@ function advanceFlow ( ctx, level ) {
 		}
 	}
 	if ( gameTime == 1 ) {
-		adventure.banner = { text : ( level.type == "hunt" ) ? "Destroy " + level.goal + "!" : ( level.type == "bonus" ) ? "Build the " + weaponName ( level.weapon ) + "!"
-			: "Survive " + minutes ( level.time ) + "!", from : gameTime, time : 2.5 };
-	}
-	if ( level.type == "bonus" && weaponOfType ( level.weapon ).cannonNbr > 0 ) {
-		adventure.ending = levelEnd * framesPerSecond;
-		adventure.banner = { text : weaponName ( level.weapon ) + " built!", from : gameTime, time : levelEnd };
-		return;
+		adventure.banner = { text : ( level.type == "hunt" ) ? "Destroy " + level.goal + "!" : "Survive " + minutes ( level.time ) + "!", from : gameTime, time : 2.5 };
 	}
 	if ( flow.comets && gameTime >= cometDelay * framesPerSecond ) {
 		adventure.calm--;
 		if ( adventure.calm <= 0 ) {
 			launchComet ( ctx );
-			adventure.calm = Math.round ( flow.comets * ( 0.6 + Math.random() * 0.8 ) * framesPerSecond );
+			adventure.calm = Math.round ( flow.comets / dense * ( 0.6 + Math.random() * 0.8 ) * framesPerSecond );
 		}
 	}
 	for ( var s in flow.swarms ) {
@@ -411,8 +492,6 @@ function advanceFlow ( ctx, level ) {
 	if ( gameTime >= level.time * framesPerSecond ) {
 		if ( level.type == "hunt" && nbrDestroyed < level.goal ) {
 			failLevel ( "time is up: " + nbrDestroyed + " of " + level.goal + " asteroids destroyed" );
-		} else if ( level.type == "bonus" ) {
-			failLevel ( "time is up: the " + weaponName ( level.weapon ) + " is not built" );
 		} else {
 			adventure.ending = levelEnd * framesPerSecond;
 			adventure.banner = { text : "Level complete", from : gameTime, time : levelEnd };
@@ -420,7 +499,7 @@ function advanceFlow ( ctx, level ) {
 	}
 }
 
-// function to write a level's goal : its waves, the asteroids to destroy in a hunt, the time to survive
+// function to write a level's goal : its waves, the asteroids to destroy in a hunt, the time to survive, the prototype to test
 function levelGoal ( level ) {
 	if ( level.type == "hunt" ) {
 		return "Hunt: destroy " + level.goal + " asteroids in " + minutes ( level.time );
@@ -431,8 +510,8 @@ function levelGoal ( level ) {
 	if ( level.type == "boss" ) {
 		return "Boss: destroy the Colossus";
 	}
-	if ( level.type == "bonus" ) {
-		return "Bonus: build the " + weaponName ( level.weapon ) + " in " + minutes ( level.time );
+	if ( level.simulation ) {
+		return "Simulator: test the " + weaponName ( level.prototype ) + " over " + level.waves.length + " waves";
 	}
 	return level.waves.length + " waves";
 }
@@ -448,6 +527,198 @@ function weaponName ( type ) {
 	return type;
 }
 
+// THE SIMULATOR : the look of a simulation, the NAZA's simulator : a deep blue space crossed by a glowing grid, rings and a radar's
+// beam instead of the sky, the simulated world as holograms (the planet and its wireframe globe, the asteroids, the debris : tinted
+// cyan, see-through and outlined ; the player's weapons and Gravitron keep their colors), and the simulator's screen over it all
+var simGrid		= 30;		// the grid's step, in game units (a brighter line every five, through the planet's center)
+var simFilter	= "grayscale(1) sepia(1) hue-rotate(150deg) saturate(3) brightness(1.15)";		// the holograms' tint
+
+// function to know if the game shows a simulation
+function simulating () {
+	return inAdventure() && adventureLevels[adventure.level].simulation && ( state == "playing" || state == "countdown" ) ? true : false;
+}
+
+var simInk		= "120,220,255";	// the simulator's cyan, its lines and its writing
+var simSweep	= 6;		// the seconds of a turn of its radar's beam
+
+// function to draw the simulator under the game, the game area's sky hidden then (css/main.css) : its deep blue, lighter around the
+// planet, its grid fading away from it, rings of distance around it, and a radar's beam turning ; false when the game isn't a
+// simulation (drawGame, engine.js)
+function drawSimulation ( ctx ) {
+	var sim = simulating();
+	if ( ctx.canvas.classList.contains ( "simulation" ) != sim ) {
+		ctx.canvas.classList.toggle ( "simulation", sim );
+	}
+	if ( !sim ) {
+		return false;
+	}
+	var cx = MyPlanet.x, cy = MyPlanet.y;
+	var time = performance.now() / 1000;
+	ctx.save();
+	var glow = ctx.createRadialGradient ( cx, cy, 30, cx, cy, gameSize * 0.75 );
+	glow.addColorStop ( 0, "rgba(25,70,125,0.6)" );
+	glow.addColorStop ( 1, "rgba(25,70,125,0)" );
+	ctx.fillStyle = glow;
+	ctx.fillRect ( 0, 0, gameSize, gameSize );
+	// the grid : its lines, then a brighter one every five, both fading away from the planet
+	for ( var strong = 0; strong < 2; strong++ ) {
+		var ink = ctx.createRadialGradient ( cx, cy, 0, cx, cy, gameSize * 0.72 );
+		ink.addColorStop ( 0, "rgba(" + simInk + "," + ( strong ? 0.3 : 0.13 ) + ")" );
+		ink.addColorStop ( 1, "rgba(" + simInk + "," + ( strong ? 0.08 : 0.03 ) + ")" );
+		ctx.strokeStyle = ink;
+		ctx.lineWidth = strong ? 1 : 0.6;
+		ctx.beginPath();
+		for ( var x = 0; x <= gameSize; x += simGrid ) {
+			if ( ( ( x / simGrid ) % 5 == 0 ) == ( strong == 1 ) ) {
+				ctx.moveTo ( x, 0 );
+				ctx.lineTo ( x, gameSize );
+				ctx.moveTo ( 0, x );
+				ctx.lineTo ( gameSize, x );
+			}
+		}
+		ctx.stroke();
+	}
+	// the rings of distance around the planet, dashed, each one with its distance written
+	ctx.setLineDash ( [2, 6] );
+	ctx.strokeStyle = "rgba(" + simInk + ",0.22)";
+	ctx.fillStyle = "rgba(" + simInk + ",0.4)";
+	ctx.font = "8px Arial";
+	ctx.textAlign = "left";
+	ctx.textBaseline = "bottom";
+	for ( var r = 120; r <= 420; r += 75 ) {
+		ctx.beginPath();
+		ctx.arc ( cx, cy, r, 0, 2 * Math.PI );
+		ctx.stroke();
+		ctx.fillText ( r, cx + r * 0.82 + 3, cy - r * 0.57 - 2 );		// (at 35° over the east : clear of the screen's writing)
+	}
+	ctx.setLineDash ( [] );
+	// the radar's beam, turning, with its fading trail
+	var beam = ( time / simSweep % 1 ) * 2 * Math.PI;
+	for ( var k = 0; k < 20; k++ ) {
+		ctx.fillStyle = "rgba(" + simInk + "," + ( 0.07 * ( 1 - k / 20 ) ) + ")";
+		ctx.beginPath();
+		ctx.moveTo ( cx, cy );
+		ctx.arc ( cx, cy, gameSize * 0.75, beam - ( k + 1 ) * 0.025, beam - k * 0.025 );
+		ctx.closePath();
+		ctx.fill();
+	}
+	ctx.strokeStyle = "rgba(" + simInk + ",0.35)";
+	ctx.beginPath();
+	ctx.moveTo ( cx, cy );
+	ctx.lineTo ( cx + gameSize * 0.75 * Math.cos ( beam ), cy + gameSize * 0.75 * Math.sin ( beam ) );
+	ctx.stroke();
+	ctx.restore();
+	return true;
+}
+
+// function to draw a part of a simulated world as a hologram : tinted cyan and see-through
+function asHologram ( ctx, draw ) {
+	ctx.save();
+	ctx.filter = simFilter;
+	ctx.globalAlpha = 0.8;
+	draw();
+	ctx.restore();
+}
+
+// function to draw an asteroid of a simulation as a hologram, outlined along its rock (drawPlaying, engine.js)
+function drawHologram ( ctx, asteroid ) {
+	asHologram ( ctx, function () { asteroid.Draw(); } );
+	ctx.save();
+	ctx.strokeStyle = "rgba(" + simInk + ",0.75)";
+	ctx.lineWidth = 0.8;
+	ctx.translate ( asteroid.x, asteroid.y );
+	if ( asteroid.outline ) {
+		ctx.rotate ( asteroid.spin );
+		ctx.stroke ( asteroid.outline );
+	} else {
+		ctx.beginPath();
+		ctx.arc ( 0, 0, asteroid.radius + 1, 0, 2 * Math.PI );
+		ctx.stroke();
+	}
+	ctx.restore();
+}
+
+// function to draw the planet of a simulation as a hologram, with its wireframe globe : its outline, its parallels, and its
+// meridians turning with it, its axis leaning as the Earth's (drawGame and drawPlaying, engine.js)
+function drawHologramPlanet ( ctx ) {
+	asHologram ( ctx, function () { MyPlanet.Draw(); } );
+	var r = MyPlanet.radius;
+	ctx.save();
+	ctx.translate ( MyPlanet.x, MyPlanet.y );
+	ctx.rotate ( planetTilt );
+	ctx.lineWidth = 1;
+	ctx.strokeStyle = "rgba(" + simInk + ",0.8)";
+	ctx.beginPath();
+	ctx.arc ( 0, 0, r, 0, 2 * Math.PI );
+	ctx.stroke();
+	ctx.strokeStyle = "rgba(" + simInk + ",0.5)";
+	for ( var lat = -60; lat <= 60; lat += 30 ) {
+		var w = r * Math.cos ( lat * Math.PI / 180 );
+		ctx.beginPath();
+		ctx.ellipse ( 0, - r * Math.sin ( lat * Math.PI / 180 ) * Math.cos ( planetView ), w, w * Math.sin ( planetView ), 0, 0, Math.PI );
+		ctx.stroke();
+	}
+	for ( var m = 0; m < 12; m++ ) {
+		var lon = MyPlanet.spin + m * Math.PI / 6;
+		if ( Math.cos ( lon ) <= 0 ) {
+			continue;		// (a meridian behind the globe)
+		}
+		var side = Math.sin ( lon );
+		ctx.beginPath();
+		ctx.ellipse ( 0, 0, r * Math.abs ( side ), r, 0, ( side > 0 ) ? - Math.PI / 2 : Math.PI / 2, ( side > 0 ) ? Math.PI / 2 : 3 * Math.PI / 2 );
+		ctx.stroke();
+	}
+	ctx.restore();
+}
+
+// function to draw over a simulation the simulator's screen : its scan lines, a brighter band going down, its corners, and what
+// it writes (its name and the prototype tested at the top left, SIMULATION blinking at the top right, the test's wave at the
+// bottom right)
+function drawSimulationOverlay ( ctx ) {
+	if ( !simulating() ) {
+		return;
+	}
+	var level = adventureLevels[adventure.level];
+	var time = performance.now() / 1000;
+	ctx.save();
+	ctx.fillStyle = "rgba(0,0,0,0.13)";
+	for ( var y = 0; y < gameSize; y += 3 ) {
+		ctx.fillRect ( 0, y, gameSize, 1 );
+	}
+	var band = ( time * 45 ) % ( gameSize + 120 ) - 60;
+	var shine = ctx.createLinearGradient ( 0, band - 30, 0, band + 30 );
+	shine.addColorStop ( 0, "rgba(" + simInk + ",0)" );
+	shine.addColorStop ( 0.5, "rgba(" + simInk + ",0.05)" );
+	shine.addColorStop ( 1, "rgba(" + simInk + ",0)" );
+	ctx.fillStyle = shine;
+	ctx.fillRect ( 0, band - 30, gameSize, 60 );
+	// the corners of the screen
+	ctx.strokeStyle = "rgba(" + simInk + ",0.6)";
+	ctx.lineWidth = 1.5;
+	var top = 30, edge = 8, arm = 22;
+	[ [edge, top, 1, 1], [gameSize - edge, top, -1, 1], [edge, gameSize - edge, 1, -1], [gameSize - edge, gameSize - edge, -1, -1] ].forEach ( function ( c ) {
+		ctx.beginPath();
+		ctx.moveTo ( c[0] + c[2] * arm, c[1] );
+		ctx.lineTo ( c[0], c[1] );
+		ctx.lineTo ( c[0], c[1] + c[3] * arm );
+		ctx.stroke();
+	} );
+	ctx.textBaseline = "top";
+	ctx.fillStyle = "rgba(" + simInk + ",0.8)";
+	ctx.font = "11px Arial";
+	ctx.textAlign = "left";
+	ctx.fillText ( "NAZA SIMULATOR", 18, 38 );
+	ctx.fillStyle = "rgba(" + simInk + ",0.55)";
+	ctx.font = "9px Arial";
+	ctx.fillText ( "PROTOTYPE: " + weaponName ( level.prototype ).toUpperCase(), 18, 52 );
+	ctx.textAlign = "right";
+	ctx.fillText ( "TEST " + Math.max ( 1, adventure.wave ) + " / " + level.waves.length, gameSize - 18, gameSize - 26 );
+	ctx.font = "16px MirageRegular";
+	ctx.fillStyle = "rgba(" + simInk + "," + ( 0.55 + 0.35 * Math.sin ( time * 2.5 ) ) + ")";
+	ctx.fillText ( "SIMULATION", gameSize - 18, 36 );
+	ctx.restore();
+}
+
 // function to write the status bar's gauges of the Adventure (showStatus, functions.js) : the waves come so far,
 // or the asteroids destroyed in a hunt and its time left, or the time survived
 function adventureGauges () {
@@ -459,11 +730,6 @@ function adventureGauges () {
 	}
 	if ( level.type == "survival" ) {
 		return statusGauge ( "Time", seconds / level.time, "#8fb8ff", minutes ( seconds ), minutes ( level.time ), 0 );
-	}
-	if ( level.type == "bonus" ) {
-		var cost = weaponCost[level.weapon];
-		return statusGauge ( weaponName ( level.weapon ), MyPlanet.mat / cost, "#8fb8ff", Math.min ( MyPlanet.mat, cost ), cost, 0 )
-			+ statusGauge ( "Time", 1 - seconds / level.time, "#f2c94c", minutes ( level.time - seconds ), minutes ( level.time ), 0 );
 	}
 	if ( level.type == "boss" ) {
 		var life = colossus ? Math.max ( 0, colossus.life ) : colossusLife;		// (boss.js)
@@ -499,15 +765,23 @@ function starsWon ( won ) {
 	return [ won, won && ( MyPlanet.life + planetHealPend ) * 2 > MyPlanet.maxLife, won && adventureLevels[adventure.level].challenge.test() ? true : false ];
 }
 
-// function to end a level won : the game stops behind the level's end, and its stars are saved
+// function to end a level won : the game stops behind the level's end, and its stars are saved ; the boss destroyed, the end of
+// the world's story is told first, every time (the map's Story link tells it again : story.js), then comes the level's end
 function winLevel () {
 	pause = 3;
 	laserCannon.firing = 0;
 	checkAchievements();	// the ones of the game's end, before they are listed
 	document.getElementById("status").style.display = "none";
 	var holder = document.getElementById("gameOver");
-	holder.style.display = "block";
 	showLevelEnd ( holder, true );
+	if ( adventureLevels[adventure.level].type == "boss" ) {
+		tellStories ( [ "world1End" ], function () {
+			holder.style.display = "block";
+			state = "playing";		// (the game stopped behind it, as before the story)
+		} );
+	} else {
+		holder.style.display = "block";
+	}
 }
 
 // function to show the end of a level, won or lost : its stars, its numbers and the achievements it brought (achievements.js)
@@ -517,14 +791,19 @@ function showLevelEnd ( holder, won ) {
 	if ( won ) {
 		var saved = levelStars[adventure.level] || [false, false, false];
 		levelStars[adventure.level] = [ saved[0] || stars[0], saved[1] || stars[1], saved[2] || stars[2] ];
-		localStorage["adventure"] = JSON.stringify ( levelStars );
+		localStorage[adventureKey ( "adventure" )] = JSON.stringify ( levelStars );
 	}
 	var seconds = Math.floor ( gameTime / framesPerSecond );
 	var tip = won ? missedStarTip ( level ) : lossTip();		// (chosen first, for its numbers to light up : gameover.js)
 	var reasons = [ "Win the level", "Save more than half of your inhabitants", level.challenge.text ];
-	var html = "<div class='over'><div class='title'>" + ( won ? "Level complete" : "Level failed" ) + "</div>"
+	// (the boss destroyed : a victory, the world saved ; a simulation won : its prototype into production, lost : a test failed)
+	var victory = won && level.type == "boss";
+	var title = victory ? "Victory!" : level.simulation ? ( won ? "Prototype validated" : "Test failed" ) : won ? "Level complete" : "Level failed";
+	var html = "<div class='over'><div class='title'>" + title + "</div>"
 		+ "<div class='subtitle'>" + levelTitle ( adventure.level ) + " &middot; <strong>" + level.name + "</strong>"
-		+ ( won ? "" : " &middot; " + ( adventure.failed || "your planet has been destroyed" ) ) + "</div>"
+		+ ( won ? "" : " &middot; " + ( adventure.failed || ( level.simulation ? "the simulated planet has been destroyed" : "your planet has been destroyed" ) ) ) + "</div>"
+		+ ( victory ? "<div class='cheer'>The Colossus is down, and " + MyPlanet.life + " million people live on. The first world is saved: the NAZA salutes you!</div>" : "" )
+		+ ( won && level.simulation ? "<div class='cheer'>The " + weaponName ( level.prototype ) + " goes into production: it is in the shop of every level now.</div>" : "" )
 		+ "<div class='stars'>";
 	for ( var s = 0; s < 3; s++ ) {
 		html += "<div class='star" + ( stars[s] ? " won" : "" ) + "'><span>&#9733;</span><div class='reason'>" + reasons[s] + "</div></div>";
@@ -551,10 +830,8 @@ function showLevelEnd ( holder, won ) {
 		html += "<a href='#' class='button' onClick='playLevel(nextLevel());'>Next Level</a>";
 	} else if ( won && adventure.level + 1 < mainLevels ) {
 		html += "<a href='#' class='button' onClick='playLevel(" + ( adventure.level + 1 ) + ");'>Next Level</a>";
-	} else if ( won ) {
-		// (the last level won : the end of the world's story, then the map : story.js)
-		html += "<a href='#' class='button' onClick='tellStories([\"world1End\"]);'>Continue</a>";
 	}
+	// (the last level won : the end of the world's story was told before : winLevel)
 	html += "<a href='#' class='button' onClick='state=\"map\";'>Map</a></div></div>";
 	holder.innerHTML = html;
 	achievementQueue = [];		// their banners would go on behind this screen, which shows their medals
@@ -590,19 +867,14 @@ function levelTile ( level, won ) {
 		var left = ( won || !colossus ) ? ( won ? 0 : 100 ) : Math.ceil ( Math.max ( 0, colossus.life ) / colossusLife * 100 );
 		return gameOverTile ( "Colossus", won ? "Destroyed" : left + "%", won ? "the boss is down" : "of its life left", false );
 	}
-	if ( level.type == "bonus" ) {
-		var name = weaponName ( level.weapon );
-		return gameOverTile ( name, won ? "Built" : Math.min ( MyPlanet.mat, weaponCost[level.weapon] ) + "/" + weaponCost[level.weapon],
-			won ? "in every level's shop now" : "mat to build it", false );
-	}
 	return gameOverTile ( "Waves", Math.max ( 0, adventure.wave - ( won ? 0 : 1 ) ) + "/" + level.waves.length, "destroyed", false );
 }
 
-// function to write the stars of a level : the ones won full, the others empty
+// function to write the stars of a level : the ones won in gold, the others in grey (css/main.css)
 function starsText ( stars ) {
 	var text = "";
 	for ( var s = 0; s < 3; s++ ) {
-		text += ( stars && stars[s] ) ? "★" : "☆";
+		text += "<i" + ( ( stars && stars[s] ) ? "" : " class='empty'" ) + ">★</i>";
 	}
 	return text;
 }
@@ -612,11 +884,15 @@ var menuPage = adventureReady ? "adventure" : "arcade";
 
 // function to show the start menu's pages, at each turn of the menu (engine.js) : the Adventure's and the Arcade's side by side,
 // sliding to the one shown (css/main.css), with a big arrow on the side turning to the other one ;
-// the Adventure's button starts it, or continues it once a level is won (in green), on the map, and tells the next level and the stars won
+// the Adventure's button starts it, or continues it once a level is won (in green), on the map, and tells the next level and the stars won,
+// at the difficulty level chosen under it (chooseAdventureLevel)
 function showMenuPages () {
 	var menu = document.getElementById("mainMenu");
 	menu.classList.toggle ( "adventure", adventureReady );
 	menu.classList.toggle ( "arcade", menuPage == "arcade" );
+	for ( var level in difficultyLevels ) {
+		document.getElementById("adventure_" + level).classList.toggle ( "current", level == adventureDifficulty );
+	}
 	var started = adventureStarted();
 	var button = document.getElementById("adventureStart");
 	writeOnce ( button, started ? "Continue" : "Start" );
@@ -626,6 +902,7 @@ function showMenuPages () {
 	writeOnce ( document.getElementById("adventureNext"), !started ? "Save the Earth, level after level"
 		: allWon ? "Every level won so far: more are coming" : "Next level: " + levelLabel ( next ) + " · " + adventureLevels[next].name );
 	writeOnce ( document.getElementById("adventureStars"), started ? "★ " + starsCount() + " / " + starsOpen() : "" );
+	document.getElementById("adventureRestart").classList.toggle ( "shown", started );
 	showBonusIcons();		// and the bonuses bought with the stars (starshop.js)
 	if ( adventureReady ) {
 		preloadStories();	// and the story's pictures, before it is told (story.js)
@@ -719,13 +996,13 @@ function showMap ( holder ) {
 	var bonuses = bonusesOpen();
 	var html = "<div class='map'><div class='bar'><span class='side'><a href='#' class='level' onClick='state=\"menu\";'>&lsaquo; Menu</a>"
 		+ "<a href='#' class='level' onClick='tellStories(storyList());'>Story</a></span>"
-		+ "<span class='world'>World 1</span><span class='count'>&#9733; " + starsCount() + " / " + starsOpen()
+		+ "<span class='world'>World 1 &middot; " + levelName ( adventureDifficulty ) + "</span><span class='count'>&#9733; " + starsCount() + " / " + starsOpen()
 		+ " <a href='#' class='level" + ( starsLeft() > 0 ? " spend" : "" ) + "' onClick='state=\"upgrades\";'>Upgrades" + ( starsLeft() > 0 ? " (" + starsLeft() + " &#9733;)" : "" ) + "</a></span></div>"
-		+ "<div class='road'><svg viewBox='0 0 566 340'><path class='lit' d='" + mapRoad ( mapSpots.slice ( 0, open ) ) + "'/>";
+		+ "<div class='road'><svg viewBox='0 0 566 340'>" + mapRoad ( mapSpots.slice ( 0, open ) );
 	for ( var b in bonuses ) {
-		// (a bonus level's side path, dashed, from the level it follows)
+		// (a bonus level's side path, thinner, from the level it follows : lit once it is won)
 		var from = mapSpots[adventureLevels[bonuses[b]].after], to = adventureLevels[bonuses[b]].spot;
-		html += "<path class='lit side' d='M" + from[0] + " " + from[1] + "L" + to[0] + " " + to[1] + "'/>";
+		html += "<path class='" + ( levelWon ( bonuses[b] ) ? "lit" : "next" ) + " side' d='M" + from[0] + " " + from[1] + "L" + to[0] + " " + to[1] + "'/>";
 	}
 	html += "</svg>";
 	for ( var n = 0; n < open; n++ ) {
@@ -770,9 +1047,13 @@ function nextLevel () {
 	return levelsOpen() - 1;
 }
 
-// function to know how an open level's spot looks : "won", or "open"
+// function to know how an open level's spot looks, as the cells of the stars' tree : "won" (framed in the Earth's blue),
+// "won perfect" with its three stars (tinted blue inside), or "open"
 function spotState ( n ) {
-	return levelWon ( n ) ? "won" : "open";
+	if ( !levelWon ( n ) ) {
+		return "open";
+	}
+	return ( levelStars[n][1] && levelStars[n][2] ) ? "won perfect" : "won";
 }
 
 // function to tell about the level chosen on the map : its name and stars, its line of the log, its challenge and the button
@@ -785,14 +1066,16 @@ function spotInfo ( n ) {
 		+ "<a href='#' class='button' onClick='playLevel(" + n + ");'>Play</a>";
 }
 
-// function to draw the road of the map, a smooth curve through the centers of its spots (a Catmull-Rom spline, as an SVG path)
+// function to draw the road of the map, a smooth curve through the centers of its spots (a Catmull-Rom spline), in SVG paths,
+// one from each spot to the next : lit in blue toward a level won, dashed toward the next one to win (as the stars' tree's links)
 function mapRoad ( spots ) {
-	var road = "M" + spots[0][0] + " " + spots[0][1];
+	var road = "";
 	for ( var s = 0; s < spots.length - 1; s++ ) {
 		var before = spots[Math.max ( s - 1, 0 )], from = spots[s], to = spots[s + 1], after = spots[Math.min ( s + 2, spots.length - 1 )];
-		road += " C" + Math.round ( from[0] + ( to[0] - before[0] ) / 6 ) + " " + Math.round ( from[1] + ( to[1] - before[1] ) / 6 )
+		road += "<path class='" + ( levelWon ( s + 1 ) ? "lit" : "next" ) + "' d='M" + from[0] + " " + from[1]
+			+ " C" + Math.round ( from[0] + ( to[0] - before[0] ) / 6 ) + " " + Math.round ( from[1] + ( to[1] - before[1] ) / 6 )
 			+ " " + Math.round ( to[0] - ( after[0] - from[0] ) / 6 ) + " " + Math.round ( to[1] - ( after[1] - from[1] ) / 6 )
-			+ " " + to[0] + " " + to[1];
+			+ " " + to[0] + " " + to[1] + "'/>";
 	}
 	return road;
 }

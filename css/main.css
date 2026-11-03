@@ -87,6 +87,12 @@ body {
 	height: 600px;
 }
 
+/* (a simulation of the Adventure : the simulator's dark blue instead of the sky, its grid drawn by src/adventure.js) */
+#mainArea.simulation {
+	background-image: none;
+	background-color: rgb(4, 12, 24);
+}
+
 .ui {
 	width: 584px;
 	margin: auto;
@@ -215,7 +221,15 @@ body {
 	z-index: 7;
 }
 
-/* the Infos page : the mission and what is good to know on the left, the controls on the right */
+/* the Infos page : the mission and what is good to know on the left, the Adventure's or the Arcade's, the controls on the right */
+#infoText .adventureInfo, #infoText.adventure .arcadeInfo {
+	display: none;
+}
+
+#infoText.adventure .adventureInfo {
+	display: block;
+}
+
 #infoText .columns {
 	display: grid;
 	grid-template-columns: 1fr 1.15fr;
@@ -325,6 +339,15 @@ kbd {
 #gameOver .over .subtitle {
 	font-size: 13px;
 	color: #bbb;
+}
+
+/* the Adventure's boss destroyed : a line saluting the player, under the level's name */
+#gameOver .over .cheer {
+	margin: 8px auto 0;
+	max-width: 440px;
+	font-size: 15px;
+	line-height: 1.4;
+	color: #fff;
 }
 
 #gameOver .over .label {
@@ -690,11 +713,12 @@ a.level.current {
 	transform: translateX(-100%);
 }
 
-#levels {
+/* (the difficulty levels of the Arcade, and the Adventure's, each one an adventure of its own) */
+#levels, #adventureLevels {
 	margin-top: 26px;
 }
 
-#levelText {
+#levelText, #adventureLevelText {
 	height: 18px;
 	margin-top: 8px;
 	font-size: 12px;
@@ -859,13 +883,28 @@ a.level.current {
 	align-items: center;
 }
 
-#story .panel.plain .title {
+/* a panel with a title over its picture : the title and the text in its middle, on a darker heart */
+#story .panel.titled .over {
+	position: absolute;
+	left: 0;
+	top: 0;
+	right: 0;
+	bottom: 0;
+	display: flex;
+	flex-direction: column;
+	justify-content: center;
+	align-items: center;
+	background: radial-gradient(ellipse at center, rgba(0,0,0,0.6) 0%, rgba(0,0,0,0.3) 40%, rgba(0,0,0,0) 70%);
+	text-shadow: 0 2px 6px #000;
+}
+
+#story .panel.plain .title, #story .panel.titled .title {
 	font-family: 'MirageRegular';
 	font-size: 40px;
 	color: rgb(255, 71, 71);
 }
 
-#story .panel.plain .caption {
+#story .panel.plain .caption, #story .panel.titled .caption {
 	position: static;
 	min-height: 18px;
 	padding: 4px;
@@ -1126,6 +1165,17 @@ a.level.current {
 	margin: 2px;
 }
 
+/* (and the link restarting it, once it is started, small as the ones erasing the achievements or the hi-scores) */
+#adventureRestart {
+	display: none;
+	margin-top: 4px;
+	font-size: 11px;
+}
+
+#adventureRestart.shown {
+	display: block;
+}
+
 #adventureMap .road {
 	position: relative;
 	height: 340px;
@@ -1141,9 +1191,16 @@ a.level.current {
 	stroke-linecap: round;
 }
 
+/* (as the links of the stars' tree : in the Earth's blue between the levels won, dashed toward the next one to win) */
 #adventureMap .lit {
-	stroke: rgba(242,201,76,0.8);
+	stroke: rgba(95,160,230,0.85);
 	stroke-width: 4;
+}
+
+#adventureMap .next {
+	stroke: rgba(255,255,255,0.35);
+	stroke-width: 2.5;
+	stroke-dasharray: 3 7;
 }
 
 /* a level's spot, centered on its place : the picture of its type, its number under it, and its stars under the spot */
@@ -1152,7 +1209,7 @@ a.level.current {
 	width: 50px;
 	height: 50px;
 	margin: -27px 0 0 -27px;
-	border: 2px solid #fff;
+	border: 2px solid #c8ccd4;
 	border-radius: 50%;
 	background: rgba(20,24,32,0.95);
 	text-align: center;
@@ -1177,19 +1234,37 @@ a.level.current {
 	position: absolute;
 	left: -20px;
 	right: -20px;
-	top: 52px;
-	font-size: 13px;
-	letter-spacing: 1px;
+	top: 50px;
+	font-size: 16px;
 	color: rgb(242,201,76);
+	text-shadow: 0 1px 2px #000;
 	white-space: nowrap;
+}
+
+/* (a star won in gold, a star still to win in grey : on the spots and beside the level chosen) */
+#adventureMap .stars i {
+	font-style: normal;
+}
+
+#adventureMap .stars i.empty {
+	color: rgba(150,160,175,0.45);
 }
 
 #adventureMap .spot:hover {
 	background: rgba(60,30,30,0.95);
 }
 
+/* (as the cells of the stars' tree : a level won framed in the Earth's blue, filled with it once its three stars are won) */
 #adventureMap .spot.won {
-	border-color: rgb(242,201,76);
+	border-color: rgb(95,160,230);
+}
+
+#adventureMap .spot.perfect {
+	background: rgb(38,82,140);
+}
+
+#adventureMap .spot.perfect:hover {
+	background: rgb(50,100,165);
 }
 
 #adventureMap .spot.boss {
@@ -1211,17 +1286,12 @@ a.level.current {
 }
 
 #adventureMap .spot.boss .stars {
-	top: 74px;
-	font-size: 11px;
-	text-transform: uppercase;
-	letter-spacing: 2px;
-	color: #777;
+	top: 72px;
 }
 
-/* a bonus level's spot : smaller, beside the path, at the end of a dashed side path */
-#adventureMap .lit.side {
+/* a bonus level's spot : smaller and dashed, beside the path, at the end of a side path, thinner */
+#adventureMap .side {
 	stroke-width: 3;
-	stroke-dasharray: 2 7;
 }
 
 #adventureMap .spot.bonus {
@@ -1246,13 +1316,13 @@ a.level.current {
 }
 
 #adventureMap .spot.bonus .stars {
-	top: 42px;
-	font-size: 11px;
+	top: 40px;
+	font-size: 13px;
 }
 
+/* (the level chosen : a white halo around its spot, its frame keeping the color of its state) */
 #adventureMap .spot.chosen {
-	border-color: rgb(255, 71, 71);
-	box-shadow: 0 0 16px rgba(255,71,71,0.6);
+	box-shadow: 0 0 0 3px rgba(255,255,255,0.85), 0 0 18px rgba(255,255,255,0.45);
 }
 
 /* the level chosen, with its challenge and the button to play it */
@@ -1740,9 +1810,10 @@ a.sideArrow:hover {
 	color: #888;
 }
 
+/* (a tab selling something : a green line along its bottom and its counter in green, the tab shown being the only one filled,
+   in red, as the open section) */
 #shop .tab.buyable {
-	background: rgba(93,244,93,0.16);
-	border-color: rgba(93,244,93,0.5);
+	box-shadow: inset 0 -3px 0 #5df45d;
 }
 
 #shop .tab.buyable .badge {
@@ -1754,10 +1825,6 @@ a.sideArrow:hover {
 	color: #fff;
 	background: rgba(255,71,71,0.35);
 	border-color: rgb(255, 71, 71);
-}
-
-#shop .tab.current.buyable {
-	box-shadow: inset 0 -3px 0 #5df45d;
 }
 
 #shop .panel {

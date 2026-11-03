@@ -108,30 +108,39 @@ function outOfDuel ( asteroid ) {
 function announceDuel ( seconds ) {
 	var side = ( Math.floor ( Math.random() * 4 ) * 2 + 1 ) * Math.PI / 4;
 	var news = announce ( "Colossus from the " + compassSide ( side ), "The Colossus, an asteroid as big as a moon, is coming from the "
-		+ compassSide ( side ) + "! Steel plates cover half of it, halving the shots under " + colossusArmor + " of power: "
-		+ "aim when its bare rock faces you. Destroy it before it charges your planet!", seconds, colossusGift,
+		+ compassSide ( side ) + "! Steel plates cover half of it, stopping most of the shots under " + colossusArmor + " of power: "
+		+ "send a kamikaze into it to turn its bare rock toward you. It curls the rocks it throws, to strike your planet from its sides. "
+		+ "Destroy it before it charges!", seconds, colossusGift,
 		function () { startDuel ( side ); } );
 	news.side = side;
 }
 
-// THE COLOSSUS : an asteroid as big as a moon, coming to the corner opposite the planet once the duel begins ; it throws asteroids
-// at the planet, from its second phase comets and swarms too, then charges the planet in its last one ; its crash ends the game,
-// its end wins the level, its asteroids crumbling with it ; half of it is plated with steel, turning with it : a hit weaker than
-// colossusArmor loses half its power on the plates (the main weapons' shots, the missiles and the rebound shots, as the armored
-// asteroids' plates stop them : threats.js)
+// THE COLOSSUS : an asteroid as big as a moon, coming to the corner opposite the planet once the duel begins ; it throws salvos of
+// asteroids at the planet, one straight and the others curled as a free kick, coming from the planet's sides, from its second phase
+// comets and swarms too, then charges the planet in its last one ; its crash ends the game, its end wins the level, its asteroids
+// crumbling with it ; half of it is plated with steel, turning slowly with it : a hit weaker than colossusArmor keeps a part of its
+// power on the plates (the main weapons' shots, the missiles and the rebound shots, as the armored asteroids' plates stop them :
+// threats.js) ; a kamikaze ramming it makes it spin half a turn more, its bare rock turning toward the planet if its plates faced it ;
+// all that comes from it crumbles, leaving fewer debris (addDebris, functions.js)
 var bossArrive		= 35;			// the second the Colossus comes (announced before), the asteroids coming from everywhere until then,
 var bossEvery		= 4;			// one every so many seconds
-var colossusGift	= 60;			// the mat given with its announce
+var colossusGift	= 30;			// the mat given with its announce
 var colossusRadius	= 60;			// its size (an asteroid's : 8, a giant's : 12),
 var colossusLife	= 300;			// its life,
 var colossusPost	= 580;			// how far from the planet's center it settles,
 var colossusArmor	= 8;			// the weakest hit its plates don't weaken,
-var colossusTurn	= 20;			// the seconds it takes to turn on itself, its plates with it,
-var colossusThrows	= [3.5, 3.5, 3];	// the seconds between two asteroids it throws, in each of its three phases,
+var colossusPlating	= 4;			// what a weaker one's power is divided by on them,
+var colossusTurn	= 30;			// the seconds it takes to turn on itself, its plates with it,
+var colossusRam		= 2.5;			// the seconds a kamikaze's ram makes it spin half a turn more in,
+var colossusSalvo	= [2, 2, 2];	// the asteroids of each salvo it throws, in each of its three phases,
+var colossusThrows	= [6, 5.5, 5];	// the seconds between two salvos,
+var colossusPace	= 1;			// their speed, as a share of an asteroid's,
+var colossusCurl	= [45, 70];		// how far aside the curled ones come to the planet from, in degrees, at least and at most,
 var colossusSplit	= [0.15, 0.25, 0.3];	// the part of them splitting ones,
 var colossusComets	= [8, 12];		// the seconds between two comets from its side, from its second phase, at least and at most,
 var colossusSwarms	= 30;			// the seconds between two swarms it spits, from its second phase,
-var colossusCharge	= 0.3;			// and its speed toward the planet in its last phase, in game units per turn
+var colossusCharge	= 0.4;			// its speed toward the planet in its last phase, in game units per turn,
+var colossusDebris	= 0.75;			// and the part of the debris left by what comes from it, and by itself
 var colossusColors	= [ "#ffb347", "#ff7a3d", "#ff3b30" ];	// the color of its life around it, in each phase
 
 // the Colossus of the game (false : not come yet), its phase (1 to 3 ; 4 once destroyed), the turns until its next asteroid,
@@ -153,7 +162,7 @@ function advanceBoss ( ctx, level ) {
 	if ( !inDuel() ) {
 		adventure.timer--;
 		if ( adventure.timer <= 0 ) {
-			adventure.timer = bossEvery * framesPerSecond;
+			adventure.timer = Math.round ( bossEvery / levelDensity() * framesPerSecond );
 			launchAsteroid ( ctx, Math.random() * 2 * Math.PI, false );
 		}
 		return;
@@ -178,28 +187,30 @@ function advanceBoss ( ctx, level ) {
 	if ( phase > bossPhase ) {
 		bossPhase = phase;
 		bossTimers.swarm = 3 * framesPerSecond;
-		bossTimers.comet = colossusComets[0] * framesPerSecond;
+		bossTimers.comet = Math.round ( colossusComets[0] / levelDensity() * framesPerSecond );
 		adventure.banner = { text : ( phase == 2 ) ? "It's cracking!" : "It's charging!", from : gameTime, time : 2.5 };
 	}
 	if ( !colossus.settled ) {
 		return;
 	}
-	// what it throws : asteroids, then comets and swarms from its second phase
+	// what it throws : salvos of asteroids, then comets and swarms from its second phase (more often at a denser difficulty level :
+	// levelDensity, adventure.js)
+	var dense = levelDensity();
 	bossTimers.rock--;
 	if ( bossTimers.rock <= 0 ) {
-		bossTimers.rock = Math.round ( colossusThrows[bossPhase - 1] * framesPerSecond );
-		throwRock ( ctx );
+		bossTimers.rock = Math.round ( colossusThrows[bossPhase - 1] / dense * framesPerSecond );
+		throwSalvo ( ctx );
 	}
 	if ( bossPhase >= 2 ) {
 		bossTimers.comet--;
 		if ( bossTimers.comet <= 0 ) {
-			bossTimers.comet = Math.round ( ( colossusComets[0] + Math.random() * ( colossusComets[1] - colossusComets[0] ) ) * framesPerSecond );
+			bossTimers.comet = Math.round ( ( colossusComets[0] + Math.random() * ( colossusComets[1] - colossusComets[0] ) ) / dense * framesPerSecond );
 			var angle = camera.side + ( Math.random() * 2 - 1 ) * duelArc * Math.PI / 180;
 			launchComet ( ctx, angle, edgeDistance ( angle ) + 10 );
 		}
 		bossTimers.swarm--;
 		if ( bossTimers.swarm <= 0 ) {
-			bossTimers.swarm = colossusSwarms * framesPerSecond;
+			bossTimers.swarm = Math.round ( colossusSwarms / dense * framesPerSecond );
 			var d = distanceToPlanet ( colossus.x, colossus.y );
 			launchSwarm ( ctx, Math.atan2 ( colossus.y - MyPlanet.y, colossus.x - MyPlanet.x ),
 				d - colossus.radius - swarmDepth - 10, colossus.radius * 0.6 / d * 180 / Math.PI );
@@ -217,7 +228,7 @@ function bringColossus ( ctx ) {
 	colossus.colossus = true;
 	colossus.settled = false;
 	colossus.spinSpeed = 2 * Math.PI / ( colossusTurn * framesPerSecond );
-	plateColossus ( colossus );
+	colossusRock ( colossus );
 	colossus.Draw = drawColossus;
 	asteroidList.push ( colossus );
 	fieldReach = Math.max ( fieldReach, d + colossusRadius + 40 );		// (not to be gone for good before it comes)
@@ -225,7 +236,36 @@ function bringColossus ( ctx ) {
 	bossTimers = { rock : 0, comet : 0, swarm : 0 };
 }
 
-// function to plate half of the Colossus's rock with steel, on its texture (the side its spin turns to : drawPlates, threats.js)
+// THE COLOSSUS'S ROCK : its picture (img/colossus.webp), a round rock seen from above in an even light, its left half bare stone,
+// its right half plated with steel (the half plateDamage knows), turning with its spin under the game's light from the top left
+// (the picture was cut round once, the black around it made clear : a canvas can't read the pixels of a picture opened from the
+// disk) ; while its picture is missing, an asteroid's rock with steel on its right half
+var colossusPicture	= new Image();
+colossusPicture.src	= "img/colossus.webp";
+var colossusFill	= 0.99;		// the part of the picture's width its rock fills
+
+// function to give the Colossus its rock : its picture, the size of its radius, round
+function colossusRock ( asteroid ) {
+	if ( !colossusPicture.complete || colossusPicture.naturalWidth == 0 ) {
+		plateColossus ( asteroid );
+		return;
+	}
+	var r = asteroid.radius;
+	asteroid.rock = colossusPicture;
+	asteroid.rockHalf = r / colossusFill;
+	asteroid.outline = new Path2D();
+	asteroid.outline.arc ( 0, 0, r, 0, 2 * Math.PI );
+	// (a lighter shading than a rock's, for its plates to show on its dark side too)
+	asteroid.shade = asteroid.context.createRadialGradient ( -0.45 * r, -0.45 * r, 0, -0.45 * r, -0.45 * r, 1.7 * r );
+	asteroid.shade.addColorStop ( 0, "rgba(255,240,220,0.25)" );
+	asteroid.shade.addColorStop ( 0.3, "rgba(255,240,220,0)" );
+	asteroid.shade.addColorStop ( 0.6, "rgba(0,0,0,0.2)" );
+	asteroid.shade.addColorStop ( 0.9, "rgba(0,0,0,0.55)" );
+	asteroid.shade.addColorStop ( 1, "rgba(0,0,0,0.7)" );
+}
+
+// function to plate half of the Colossus's rock with steel, on its texture, while its picture is missing (the side its spin turns
+// to : drawPlates, threats.js)
 function plateColossus ( asteroid ) {
 	var half = asteroid.rockHalf;
 	var ctx = asteroid.rock.getContext ( "2d" );
@@ -247,14 +287,25 @@ function plateColossus ( asteroid ) {
 	ctx.restore();
 }
 
-// function to move the Colossus : to its post, slowing down as it gets there, still there, then charging the planet in its last phase
+// function to make the Colossus spin half a turn more, a kamikaze ramming it (ramAsteroid, kamikaze.js) ; a ram during another one
+// adds its half turn
+function ramColossus () {
+	colossus.ram = ( colossus.ram || 0 ) + Math.round ( colossusRam * framesPerSecond );
+}
+
+// function to move the Colossus : to its post, slowing down as it gets there, still there, then charging the planet in its last phase ;
+// spinning faster while a kamikaze's ram turns it (ramColossus)
 function moveColossus () {
+	if ( colossus.ram > 0 ) {
+		colossus.spin += ( colossus.spinSpeed < 0 ? -1 : 1 ) * Math.PI / ( colossusRam * framesPerSecond );
+		colossus.ram--;
+	}
 	var dx = MyPlanet.x - colossus.x, dy = MyPlanet.y - colossus.y;
 	var d = Math.sqrt ( dx * dx + dy * dy );
 	colossusClosest = Math.min ( colossusClosest, d );
 	var speed = 0;
 	if ( bossPhase == 3 ) {
-		speed = colossusCharge;
+		speed = colossusCharge * levelDensity();
 	} else if ( d > colossusPost ) {
 		speed = Math.min ( 4, 0.3 + ( d - colossusPost ) * 0.04 );
 	} else {
@@ -264,24 +315,101 @@ function moveColossus () {
 	colossus.vy = dy / d * speed;
 }
 
-// function to make the Colossus throw an asteroid at the planet, from its face, a splitting one now and then
-function throwRock ( ctx ) {
+// function to make the Colossus throw a salvo at the planet, from its face, a splitting asteroid now and then : the first one
+// straight from its middle, the others from its sides, curled one way then the other (apart, not to hit each other)
+function throwSalvo ( ctx ) {
 	var d = distanceToPlanet ( colossus.x, colossus.y );
-	var angle = Math.atan2 ( colossus.y - MyPlanet.y, colossus.x - MyPlanet.x ) + ( Math.random() * 2 - 1 ) * colossus.radius * 0.7 / d;
-	var rock = launchAsteroid ( ctx, angle, false, 1, d - colossus.radius - asteroidBR * 1.5 );
-	if ( Math.random() < colossusSplit[bossPhase - 1] ) {
-		makeSplitter ( rock );
+	var face = Math.atan2 ( colossus.y - MyPlanet.y, colossus.x - MyPlanet.x );
+	var side = ( Math.random() < 0.5 ) ? -1 : 1;
+	for ( var n = 0; n < colossusSalvo[bossPhase - 1]; n++ ) {
+		var aside = ( n == 0 ) ? 0 : - side * colossus.radius * 0.5;
+		var rock = launchAsteroid ( ctx, face + aside / d, false, colossusPace, d - colossus.radius - asteroidBR * 1.5 );
+		if ( Math.random() < colossusSplit[bossPhase - 1] ) {
+			makeSplitter ( rock );
+		}
+		if ( n > 0 ) {
+			curlRock ( rock, side );
+			side = - side;
+		}
 	}
 }
 
-// function to know what a hit does to the Colossus : half of it on its plates when too weak, with a spark (armorDamage, threats.js)
+// THE CURLED ASTEROIDS : thrown aside, they turn on a circle's arc to the planet's center, as a free kick, coming to it from aside ;
+// spinning fast, a trail behind them ; once at the end of their arc (or turned away by the GRAVITRON), they go straight on
+var curlTrail		= 10;			// the places their trail goes through,
+var curlStep		= 4;			// that far apart from each other, in game units
+
+// function to curl an asteroid thrown by the Colossus, toward a side (1 or -1) : thrown that far aside from the planet, it turns
+// at each turn by what keeps it on the arc (the planet seen from where it starts, that far aside from its way : twice that in all)
+function curlRock ( rock, side ) {
+	var dx = MyPlanet.x - rock.x, dy = MyPlanet.y - rock.y;
+	var length = Math.sqrt ( dx * dx + dy * dy );
+	var aside = ( colossusCurl[0] + Math.random() * ( colossusCurl[1] - colossusCurl[0] ) ) * Math.PI / 180;
+	var speed = Math.sqrt ( rock.vx * rock.vx + rock.vy * rock.vy );
+	var heading = Math.atan2 ( dy, dx ) + side * aside;
+	rock.vx = speed * Math.cos ( heading );
+	rock.vy = speed * Math.sin ( heading );
+	rock.curl = - side * 2 * speed * Math.sin ( aside ) / length;
+	rock.curlTurns = Math.round ( 2 * aside / Math.abs ( rock.curl ) );
+	rock.spinSpeed = side * 0.2;
+	rock.trail = [];
+	rock.ownDraw = rock.Draw;
+	rock.Draw = drawCurled;
+}
+
+// function to turn a curled asteroid on its arc, at each turn of the game (engine.js), not while the Cryo freezes it ; and to keep
+// its last places for its trail
+function curlTurn ( rock ) {
+	var last = rock.trail[rock.trail.length - 1];
+	if ( !last || Math.abs ( rock.x - last.x ) + Math.abs ( rock.y - last.y ) >= curlStep ) {
+		rock.trail.push ( { x : rock.x, y : rock.y } );
+		if ( rock.trail.length > curlTrail ) {
+			rock.trail.shift();
+		}
+	}
+	if ( rock.curlTurns > 0 && !rock.frozen ) {
+		var speed = curlSpeed ( rock, rock.vx, rock.vy );
+		rock.vx = speed.vx;
+		rock.vy = speed.vy;
+		rock.curlTurns--;
+	}
+}
+
+// function to turn a speed by what a curled asteroid turns in one turn : its own (curlTurn), or the one the SMART AI foresees
+// (meetingPoint, nearestShot and crashTime, functions.js)
+function curlSpeed ( rock, vx, vy ) {
+	var cos = Math.cos ( rock.curl ), sin = Math.sin ( rock.curl );
+	return { vx : vx * cos - vy * sin, vy : vx * sin + vy * cos };
+}
+
+// function to draw a curled asteroid : its trail, thinner and fainter toward its end, then its rock (or a splitting one's)
+function drawCurled () {
+	var ctx = this.context;
+	var trail = this.trail.concat ( [ { x : this.x, y : this.y } ] );
+	ctx.save();
+	ctx.lineCap = "round";
+	for ( var t = 1; t < trail.length; t++ ) {
+		var share = t / trail.length;
+		ctx.strokeStyle = "rgba(255,170,110," + ( 0.4 * share ) + ")";
+		ctx.lineWidth = this.radius * 1.4 * share;
+		ctx.beginPath();
+		ctx.moveTo ( trail[t - 1].x, trail[t - 1].y );
+		ctx.lineTo ( trail[t].x, trail[t].y );
+		ctx.stroke();
+	}
+	ctx.restore();
+	this.ownDraw();
+}
+
+// function to know what a hit does to the Colossus : a part of it on its plates when too weak (colossusPlating), with a spark
+// (armorDamage, threats.js)
 function plateDamage ( asteroid, power, x, y ) {
 	if ( power >= colossusArmor || Math.cos ( Math.atan2 ( y - asteroid.y, x - asteroid.x ) - asteroid.spin ) <= 0 ) {
 		return power;
 	}
 	flashList.push ( { x : x, y : y, radius : 1, age : 0, color : "225,235,245" } );
 	playSound ( "ricochet" );
-	return Math.floor ( power / 2 );
+	return Math.floor ( power / colossusPlating );
 }
 
 // function to break the Colossus, its life gone : a huge blast, its debris everywhere, the asteroids it threw crumbling,
@@ -310,8 +438,8 @@ function breakColossus ( ctx ) {
 	adventure.banner = { text : "Colossus destroyed!", from : gameTime, time : levelEnd };
 }
 
-// function to draw the Colossus : a red glow beating fast around it when it charges, its rock, and its life around it,
-// with marks where its phases change
+// function to draw the Colossus : a red glow beating fast around it when it charges, its rock, and its life around it, in the
+// color of its phase
 function drawColossus () {
 	var ctx = this.context;
 	var ring = this.radius * 1.3;
@@ -338,14 +466,5 @@ function drawColossus () {
 	ctx.beginPath();
 	ctx.arc ( this.x, this.y, ring, - Math.PI / 2, - Math.PI / 2 + 2 * Math.PI * Math.max ( 0, this.life ) / colossusLife );
 	ctx.stroke();
-	ctx.strokeStyle = "rgba(255,255,255,0.6)";
-	ctx.lineWidth = 1.5;
-	for ( var m = 1; m <= 2; m++ ) {
-		var angle = - Math.PI / 2 + m * 2 * Math.PI / 3;
-		ctx.beginPath();
-		ctx.moveTo ( this.x + ( ring - 4 ) * Math.cos ( angle ), this.y + ( ring - 4 ) * Math.sin ( angle ) );
-		ctx.lineTo ( this.x + ( ring + 4 ) * Math.cos ( angle ), this.y + ( ring + 4 ) * Math.sin ( angle ) );
-		ctx.stroke();
-	}
 	ctx.restore();
 }

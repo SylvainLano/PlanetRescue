@@ -18,7 +18,8 @@
 //	  and at the right (in parts of the page's height), and the sides of each panel, at its top and at its bottom (in parts of the
 //	  page's width) ; then its panels, each one with its picture (in img/story/ ; the game's sky while it is not there) and the
 //	  height its pan looks at (and fromRight, for a pan starting at its right end, or midway, for one starting halfway ; one panel
-//	  out of two pans the other way), or a panel without picture, its title and its text in the middle
+//	  out of two pans the other way), and a title to write in its middle with its text, over its picture ; or a panel without
+//	  picture, its title and its text in the middle
 var stories = {
 	intro : { lines : [ [0, 0], [0.27, 0.21], [0.46, 0.55], [0.72, 0.86], [1, 1] ],
 		sides : [ [ [0, 0], [1, 1] ], [ [0.035, 0], [1, 0.985] ], [ [0, 0.02], [0.97, 1] ], [ [0, 0], [1, 1] ] ],
@@ -33,7 +34,7 @@ var stories = {
 		panels : [
 			{ picture : "end1.jpg", look : "55%", text : "The Colossus is down. In its broken core, the NAZA finds steel beams, cables, and a light still blinking." },
 			{ picture : "end2.jpg", look : "35%", fromRight : true, midway : true, text : "Asteroids don't fall by chance. Someone is sending them." },
-			{ title : "World 1 complete", text : "To be continued." }
+			{ picture : "end3.jpg", look : "40%", title : "World 1 complete", text : "To be continued." }
 		] }
 };
 var storySky		= "img/background1.jpg";	// the picture of a panel while its own one is not there,
@@ -74,9 +75,11 @@ function openAdventure () {
 	}
 }
 
-// function to tell stories, one after the other, then go to the map (engine.js shows them : showStory)
-function tellStories ( list ) {
+// function to tell stories, one after the other, then go to the map, or else do what is to be done after them (engine.js shows
+// them : showStory)
+function tellStories ( list, then ) {
 	story.queue = list.slice();
+	story.then = then || false;
 	state = "story";
 }
 
@@ -120,12 +123,17 @@ function showStory ( holder ) {
 		var width = ( corners[1][0] - corners[0][0] ) * 0.5;
 		var x = Math.max ( corners[0][0], corners[3][0] ) + 10;
 		var y = Math.max ( corners[0][1], edgeHeight ( corners[0], corners[1], x + width ) ) + 9;
-		html += "<div class='panel" + ( panel.picture ? "" : " plain" ) + "' style='left:" + left.toFixed(1) + "px;top:" + top.toFixed(1) + "px;"
+		html += "<div class='panel" + ( panel.picture ? ( panel.title ? " titled" : "" ) : " plain" ) + "' style='left:" + left.toFixed(1) + "px;top:" + top.toFixed(1) + "px;"
 			+ "width:" + ( right - left ).toFixed(1) + "px;height:" + ( bottom - top ).toFixed(1) + "px;clip-path:polygon(" + shape + ")'>";
 		if ( panel.picture ) {
 			html += "<div class='picture" + ( panel.fromRight ? " fromRight" : "" ) + ( panel.midway ? " midway" : "" ) + "' style=\"background-image:url('img/story/" + panel.picture + "'),url('" + storySky + "');"
-				+ "background-position-y:" + panel.look + "\"></div>"
-				+ "<div class='caption' style='left:" + ( x - left ).toFixed(1) + "px;top:" + ( y - top ).toFixed(1) + "px;max-width:" + width.toFixed(1) + "px'></div>";
+				+ "background-position-y:" + panel.look + "\"></div>";
+			if ( panel.title ) {
+				// (its title and its text in the middle, over its picture)
+				html += "<div class='over'><div class='title'>" + panel.title + "</div><div class='caption'></div></div>";
+			} else {
+				html += "<div class='caption' style='left:" + ( x - left ).toFixed(1) + "px;top:" + ( y - top ).toFixed(1) + "px;max-width:" + width.toFixed(1) + "px'></div>";
+			}
 		} else {
 			html += "<div class='title'>" + panel.title + "</div><div class='caption'></div>";
 		}
@@ -226,7 +234,7 @@ function advanceStory () {
 	}
 }
 
-// function to end the story told : the next one, or the map
+// function to end the story told : the next one, or the map, or else what is to be done after them (tellStories)
 function endStory () {
 	clearInterval ( story.timer );
 	story.timer = false;
@@ -235,7 +243,13 @@ function endStory () {
 		state = "story";
 	} else {
 		document.getElementById("story").style.display = "none";
-		state = "map";
+		var then = story.then;
+		story.then = false;
+		if ( then ) {
+			then();
+		} else {
+			state = "map";
+		}
 	}
 }
 

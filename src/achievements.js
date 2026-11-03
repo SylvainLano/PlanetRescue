@@ -12,7 +12,8 @@
 
 // The achievements, saved by the browser for good, whatever the difficulty level (planned in 2010, to unlock the research tree later)
 // each one : its name, what it asks, its medal (its picture, and its metal for how hard it is), and its test,
-// read at each turn of the engine until it is achieved ; they are shown in this order, six by row
+// read at each turn of the engine until it is achieved ; they are shown in this order, six by row (the Adventure's ones, marked,
+// only once it is ready : adventure.js)
 var achievements = {
 	// the four ones of 2010, and the tutorial
 	firstContact	: { name : "First Contact", text : "Play your first game.", picture : "planet", metal : "bronze",
@@ -68,8 +69,44 @@ var achievements = {
 	goliath			: { name : "David and Goliath", text : "Finish a giant asteroid with a rebound shot, after a ricochet.", picture : "sling", metal : "gold",
 						test : function () { return state == "playing" && goliath; } },
 	scholar			: { name : "Scholar", text : "Complete 8 researches in a game.", picture : "book", metal : "gold",
-						test : function () { return state == "playing" && researchesDone() >= 8; } }
+						test : function () { return state == "playing" && researchesDone() >= 8; } },
+	// the Adventure's, at any difficulty level (its stars saved : adventure.js)
+	pathfinder		: { name : "Pathfinder", text : "Win the first level of the Adventure.", picture : "map", metal : "bronze",
+						adventure : true, test : function () { return levelWon ( 0 ); } },
+	hatTrick		: { name : "Hat Trick", text : "Win the three stars of a level of the Adventure.", picture : "stars", metal : "bronze",
+						adventure : true, test : function () { return perfectLevel(); } },
+	intoProduction	: { name : "Into Production", text : "Unlock the Spiral: validate its prototype in the NAZA's simulator.", picture : "spiral", metal : "silver",
+						adventure : true, test : function () { return levelWon ( mainLevels ); } },
+	worldSaver		: { name : "World Saver", text : "Finish the first world of the Adventure.", picture : "globe", metal : "silver",
+						adventure : true, test : function () { return levelWon ( mainLevels - 1 ); } },
+	// the Hard Adventure's, its own adventure (adventure.js)
+	notAScratch		: { name : "Not a Scratch", text : "Win a level of the Hard Adventure without losing a single inhabitant.", picture : "shield", metal : "silver",
+						adventure : true, test : function () { return hardAdventure() && adventure.ending > 0 && nbrDamage == 0; } },
+	moonbreaker		: { name : "Moonbreaker", text : "Destroy the Colossus in the Hard Adventure.", picture : "moon", metal : "gold",
+						adventure : true, test : function () { return hardAdventure() && bossPhase == 4; } },
+	constellation	: { name : "Constellation", text : "Win every star of the first world in the Hard Adventure.", picture : "star", metal : "gold",
+						adventure : true, test : function () { return adventureDifficulty == "hard" && starsCount() >= adventureLevels.length * 3; } }
 };
+
+// function to know if a level of the Adventure has its three stars
+function perfectLevel () {
+	for ( var n in levelStars ) {
+		if ( levelStars[n] && levelStars[n][0] && levelStars[n][1] && levelStars[n][2] ) {
+			return true;
+		}
+	}
+	return false;
+}
+
+// function to know if a level of the Hard Adventure is being played
+function hardAdventure () {
+	return state == "playing" && inAdventure() && adventureDifficulty == "hard";
+}
+
+// function to know if an achievement is shown and can be obtained : all of them, but the Adventure's until it is ready
+function achievementShown ( id ) {
+	return !achievements[id].adventure || adventureReady;
+}
 
 // The pictures of the medals, drawn in a 64 x 64 square around its center (32, 32), with lines of the color "INK"
 var medalPictures = {
@@ -93,6 +130,14 @@ var medalPictures = {
 	book		: '<path d="M32 21c-5-4-12-5-18-4v26c6-1 13 0 18 4 5-4 12-5 18-4V17c-6-1-13 0-18 4zM32 21v26"/><path d="M19 25c3 0 6 1 8 2M19 31c3 0 6 1 8 2M37 27c2-1 5-2 8-2M37 33c2-1 5-2 8-2" stroke-width="1.5"/>',
 	boomerang	: '<path fill="INK" stroke="none" d="M20 17Q36 14 50 22Q53 26 49 29Q36 24 27 27Q24 36 29 49Q26 53 22 50Q14 36 20 17z"/><path d="M38 44q6-2 8-8M42 50q8-3 11-11" stroke-width="2"/>',
 	pinball		: '<path d="M45 47L19 37L43 25L21 17" stroke-dasharray="3 4" stroke-width="2"/><circle cx="19" cy="37" r="5"/><circle cx="43" cy="25" r="5"/><circle cx="21" cy="17" r="5"/><circle fill="INK" stroke="none" cx="45" cy="47" r="4"/>',
+	map			: '<path d="M15 45c9 0 9-11 17-11s8-12 17-12" stroke-dasharray="3 4" stroke-width="2"/><circle cx="15" cy="45" r="4.5"/><circle cx="32" cy="34" r="4.5"/><circle fill="INK" stroke="none" cx="49" cy="22" r="5.5"/>',
+	stars		: '<g fill="INK" stroke="none"><polygon transform="translate(13.4 6) scale(0.58)" points="32,13 37.3,25.2 50.5,26.4 40.5,35.1 43.4,48 32,41.3 20.6,48 23.5,35.1 13.5,26.4 26.7,25.2"/>'
+				+ '<polygon transform="translate(5.6 27) scale(0.45)" points="32,13 37.3,25.2 50.5,26.4 40.5,35.1 43.4,48 32,41.3 20.6,48 23.5,35.1 13.5,26.4 26.7,25.2"/>'
+				+ '<polygon transform="translate(29.6 27) scale(0.45)" points="32,13 37.3,25.2 50.5,26.4 40.5,35.1 43.4,48 32,41.3 20.6,48 23.5,35.1 13.5,26.4 26.7,25.2"/></g>',
+	spiral		: '<path d="M29 32a3 3 0 0 1 6 0a6 6 0 0 1-12 0a9 9 0 0 1 18 0a12 12 0 0 1-24 0a15 15 0 0 1 30 0"/>',		// (as its tile : tiles.js)
+	globe		: '<circle cx="32" cy="32" r="16"/><path d="M16 32h32M32 16c-7 5-7 27 0 32M32 16c7 5 7 27 0 32M19 23h26M19 41h26" stroke-width="2"/>',
+	moon		: '<circle cx="32" cy="32" r="15"/><path d="M33 17l-4 8 6 6-5 7 3 9" stroke-width="2.5"/><circle cx="24" cy="28" r="2.5"/><circle cx="40" cy="37" r="3"/><path d="M48 18l4-4M50 25h5M44 13l1-5" stroke-width="2"/>',
+	star		: '<polygon fill="INK" stroke="none" points="32,13 37.3,25.2 50.5,26.4 40.5,35.1 43.4,48 32,41.3 20.6,48 23.5,35.1 13.5,26.4 26.7,25.2"/>',
 	sling		: '<g transform="translate(12 -2) scale(0.8)"><path d="M18 31l7-12 12-2 9 8-1 13-9 8-12-1-6-8z"/><path d="M34 18l-3 10 6 5-5 8" stroke-width="2"/></g><path d="M15 20v26" stroke-width="2.5"/><path d="M27 49L16 38L26 31" stroke-dasharray="3 4" stroke-width="2"/><circle fill="INK" stroke="none" cx="27" cy="49" r="3.5"/>'
 };
 
@@ -175,7 +220,7 @@ function loadAchievements () {
 // function to test the achievements not obtained yet, at each turn of the engine
 function checkAchievements () {
 	for ( var id in achievements ) {
-		if ( !achieved[id] && achievements[id].test() ) {
+		if ( !achieved[id] && achievementShown ( id ) && achievements[id].test() ) {
 			achieved[id] = new Date().toISOString().substring ( 0, 10 );
 			localStorage["achievements"] = JSON.stringify ( achieved );
 			newAchievements.push ( id );
@@ -189,6 +234,9 @@ function checkAchievements () {
 function showAchievementCount () {
 	var count = 0, total = 0;
 	for ( var id in achievements ) {
+		if ( !achievementShown ( id ) ) {
+			continue;
+		}
 		total++;
 		if ( achieved[id] ) {
 			count++;
@@ -255,6 +303,9 @@ function showAchievements ( holder ) {
 	var count = 0, total = 0;
 	var medals = "";
 	for ( var id in achievements ) {
+		if ( !achievementShown ( id ) ) {
+			continue;
+		}
 		total++;
 		if ( achieved[id] ) {
 			count++;

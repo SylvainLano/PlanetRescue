@@ -179,11 +179,15 @@ function kamikazeGoal ( ship ) {
 	return { x : x, y : y };
 }
 
-// function to ram an asteroid : it loses most of its speed (a heavy one less, the Colossus nearly nothing), with a small blast
+// function to ram an asteroid : it loses most of its speed (a heavy one less, the Colossus nearly nothing, but it spins half a turn
+// more : boss.js), with a small blast
 function ramAsteroid ( ship, asteroid ) {
 	var keep = 1 - kamikazeBrake * Math.min ( 1, asteroidBM / asteroid.mass );
 	asteroid.vx *= keep;
 	asteroid.vy *= keep;
+	if ( asteroid.colossus ) {
+		ramColossus();
+	}
 	blastList.push ( { x : ship.x, y : ship.y, size : 0, age : 0, blast : 5 } );
 	playSound ( "ram" );
 }

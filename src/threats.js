@@ -319,10 +319,14 @@ function splitRock ( ctx, asteroid, kept ) {
 	}
 }
 
-// function to count a crash on the planet, at the moment it happens (engine.js) : the parts of a splitting asteroid are counted
+// function to count a crash on the planet, at the moment it happens (engine.js) : the parts of a splitting asteroid are counted,
+// and the pebbles of the swarms
 function countCrash ( asteroid ) {
 	if ( asteroid.part ) {
 		splinterHits++;
+	}
+	if ( asteroid.pebble ) {
+		pebbleHits++;
 	}
 }
 
@@ -362,6 +366,7 @@ var swarmDepth		= 60;		// and how far behind the edge, for the cloud to come in 
 var swarmGift		= 60;		// the mat given with its announce
 var swarmGap		= [60, 90];	// seconds between two swarms in the Arcade, at least and at most
 var swarmAt			= 0;		// the turn the next swarm comes in the Arcade (0 : not planned yet)
+var pebbleHits		= 0;		// the pebbles that crashed on the planet in this game (a challenge of the Adventure)
 
 // function to announce a swarm, coming from a side chosen now, with the mat given
 function announceSwarm ( seconds ) {
@@ -384,15 +389,16 @@ function launchSwarm ( ctx, side, near, arc ) {
 		var pebble = new Asteroid ( ctx, 1 + Math.floor ( Math.random() * swarmLife ), swarmRadius, asteroidBM * 0.3,
 			MyPlanet.x + d * Math.cos ( angle ), MyPlanet.y + d * Math.sin ( angle ), - velocity * Math.cos ( aim ), - velocity * Math.sin ( aim ), false, false );
 		pebble.flyBy = true;		// (a pebble missing the planet is gone for good)
+		pebble.pebble = true;		// (and one crashing counted : countCrash)
 		asteroidList.push ( pebble );
 	}
 }
 
-// THE ARMORED ASTEROIDS : plated with steel ; a hit weaker than armorMin bounces off with a spark, doing nothing (the main weapons'
-// shots, the missiles and the rebound shots : a critical shot counts with its power multiplied, the laser burns through, and the
-// nitroglycerine, the shield, the pulses, the collisions and the atmosphere are strong enough) ; in the Arcade, they come
-// in groups from one side, announced with that side and with mat given to raise the fire power
-var armorMin		= 3;		// the weakest hit an armored asteroid feels
+// THE ARMORED ASTEROIDS : plated with steel, as an armor in a game : the plates absorb a part of each hit, with a spark, and a hit no
+// stronger bounces off, doing nothing (the main weapons' shots, the missiles and the rebound shots : a critical shot goes through
+// whole, the laser burns through, and the nitroglycerine, the shield, the pulses, the collisions and the atmosphere are strong
+// enough) ; in the Arcade, they come in groups from one side, announced with that side and with mat given to raise the fire power
+var armorPlates		= 3;		// the damage the plates absorb from each hit
 var armorGroup		= 3;		// the armored asteroids of a group,
 var armorGap		= 2;		// the seconds between two of them,
 var armorArc		= 25;		// how far from its side each one may come, in degrees on each side
@@ -408,16 +414,20 @@ function makeArmored ( asteroid ) {
 	shapeRock ( asteroid );		// (its rock again, with the plates : prototypes.js)
 }
 
-// function to get the damage of a hit on an asteroid : its power, or nothing on an armored one when it is too weak,
-// the hit then bouncing off with a white spark where it hit (the critical shots' flashes : bonuses.js) and a ricochet's sound
-function armorDamage ( asteroid, power, x, y ) {
+// function to get the damage of a hit on an asteroid : its power, less what an armored one's plates absorb (not from a critical
+// shot), with a white spark where it hit (the critical shots' flashes : bonuses.js), and nothing when the plates absorb it all :
+// the hit bounces off then, with a ricochet's sound
+function armorDamage ( asteroid, power, x, y, critical ) {
 	if ( asteroid.colossus ) {
 		return plateDamage ( asteroid, power, x, y );		// (the Colossus's plates : boss.js)
 	}
-	if ( !asteroid.armored || power >= armorMin ) {
+	if ( !asteroid.armored || critical ) {
 		return power;
 	}
 	flashList.push ( { x : x, y : y, radius : 1, age : 0, color : "225,235,245" } );
+	if ( power > armorPlates ) {
+		return power - armorPlates;
+	}
 	playSound ( "ricochet" );
 	nbrBounces++;		// (the tips of the game's end : gameover.js)
 	return 0;
@@ -427,8 +437,8 @@ function armorDamage ( asteroid, power, x, y ) {
 function announceArmored ( seconds ) {
 	var side = Math.random() * 2 * Math.PI;
 	var news = announce ( "Armored from the " + compassSide ( side ), "Armored asteroids are coming from the " + compassSide ( side )
-		+ "! Their steel plates stop the shots under " + armorMin + " of power: raise your fire power; critical shots"
-		+ ( adventureAllows ( "lasers" ) ? " and the laser get through." : " get through." ),
+		+ "! Their steel plates absorb " + armorPlates + " of each shot's power: raise your fire power; critical shots"
+		+ ( adventureAllows ( "lasers" ) ? " and the laser go through whole." : " go through whole." ),
 		seconds, armorGift, function ( ctx ) { launchArmored ( ctx, side ); } );
 	news.side = side;
 }

@@ -194,6 +194,7 @@
 	// player's GRAVITRON parameters
 	var key				= [0,0,0,0,0,0,0];		// counterclockwise, clockwise, close, open, pause, change target, erase target choice
 	var gravSuction		= 0.05;
+	var cushionShare	= 0.03;		// the part of that pull, times the Gravity Generator, the Gravity Cushion brakes the asteroids with (functions.js)
 	var gravColor		= '#666666';
 	var gravRadius		= planetRadius * 1.1;
 	var gravFriction	= 30;					// expressed in percents
@@ -351,6 +352,7 @@ function initDefault(context,level) {
 	armorAt			= 0;
 	armorClosest	= gameSize;
 	splinterHits	= 0;
+	pebbleHits		= 0;
 	newResearches();
 	
 	// player's GRAVITRON parameters

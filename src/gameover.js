@@ -33,8 +33,8 @@ var tipReach	= 3;		// and the asteroids coming too fast for the cannon's shots t
 // achievements.js), and its text, or false when it doesn't fit the game
 var lossTips = [
 	{ id : "shop", tiles : [ "Upgrades" ], picture : "pause", text : function () {
-		if ( nbrUpgrades > 0 || nbrCost > 0 || ( inAdventure() && adventureLevels[adventure.level].bonus ) ) {
-			return false;		// (a bonus level's mat is kept for its weapon : adventure.js)
+		if ( nbrUpgrades > 0 || nbrCost > 0 ) {
+			return false;
 		}
 		return "You spent no mat in this game. Press Space: the pause menu sells upgrades for your cannon, your Gravitron and your planet."; } },
 	{ id : "autoHeal", tiles : [ "Hits taken", "Inhabitants" ], picture : "autoHeal", text : function () {
@@ -53,10 +53,10 @@ var lossTips = [
 		}
 		return "A giant ended the game: all the life it had left crashed on your planet. Aim at the giants first, with T, as soon as they come."; } },
 	{ id : "armored", tiles : [ "Accuracy" ], picture : "flame", text : function () {
-		if ( nbrBounces < tipBounces || mainCannon.power >= armorMin || !tipCan ( "mainPow" ) ) {
+		if ( nbrBounces < tipBounces || mainCannon.power > armorPlates || !tipCan ( "mainPow" ) ) {
 			return false;
 		}
-		return nbrBounces + " of your shots bounced off armored asteroids. Under " + armorMin + " of Fire Power, their plates stop them: raise it, or count on critical shots"
+		return nbrBounces + " of your shots bounced off armored asteroids. Their plates absorb " + armorPlates + " of each shot's power: raise your Fire Power, or count on critical shots"
 			+ ( adventureAllows ( "lasers" ) ? " and the laser." : "." ); } },
 	{ id : "smart", tiles : [ "Accuracy" ], picture : "chip", text : function () {
 		if ( gameAccuracy() >= tipAccuracy || mainCannon.smart >= 2 || !tipCan ( "SMART" ) ) {
