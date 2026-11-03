@@ -357,7 +357,9 @@ function movingParts() {
 		{ objects : weaponList, parts : ["angle"] },	// the Spiral & Orbital weapon's "angle" is a number of cannon, but it is not drawn
 		{ objects : [banner], parts : ["y"] },
 		{ objects : [camera], parts : ["share"] },	// (the duel's camera : boss.js)
-		{ objects : kamikazeList, parts : ["x", "y"] }	// (the kamikazes : kamikaze.js)
+		{ objects : kamikazeList, parts : ["x", "y"] },	// (the kamikazes : kamikaze.js)
+		{ objects : shardList, parts : ["x", "y"] },	// (the Cryo's shards : cryo.js)
+		{ objects : waveList, parts : ["radius"] }		// (the Hammer's waves : hammer.js)
 	];
 }
 
@@ -826,14 +828,9 @@ function shoot(ctx,weapon){
 			}
 			break;
 		case "HaBW" :
-			for ( ik = 0; ik < weapon.cannonNbr; ik++ ) {
-				var t = 2 * Math.PI / weapon.cannonNbr * ik + weapon.angle;
-				if ( t > Math.PI ) { t -= Math.PI * 2; }
-				
-				// let's create a shot
-				item = new Shot4( ctx, weapon.power, weapon.color, t, 5, weapon.speed );
-				shotList.push(item);
-			}
+			// waves, one by cannon, all around from where it points (hammer.js)
+			sendWaves ( weapon );
+			playSound ( "shot" );
 			break;
 		case "harvestW" :
 			// rays, at once, on the asteroids in front of the GRAVITRON's opening, one by cannon : a little damage, but the debris

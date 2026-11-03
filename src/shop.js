@@ -188,23 +188,27 @@ var upgrades = {
 							level : function () { return magneticCannon.speed; }, raise : function () { magneticCannon.speed++; },
 							picture : "slow", unit : "friction", what : "friction, to keep the shots longer" },
 
-	// HAMMER AND BROOM CANNON
-	HaBCNumber			: { name : "Cannons", tip : "Hammer Cannons Number - Increased fire spread.",
-							max : 5, price : "times150",
+	// HAMMER AND BROOM CANNON : waves damaging a little the asteroids they cross, and slowing down the ones coming closer, always
+	// 1 of damage (hammer.js)
+	HaBCNumber			: { name : "Cannons", tip : "Hammer Cannons Number - One more wave at each shot, sent the other way.",
+							max : 2, price : "times150",
 							level : function () { return hammerCannon.cannonNbr; }, raise : function () { hammerCannon.cannonNbr++; },
 							picture : "cannons", unit : "cannons", what : "cannon" },
 	HaBCFireRate		: { name : "Cooldown", tip : "Hammer Weapon Cooldown - The time the weapon waits between two shots, a fifth shorter at each level. Expressed in seconds.",
 							max : function () { return cooldownSeconds ( hammerCannon, 5 ); }, decreasing : true, price : "cooldown", toPay : function () { return cooldownLevel ( hammerCannon ); },
 							level : function () { return hammerCannon.fireRate / framesPerSecond; }, raise : function () { shortenCooldown ( hammerCannon ); },
 							picture : "bolt", unit : "s cooldown", next : function () { return cooldownSeconds ( hammerCannon, cooldownLevel ( hammerCannon ) + 1 ); }, what : "seconds of cooldown" },
-	HaBPow				: { name : "Fire Power", tip : "Hammer Shots Power - To cause more damages.",
-							max : 10, price : "plus1times3pow2",
-							level : function () { return hammerCannon.power; }, raise : function () { hammerCannon.power++; },
-							picture : "flame", unit : "power", what : "power per shot" },
-	HaBSpeed			: { name : "Fire Spread", tip : "Hammer Shots Spread - To slow down shoots, thus making more of them staying in game.",
-							max : 5, price : "times10plus50",
+	// (how far its waves go : 150 at first, 50 more at each level)
+	HaBReach			: { name : "Wave Reach", tip : "Hammer Wave Reach - How far from your planet the waves go, before they fade.",
+							max : 300, price : "plus1times100", toPay : function () { return ( hammerCannon.reach - gameValues.HaBW.reach ) / 50; },
+							level : function () { return hammerCannon.reach; }, raise : function () { hammerCannon.reach += 50; },
+							picture : "pulse", unit : "reach", step : 50, what : "reach" },
+	// (its waves' width : 30°, then 10° more at each level : waveWidth, hammer.js)
+	HaBSpeed			: { name : "Wave Width", tip : "Hammer Wave Width - How wide each wave is, to catch more asteroids.",
+							max : 3, price : "times10plus50",
 							level : function () { return hammerCannon.speed; }, raise : function () { hammerCannon.speed++; },
-							picture : "spread", unit : "spread", what : "spread, to keep the shots longer" },
+							picture : "spread", unit : "wide", value : function () { return Math.round ( waveWidth ( hammerCannon ) * 180 / Math.PI ) + "°"; },
+							change : function () { return Math.round ( waveWidth ( hammerCannon ) * 180 / Math.PI ) + "° → " + ( Math.round ( waveWidth ( hammerCannon ) * 180 / Math.PI ) + 10 ) + "° wide waves"; } },
 
 	// MISSILE LAUNCHER : a secondary weapon, given by its research (researches.js)
 	// (its reload time goes down as the cannons' cooldown, three levels at most)
@@ -359,14 +363,15 @@ var shopLayout = [
 			about : "Its ice shards fly to the asteroid nearest to your planet and freeze it: stopped at once, your Gravitron no longer pulls it, a shock only makes it slide a little, and it stops the asteroids hitting it. Once thawed, it stays where it is, without any speed... nor brakes: a shock sends it flying again.",
 			statusTip : "One weapon can be active next to your basic cannon, two with the Multiple weapon : making this one active may disactivate another one.",
 			upgrades : ["cryoShards","cryoCooldown","cryoFreeze"] },
-		{ tab : "Magnet", title : "Magnetic Weapon", weapon : "magneticW", modes : true,
+		{ tab : "Hammer", title : "Hammer and Broom Weapon", weapon : "HaBW", modes : true,
 			appears : function () { return cryo.cannonNbr > 0; },
+			about : "Its waves damage a little each asteroid they cross, and slow down the ones coming closer to your planet, before they fade; the debris go through them. At first they leave through your Gravitron's opening, to slow down the asteroids it pulls in while the debris come: its other modes follow the main cannon, or turn.",
+			statusTip : "One weapon can be active next to your basic cannon, two with the Multiple weapon : making this one active may disactivate another one.",
+			upgrades : ["HaBCNumber","HaBCFireRate","HaBReach","HaBSpeed"] },
+		{ tab : "Magnet", title : "Magnetic Weapon", weapon : "magneticW", modes : true,
+			appears : function () { return hammerCannon.cannonNbr > 0; },
 			statusTip : "One weapon can be active next to your basic cannon, two with the Multiple weapon : making this one active may disactivate another one.",
 			upgrades : ["magneticCNumber","magneticCFireRate","magneticPow","magneticSpeed"] },
-		{ tab : "Hammer", title : "Hammer and Broom Weapon", weapon : "HaBW", modes : true,
-			appears : function () { return magneticCannon.cannonNbr > 0; },
-			statusTip : "One weapon can be active next to your basic cannon, two with the Multiple weapon : making this one active may disactivate another one.",
-			upgrades : ["HaBCNumber","HaBCFireRate","HaBPow","HaBSpeed"] },
 		// a secondary weapon : its tab is shown once its research is validated
 		{ tab : "Missile", title : "Missile Launcher", secondary : "missileW",
 			appears : function () { return missileLauncher.cannonNbr > 0; },

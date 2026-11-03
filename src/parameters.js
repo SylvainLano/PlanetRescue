@@ -44,7 +44,7 @@
 		basicW			: { delay : 25, power : 2, speed : 1, smart : 1, cannons : 1 },
 		SaOW			: { delay : 25, power : 1, speed : 3, smart : 0, cannons : 0 },
 		magneticW		: { delay : 50, power : 3, speed : 1, smart : 0, cannons : 0 },	// (its shots go to the asteroids near them : slower)
-		HaBW			: { delay : 50, power : 1, speed : 1, smart : 0, cannons : 0 },
+		HaBW			: { delay : 75, power : 1, speed : 1, smart : 2, cannons : 0, reach : 150 },	// the Hammer : its waves keeping the GRAVITRON's opening at first, and how far they go (hammer.js)
 		harvestW		: { delay : 25, power : 1, speed : 0, smart : 0, cannons : 0, yield : 2 },	// the Harvester : its rays' power, and the debris torn off by point of damage
 		cryoW			: { delay : 75, power : 1, speed : 0, smart : 0, cannons : 0, freeze : 5 },	// the Cryo cannon : its shards' power, and the seconds they freeze an asteroid
 		missileW		: { delay : 100, power : 3, speed : 1.5, smart : 0, cannons : 0, blast : 25 },	// a secondary weapon, given by its research
@@ -169,7 +169,7 @@
 	weaponCost["harvestW"]	= 250;
 	weaponCost["cryoW"]	= 300;
 	weaponCost["magneticW"]	= 400;
-	weaponCost["HaBW"]	= 450;
+	weaponCost["HaBW"]	= 350;
 	var mainCanMovSpeed	= startValues.mainCanMovSpeed;
 	var maxWAtATime		= startValues.maxWAtATime;
 	var orbitalNbr		= 0;
@@ -313,8 +313,10 @@ function initDefault(context,level) {
 	cryo			= newWeapon(context,"cryoW","#a0dcff");
 	cryo.freeze		= gameValues.cryoW.freeze;
 	shardList		= [];
+	waveList		= [];
 	magneticCannon	= newWeapon(context,"magneticW","#964514");
 	hammerCannon	= newWeapon(context,"HaBW","#0099CC");
+	hammerCannon.reach = gameValues.HaBW.reach;
 	weaponList.push(mainCannon);
 	weaponList.push(spiralCannon);
 	weaponList.push(harvester);

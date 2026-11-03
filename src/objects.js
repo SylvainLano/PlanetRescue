@@ -198,23 +198,4 @@ function Shot3(context,power,color,x,y,vx,vy) {
 	this.type="Magnetic Shot";
 }
 
-// Hammer and broom shots pseudo-class
-function Shot4(context,power,color,t,vd,spread) {
-// elements from the function call
-	this.power=power;
-	this.color=color;
-	this.context=context;
-	this.tbase=t;
-	this.t=t;
-	this.vd=vd;
-	this.spread=spread;
-
-// elements to define
-	this.d=MyPlanet.radius + 4;
-	this.weapon=4;
-	this.x=MyPlanet.x+Math.cos(this.t)*this.d;
-	this.y=MyPlanet.y+Math.sin(this.t)*this.d;
-
-// object definition
-	this.type="Hammer/Broom Shot";
-}
+// (the Hammer and broom's waves are not shots any more : hammer.js)

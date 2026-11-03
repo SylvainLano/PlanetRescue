@@ -921,15 +921,8 @@ function engine() {
 					} else if ( weaponList[i].smart == 1 ) {
 						weaponList[i].angle += moveSpeed;
 					} else if ( weaponList[i].smart == 2 ) {
-						var testAngle = MyGravitron.angle - weaponList[i].angle;
-						if( (testAngle > moveSpeed && testAngle < Math.PI) || (testAngle < (0 - moveSpeed) && testAngle < (0 - Math.PI)) ) {
-							weaponList[i].angle += moveSpeed;
-						} else if( (testAngle < (0 - moveSpeed) && testAngle > (0 - Math.PI)) || (testAngle > moveSpeed && testAngle > Math.PI) ) {
-							weaponList[i].angle -= moveSpeed;
-						}
-						weaponList[i].angle += 3 * Math.PI;
-						weaponList[i].angle = weaponList[i].angle % ( Math.PI * 2 );
-						weaponList[i].angle -= Math.PI;
+						// the middle of the GRAVITRON's opening, which the Hammer's waves keep (hammer.js)
+						weaponList[i].angle = ( ( MyGravitron.angle + MyGravitron.wideness / 2 + 3 * Math.PI ) % ( Math.PI * 2 ) ) - Math.PI;
 					}
 				}
 				weaponList[i].currentDelay++;
@@ -1021,12 +1014,6 @@ function engine() {
 					shotList[i].vd += 0.1;
 				}
 				orbitalCount++;
-			} else if ( shotList[i].weapon == 4 ) {
-				// Calculating positions
-				shotList[i].d += shotList[i].vd / shotList[i].spread;
-				shotList[i].t = shotList[i].tbase + ( shotList[i].spread - 1 ) * Math.PI / 64 * Math.sin( shotList[i].d / 8 );
-				shotList[i].x = MyPlanet.x + Math.cos(shotList[i].t) * shotList[i].d;
-				shotList[i].y = MyPlanet.y + Math.sin(shotList[i].t) * shotList[i].d;
 			}
 
 			// Testing if shot still in game
@@ -1044,27 +1031,17 @@ function engine() {
 				for (j in asteroidList) {
 					var distance = Math.floor( Math.sqrt( Math.pow((shotList[i].x - asteroidList[j].x),2) + Math.pow((shotList[i].y - asteroidList[j].y),2) ) );
 					if ( distance < asteroidList[j].radius ) {
-						if ( shotList[i].weapon == 4 ) {
-							var tempD = shotList[i].d + shotList[i].vd / shotList[i].spread;
-							var tempT = shotList[i].tbase + shotList[i].spread * Math.PI / 64 * Math.sin( tempD / 8 );
-							var tempX = MyPlanet.x + Math.cos(tempT) * tempD;
-							var tempY = MyPlanet.y + Math.sin(tempT) * tempD;
-							var tempVX = tempX - shotList[i].x;
-							var tempVY = tempY - shotList[i].y;
-							asteroidList[j].vx += tempVX * shotList[i].power / 15;
-							asteroidList[j].vy += tempVY * shotList[i].power / 15;
-						} else {
-							// debris creation from asteroids' life (none from a shot too weak for an armored one : threats.js)
-							var damage = armorDamage(asteroidList[j],shotList[i].power,shotList[i].x,shotList[i].y);
-							addDebris(ctx,damage,asteroidList[j].x,asteroidList[j].y,asteroidList[j].vx,asteroidList[j].vy,debrisList,asteroidList[j].metal);
-							asteroidList[j].life -= damage;
-							if ( asteroidList[j].life <= 0 ) {
-								allPassed = 1;
-							}
-							// a critical shot flashes red (bonuses.js)
-							if ( shotList[i].critical ) {
-								criticalHit(asteroidList[j]);
-							}
+						// debris creation from asteroids' life (none from a shot too weak for an armored one : threats.js)
+						// (the Hammer's waves, which push, are not shots : hammer.js)
+						var damage = armorDamage(asteroidList[j],shotList[i].power,shotList[i].x,shotList[i].y);
+						addDebris(ctx,damage,asteroidList[j].x,asteroidList[j].y,asteroidList[j].vx,asteroidList[j].vy,debrisList,asteroidList[j].metal);
+						asteroidList[j].life -= damage;
+						if ( asteroidList[j].life <= 0 ) {
+							allPassed = 1;
+						}
+						// a critical shot flashes red (bonuses.js)
+						if ( shotList[i].critical ) {
+							criticalHit(asteroidList[j]);
 						}
 						keepit = 0;
 					} else if ( shotList[i].weapon == 3 && distance < ( asteroidList[j].radius * 10 ) ) {
@@ -1104,6 +1081,7 @@ function engine() {
 	if ( pause == 0 ) {
 		resolveMissiles(ctx);
 		resolveShards(ctx);		// (the Cryo's : cryo.js)
+		resolveWaves(ctx);		// (the Hammer's : hammer.js)
 		resolveCapsules(ctx);
 		resolveBlasts();
 		resolveRebounds(ctx);
@@ -1254,6 +1232,8 @@ function drawGame ( blend ) {
 
 // Function to draw a game being played, in the order of 2010 : some drawings keep the line's width left by the one before
 function drawPlaying ( ctx ) {
+	// the Hammer's waves, the sky rippling through them, under everything (hammer.js)
+	drawWaves(ctx);
 	// the limits of the GRAVITRON's field, with the Field Scanner, or golden with the Harvester, whose rays strike in it
 	var harvesting = ( harvester.active >= 1 && harvester.cannonNbr > 0 );
 	if ( ( MyGravitron.scanner > 0 || harvesting ) && pause == 0 ) {
