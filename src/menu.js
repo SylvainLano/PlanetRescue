@@ -91,7 +91,8 @@ function addPanel ( tabs, holder, panel ) {
 		var status = addLine ( box, "Status", panel.secondary, panel.statusTip, function () {} );
 		status.querySelector ( "a" ).innerHTML = "<span class='green'>active</span>";
 	} else if ( panel.weapon ) {
-		addLine ( box, "Status", panel.weapon, panel.statusTip, function () { activate ( panel.weapon ); } );
+		// (the basic weapon, always active : its status can't be clicked)
+		addLine ( box, "Status", panel.weapon, panel.statusTip, panel.always ? function () {} : function () { activate ( panel.weapon ); } );
 		// the weapon's mode and upgrades, shown by refresh() once it is bought
 		list = newElement ( "div", "more", box );
 		list.id = panel.weapon + "Upgrades";

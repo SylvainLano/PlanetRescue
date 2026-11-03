@@ -42,8 +42,8 @@
 		maxWAtATime		: 1,		// maximum amount of active weapons
 		mainCanMovSpeed	: 2,
 		basicW			: { delay : 25, power : 2, speed : 1, smart : 1, cannons : 1 },
-		SaOW			: { delay : 25, power : 1, speed : 5, smart : 0, cannons : 0 },
-		magneticW		: { delay : 25, power : 3, speed : 1, smart : 0, cannons : 0 },
+		SaOW			: { delay : 25, power : 1, speed : 3, smart : 0, cannons : 0 },
+		magneticW		: { delay : 50, power : 3, speed : 1, smart : 0, cannons : 0 },	// (its shots go to the asteroids near them : slower)
 		HaBW			: { delay : 50, power : 1, speed : 1, smart : 0, cannons : 0 },
 		missileW		: { delay : 100, power : 3, speed : 1.5, smart : 0, cannons : 0, blast : 25 },	// a secondary weapon, given by its research
 		nitroW			: { delay : 200, power : 12, speed : 1.5, smart : 0, cannons : 0, blast : 40 },	// another one, its delay counted once its bomb is gone
@@ -161,7 +161,7 @@
 	var weaponCost		= new Array();	// costs of each weapon
 	weaponCost["basicW"]= 50;
 	weaponCost["SaOW"]	= 150;
-	weaponCost["magneticW"]	= 300;
+	weaponCost["magneticW"]	= 400;
 	weaponCost["HaBW"]	= 450;
 	var mainCanMovSpeed	= startValues.mainCanMovSpeed;
 	var maxWAtATime		= startValues.maxWAtATime;

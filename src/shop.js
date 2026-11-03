@@ -75,10 +75,12 @@ var upgrades = {
 							max : 5, price : "times100",
 							level : function () { return mainCannon.smart; }, raise : function () { mainCannon.smart++; },
 							picture : "chip", unit : "AI level", what : "level of SMART AI" },
-	MaxWAtATime			: { name : "Multiple weapon", tip : "Multiple weapon structure - Each level gives you one more weapon to activate at the same time.",
-							max : 2, price : "times250", appears : function () { return ownedWeapons() > 1; },
+	// (the basic weapon is always active, besides : its tile counts it, and it comes once two other weapons are bought)
+	MaxWAtATime			: { name : "Multiple weapon", tip : "Multiple weapon structure - One more weapon to activate at the same time, next to your basic cannon.",
+							max : 2, price : "times250", appears : function () { return ownedWeapons() > 2; },
 							level : function () { return maxWAtATime; }, raise : function () { maxWAtATime++; },
-							picture : "weapons", unit : "at a time", what : "weapon active at a time" },
+							picture : "weapons", unit : "at a time", value : function () { return maxWAtATime + 1; }, next : function () { return maxWAtATime + 2; },
+							what : "weapon active at a time" },
 	// the critical shots of the Basic, Spiral and Magnetic weapons (bonuses.js)
 	critChance			: { name : "Critical Chance", tip : "Critical Chance - The chance of a shot of your Basic, Spiral or Magnetic weapon to be critical: red, it does several times its power. Expressed in percents, 5 more at each level.",
 							max : 25, price : "times10",
@@ -111,7 +113,7 @@ var upgrades = {
 							picture : "speed", unit : "speed", what : "speed for the shots" },
 
 	// SPIRAL AND ORBITAL CANNON
-	SaOCNumber			: { name : "Cannons", tip : "Spiral Cannons Number - Increased fire spread and unlock new modes.",
+	SaOCNumber			: { name : "Cannons", tip : "Spiral Cannons Number - Increased fire spread and unlock new modes: one after the other with 2 cannons, Orbital with 3.",
 							max : 5, price : "times150",
 							level : function () { return spiralCannon.cannonNbr; }, raise : function () { spiralCannon.cannonNbr++; },
 							picture : "cannons", unit : "cannons", what : "cannon" },
@@ -124,8 +126,8 @@ var upgrades = {
 							level : function () { return spiralCannon.power; }, raise : function () { spiralCannon.power++; },
 							picture : "flame", unit : "damage", what : "damage per shot" },
 	// this one goes down : slower spiral shots stay longer in game
-	SaOSpeed			: { name : "Fire Speed", tip : "Spiral Shots Speed - To slow down shoots, thus making more of them staying in game.",
-							max : 1, decreasing : true, price : "from6times100",
+	SaOSpeed			: { name : "Slow Shots", tip : "Spiral Slow Shots - Slower spiral shots stay longer in game, and hit more asteroids.",
+							max : 1, decreasing : true, price : "from4times100",
 							level : function () { return spiralCannon.speed; }, raise : function () { spiralCannon.speed--; },
 							picture : "slow", unit : "speed", what : "speed for the shots, to stay longer" },
 
@@ -299,19 +301,20 @@ var shopLayout = [
 	{ title : "Upgrade Your Gravitron", upgrades : ["gravSort","gravPower","repulsion","gravShield","gravPulse","gravScanner","gravProspector","compactor"] },
 	{ title : "Build or upgrade your Weapons", panels : [
 		{ tab : "Structure", title : "Main Structure", upgrades : ["mCMSpeed","SMART","MaxWAtATime","critChance","critDamage"] },
-		{ tab : "Basic", title : "Basic Weapon", weapon : "basicW",
-			statusTip : "By making this weapon active, you could disactivate the current one.",
+		// (the basic weapon is always active : the others, one at a time next to it, or two with the Multiple weapon)
+		{ tab : "Basic", title : "Basic Weapon", weapon : "basicW", always : true,
+			statusTip : "Your main cannon, always active : it takes no place among your active weapons.",
 			upgrades : ["mCNumber","mCFireRate","mainPow","mainSpeed"] },
 		{ tab : "Spiral", title : "Spiral and Orbital Weapon", weapon : "SaOW", modes : true,
-			statusTip : "By making this weapon active, you could disactivate one of the current one.",
+			statusTip : "One weapon can be active next to your basic cannon, two with the Multiple weapon : making this one active may disactivate another one.",
 			upgrades : ["SaOCNumber","SaOCFireRate","SaOPow","SaOSpeed"] },
 		{ tab : "Magnet", title : "Magnetic Weapon", weapon : "magneticW", modes : true,
 			appears : function () { return spiralCannon.cannonNbr > 0; },
-			statusTip : "By making this weapon active, you could disactivate one of the current one.",
+			statusTip : "One weapon can be active next to your basic cannon, two with the Multiple weapon : making this one active may disactivate another one.",
 			upgrades : ["magneticCNumber","magneticCFireRate","magneticPow","magneticSpeed"] },
 		{ tab : "Hammer", title : "Hammer and Broom Weapon", weapon : "HaBW", modes : true,
 			appears : function () { return magneticCannon.cannonNbr > 0; },
-			statusTip : "By making this weapon active, you could disactivate one of the current one.",
+			statusTip : "One weapon can be active next to your basic cannon, two with the Multiple weapon : making this one active may disactivate another one.",
 			upgrades : ["HaBCNumber","HaBCFireRate","HaBPow","HaBSpeed"] },
 		// a secondary weapon : its tab is shown once its research is validated
 		{ tab : "Missile", title : "Missile Launcher", secondary : "missileW",
@@ -381,8 +384,13 @@ function cooldownSeconds ( weapon, levels ) {
 	return cooldownAt ( weapon, levels ) / framesPerSecond;
 }
 
-// function to activate a weapon
+// function to activate a weapon : the basic one is always active, and takes no place among the others (maxWAtATime of them at a time)
 function activate ( weapon ) {
+	if ( weapon == mainCannon.type ) {
+		mainCannon.active = 1;
+		document.getElementById(weapon).innerHTML = "<span class='green'>always active</span>";
+		return;
+	}
 	// buying the weapon first if needed, so that a lack of mat leaves the active weapons untouched
 	var purchased = false;
 	for ( i in weaponList ) {
@@ -400,6 +408,9 @@ function activate ( weapon ) {
 		}
 	}
 	for ( i in weaponList ) {
+		if ( weaponList[i] == mainCannon ) {
+			continue;
+		}
 		var item = document.getElementById(weaponList[i].type);
 		if ( weaponList[i].type == weapon ) {
 			weaponList[i].active = 1;
@@ -434,7 +445,8 @@ function modeChange ( weapon ) {
 	for ( i in weaponList ) {
 		if ( weaponList[i].type == weapon ) {
 			if ( weapon == "SaOW" ) {
-				weaponList[i].smart = ( weaponList[i].smart + 1 ) % Math.ceil( weaponList[i].cannonNbr / 2 );
+				// (a mode by cannon : one after the other with two of them, Orbital with three)
+				weaponList[i].smart = ( weaponList[i].smart + 1 ) % Math.min ( 3, weaponList[i].cannonNbr );
 				modeUpdate ( weaponList[i] );
 			} else if ( weapon == "magneticW" ) {
 				weaponList[i].smart = ( weaponList[i].smart + 1 ) % 2;
@@ -682,6 +694,9 @@ function calculate(type,ref) {
 			break;
 		case "plus1times500" :
 			ref = ( ref + 1 ) * 500;
+			break;
+		case "from4times100" :
+			ref = ( 4 - ref ) * 100;
 			break;
 		case "from6times100" :
 			ref = ( 6 - ref ) * 100;

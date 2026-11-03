@@ -807,7 +807,7 @@ function shoot(ctx,weapon){
 				var vy = 10 * Math.sin(weapon.angle+tempAngle);
 				
 				// let's create a shot
-				item = new Shot3(ctx,weapon.power * 2,weapon.color,x,y,vx,vy);
+				item = new Shot3(ctx,weapon.power,weapon.color,x,y,vx,vy);
 				shotList.push(item);
 			}
 			break;
