@@ -33,7 +33,7 @@ var adventureLevels = [
 			picture : "pull", tiles : [ "Mat gathered" ] } },
 	{ name : "Crossfire", log : "Rain 42. From two sides at once, this time. As if they were aimed.",
 		values : { planetMat : 40 },
-		brings : [ "gravShield", "gravScanner", "mCFireRate", "SMART", "kamikazeNbr", "kamikazeBuilding" ],
+		brings : [ "gravShield", "gravScanner", "gravOpening", "mCFireRate", "SMART", "kamikazeNbr", "kamikazeBuilding" ],
 		waves : [ { count : 3, gap : 3 }, { count : 4, gap : 3 }, { count : 5, gap : 2.5, from : [0, 180] }, { count : 6, gap : 2, from : [90, 270] } ],
 		challenge : { text : "Win in less than 1 minute 45", test : function () { return gameTime <= 105 * framesPerSecond; },
 			hint : "The next wave comes as soon as the last asteroid is gone: more Fire Power and a shorter Cooldown shorten every wave.",

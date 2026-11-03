@@ -31,6 +31,12 @@ var upgrades = {
 							picture : "pull", unit : "pull", value : function () { return "×" + MyGravitron.power; },
 							change : function () { return "×" + MyGravitron.power + " → ×" + ( MyGravitron.power + 1 ) + " pull on the debris, the asteroids feeling "
 								+ rockPull ( MyGravitron.sort, MyGravitron.power + 1 ) + "% of it"; } },
+	// (its widest opening, in degrees : gravOpenings, parameters.js)
+	gravOpening			: { name : "Field Width", tip : "Field Width - How wide your Gravitron can open. Wider, it gathers more debris, but pulls more asteroids in, and its closed part, the one the shield guards, gets shorter.",
+							max : 4, price : "50times2pow",
+							level : function () { return MyGravitron.opening; }, raise : function () { MyGravitron.opening++; gravMaxSize = gravitronWidest ( MyGravitron.opening ); },
+							picture : "opening", unit : "at most", value : function () { return gravOpenings[MyGravitron.opening] + "°"; },
+							change : function () { return gravOpenings[MyGravitron.opening] + "° → " + gravOpenings[MyGravitron.opening + 1] + "° of opening at most"; } },
 	repulsion			: { name : "Repulsion", tip : "Repulsion - This represent the repulsion power of the closed part of the Gravitron. It uses the Gravity Generator power and the Gravitron's sorting effect to perform.",
 							max : 1, price : "plus250", appears : function () { return MyGravitron.power > 1; },
 							level : function () { return MyGravitron.repulsion; }, raise : function () { MyGravitron.repulsion++; },
@@ -298,7 +304,7 @@ var upgrades = {
 // (a weapon's upgrades are shown once it is bought, and a tab with appears() stays hidden until then :
 // each weapon comes once the one before is bought, a secondary weapon once its research is validated)
 var shopLayout = [
-	{ title : "Upgrade Your Gravitron", upgrades : ["gravSort","gravPower","repulsion","gravShield","gravPulse","gravScanner","gravProspector","compactor"] },
+	{ title : "Upgrade Your Gravitron", upgrades : ["gravSort","gravPower","gravOpening","repulsion","gravShield","gravPulse","gravScanner","gravProspector","compactor"] },
 	{ title : "Build or upgrade your Weapons", panels : [
 		{ tab : "Structure", title : "Main Structure", upgrades : ["mCMSpeed","SMART","MaxWAtATime","critChance","critDamage"] },
 		// (the basic weapon is always active : the others, one at a time next to it, or two with the Multiple weapon)
@@ -652,6 +658,10 @@ function calculate(type,ref) {
 			break;
 		case "cooldownMissile" :
 			ref = 150 * Math.pow ( 2, ref );
+			break;
+		// (the Field Width : 50, 100, 200, 400)
+		case "50times2pow" :
+			ref = 50 * Math.pow ( 2, ref );
 			break;
 		case "times250" :
 			ref *= 250;

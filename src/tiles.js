@@ -27,6 +27,7 @@ var tilePictures = {
 	eye			: '<path d="M10 32q22-20 44 0-22 20-44 0z"/><circle cx="32" cy="32" r="6"/><circle fill="INK" stroke="none" cx="32" cy="32" r="2"/>',
 	crystal		: medalPictures.crystal,
 	press		: '<rect x="23" y="26" width="18" height="12" rx="2"/><path d="M32 8v13M26 15l6 6 6-6M32 56V43M26 49l6-6 6 6"/>',
+	opening		: '<circle fill="INK" stroke="none" cx="32" cy="32" r="5"/><path d="M47 21A18 18 0 1 0 47 43" stroke-width="3"/><path d="M32 32L54 17M32 32L54 47" stroke-width="2" stroke-dasharray="3 3"/>',
 	// the weapons
 	turn		: '<path d="M47 24A16 16 0 1 0 48 38"/><path d="M48 14v10H38"/><circle fill="INK" stroke="none" cx="32" cy="32" r="3"/>',
 	chip		: medalPictures.chip,

@@ -191,7 +191,9 @@
 	var gravRadius		= planetRadius * 1.1;
 	var gravFriction	= 30;					// expressed in percents
 	var gravMinSize		= Math.PI / 64;
-	var gravMaxSize		= 2 * Math.PI - gravMinSize;
+	var gravFullSize	= 2 * Math.PI - gravMinSize;	// the GRAVITRON opened on the whole circle (its smallest arc left),
+	var gravOpenings	= [60, 90, 150, 240, 357];		// its widest opening in degrees, at each level of the Field Width (the whole circle, last),
+	var gravMaxSize		= gravitronWidest ( 0 );		// and the one of the game
 	var pulseList		= new Array();
 	var wideNetMargin	= 20 * Math.PI / 180;	// how much the Wide Net widens the GRAVITRON's field for the debris, on each side
 	var brakeRate		= 0.01;		// the speed an asteroid of base mass loses at each turn in the opening, with the Gravity Brake
@@ -354,7 +356,8 @@ function initDefault(context,level) {
 	gravRadius				= planetRadius * 1.1;
 	gravFriction			= 30;					// expressed in percents
 	gravMinSize				= Math.PI / 64;
-	gravMaxSize				= 2 * Math.PI - gravMinSize;
+	MyGravitron.opening		= 0;		// the levels of its Field Width, opening it wider
+	gravMaxSize				= gravitronWidest ( 0 );
 	MyGravitron.wideness	= gravMinSize;
 	
 	// asteroids parameters

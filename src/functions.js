@@ -493,9 +493,15 @@ function shieldTurns(level) {
 	return ( 30 / level ) + ( 21 - level );
 }
 
-// Function to get the Wide Net : the GRAVITRON's field widened on each side, for the debris only (researches.js)
+// Function to get the GRAVITRON's widest opening at a level of its Field Width, in radians (shop.js)
+function gravitronWidest ( level ) {
+	return Math.min ( gravOpenings[level] * Math.PI / 180, gravFullSize );
+}
+
+// Function to get the Wide Net : the GRAVITRON's field widened on each side, for the debris only (researches.js),
+// beyond its widest opening too
 function wideNetArc() {
-	var wideness = Math.min ( MyGravitron.wideness + 2 * wideNetMargin, gravMaxSize );
+	var wideness = Math.min ( MyGravitron.wideness + 2 * wideNetMargin, gravFullSize );
 	var angle = MyGravitron.angle - ( wideness - MyGravitron.wideness ) / 2;
 	return { angle : ( ( angle + 3 * Math.PI ) % ( 2 * Math.PI ) ) - Math.PI, wideness : wideness };
 }
