@@ -493,6 +493,13 @@ function shieldTurns(level) {
 	return ( 30 / level ) + ( 21 - level );
 }
 
+// Function to get the asteroids the Harvester's rays strike : the ones in front of the GRAVITRON's opening, for the debris torn off
+// to fall into it, the nearest to the planet first
+function harvestTargets() {
+	return asteroidList.filter ( function ( a ) { return a.life > 0 && intoArcField ( angleAroundPlanet ( a.x, a.y ), MyGravitron ); } )
+		.sort ( function ( a, b ) { return distanceToPlanet ( a.x, a.y ) - distanceToPlanet ( b.x, b.y ); } );
+}
+
 // Function to get the GRAVITRON's widest opening at a level of its Field Width, in radians (shop.js)
 function gravitronWidest ( level ) {
 	return Math.min ( gravOpenings[level] * Math.PI / 180, gravFullSize );
@@ -624,10 +631,11 @@ function drawShelterNote(ctx) {
 	ctx.restore();
 }
 
-// Function to show the limits of the GRAVITRON's field (Field Scanner level 1) : the field has no end, so they go to the edge of the game area
-function drawFieldLimits(ctx) {
+// Function to show the limits of the GRAVITRON's field (Field Scanner level 1, or golden with the Harvester, whose rays strike in it) :
+// the field has no end, so they go to the edge of the game area
+function drawFieldLimits(ctx,color) {
 	var limits = [MyGravitron.angle, MyGravitron.angle + MyGravitron.wideness];
-	ctx.strokeStyle = 'rgba(255,255,255,0.3)';
+	ctx.strokeStyle = color;
 	ctx.lineWidth = 1;
 	ctx.setLineDash([4,6]);
 	ctx.beginPath();
@@ -827,6 +835,25 @@ function shoot(ctx,weapon){
 				shotList.push(item);
 			}
 			break;
+		case "harvestW" :
+			// rays, at once, on the asteroids in front of the GRAVITRON's opening, one by cannon : a little damage, but the debris
+			// they tear off multiplied by its yield, falling into the opening (none from an armored asteroid : threats.js)
+			var near = harvestTargets();
+			for ( var r = 0; r < weapon.cannonNbr && r < near.length; r++ ) {
+				var rock = near[r];
+				var damage = armorDamage ( rock, weapon.power, rock.x, rock.y );
+				addDebris ( ctx, damage * weapon.yield, rock.x, rock.y, rock.vx, rock.vy, debrisList, rock.metal );
+				rock.life -= damage;
+				if ( rock.life <= 0 ) {
+					allPassed = 1;
+				}
+				var t = angleAroundPlanet ( rock.x, rock.y );
+				rayList.push ( { x : MyPlanet.x + MyPlanet.radius * Math.cos ( t ), y : MyPlanet.y + MyPlanet.radius * Math.sin ( t ), toX : rock.x, toY : rock.y, age : 0 } );
+			}
+			if ( near.length > 0 ) {
+				playSound ( "shot" );
+			}
+			break;
 	}
 	// some of them are critical, red with more power (bonuses.js)
 	criticalShots ( weapon, shotsBefore );
@@ -951,8 +978,15 @@ function displayWeapon(ctx,weapon) {
 				ctx.lineTo(ex,ey);
 				ctx.closePath();
 				ctx.stroke();
-				
+
 			}
+			break;
+		case "harvestW" :
+			// a thin golden ring around the planet, its rays leaving from anywhere on it
+			ctx.strokeStyle = "rgba(255,200,61,0.6)";
+			ctx.beginPath();
+			ctx.arc(MyPlanet.x,MyPlanet.y,MyPlanet.radius+2,0,2*Math.PI,true);
+			ctx.stroke();
 			break;
 	}
 }

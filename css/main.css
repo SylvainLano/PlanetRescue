@@ -1481,6 +1481,15 @@ a.sideArrow:hover {
 	grid-column: 1 / -1;
 }
 
+/* a weapon's few words under its title, when it plays in its own way (the Harvester) */
+#shop .lines .about {
+	grid-column: 1 / -1;
+	margin: -2px 0 6px;
+	font-size: 11px;
+	line-height: 1.4;
+	color: #e8cf8a;
+}
+
 #shop .lines p, #shop .lines .tip, #shop .lines .tip a, #shop .lines .more {
 	display: contents;
 }

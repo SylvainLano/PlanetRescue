@@ -85,6 +85,9 @@ function addPanel ( tabs, holder, panel ) {
 	menuAppearing.push ( { element : tab, appears : function () { return panelAppears ( panel ); } } );
 	var box = newElement ( "div", "panel lines", holder );
 	newElement ( "h2", "", box ).textContent = panel.title;
+	if ( panel.about ) {
+		newElement ( "div", "about", box ).textContent = panel.about;		// (a weapon playing in its own way : the Harvester)
+	}
 	var list = box;
 	if ( panel.secondary ) {
 		// a secondary weapon, always active once researched

@@ -931,6 +931,13 @@ function engine() {
 				weaponList[i].currentDelay++;
 				if(weaponList[i].currentDelay >= weaponList[i].fireRate){
 					switch(weaponList[i].type){
+						// the Harvester's rays, at once, need an asteroid in front of the GRAVITRON's opening (functions.js)
+						case "harvestW":
+							if ( harvestTargets().length > 0 ) {
+								weaponList[i].currentDelay = 0;
+								shoot(ctx,weaponList[i]);
+							}
+							break;
 						case "magneticW":
 						case "HaBW":
 						case "basicW":
@@ -1077,6 +1084,10 @@ function engine() {
 	}
 	orbitalNbr = orbitalCount;
 	shotList = tempList;
+	// the Harvester's rays fade, and go
+	if ( pause == 0 ) {
+		rayList = rayList.filter ( function ( ray ) { return ++ray.age < raySpan; } );
+	}
 
 	// Resolving the missiles, the capsules, the blasts, the rebound shots and their sparks (secondary.js)
 	if ( pause == 0 ) {
@@ -1231,9 +1242,10 @@ function drawGame ( blend ) {
 
 // Function to draw a game being played, in the order of 2010 : some drawings keep the line's width left by the one before
 function drawPlaying ( ctx ) {
-	// the limits of the GRAVITRON's field, with the Field Scanner
-	if ( MyGravitron.scanner > 0 && pause == 0 ) {
-		drawFieldLimits(ctx);
+	// the limits of the GRAVITRON's field, with the Field Scanner, or golden with the Harvester, whose rays strike in it
+	var harvesting = ( harvester.active >= 1 && harvester.cannonNbr > 0 );
+	if ( ( MyGravitron.scanner > 0 || harvesting ) && pause == 0 ) {
+		drawFieldLimits(ctx, harvesting ? 'rgba(255,200,61,0.4)' : 'rgba(255,255,255,0.3)');
 	}
 	// the planet's Thick Atmosphere, under everything (functions.js)
 	drawAtmosphere(ctx);
@@ -1303,6 +1315,17 @@ function drawPlaying ( ctx ) {
 		ctx.closePath();
 		ctx.fill();
 	}
+	// the Harvester's rays, fading
+	ctx.save();
+	ctx.lineWidth = 1.5;
+	for ( var i in rayList ) {
+		ctx.strokeStyle = "rgba(255,200,61," + ( 1 - rayList[i].age / raySpan ) + ")";
+		ctx.beginPath();
+		ctx.moveTo(rayList[i].x,rayList[i].y);
+		ctx.lineTo(rayList[i].toX,rayList[i].toY);
+		ctx.stroke();
+	}
+	ctx.restore();
 	// the critical shots over them, and their flashes (bonuses.js)
 	drawCriticals(ctx);
 	// the missiles, the capsules, the blasts, the laser's beam and the rebound shots, from under the planet (secondary.js)

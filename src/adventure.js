@@ -48,7 +48,7 @@ var adventureLevels = [
 			picture : "flame", tiles : [ "Destroyed" ] } },
 	{ name : "Comet Shower", log : "Rain 44. Ice, this time. The inhabitants call it the cold rain, and its debris are worth a lot.",
 		type : "hunt", time : 150, goal : 15, values : { planetMat : 60 },
-		brings : [ "critChance", "critDamage", "mCNumber" ],
+		brings : [ "critChance", "critDamage", "mCNumber", "harvestW", "harvestRays", "harvestCooldown", "harvestYield" ],
 		flow : { every : [6, 3], comets : 7 },
 		challenge : { text : "Destroy 25 asteroids", test : function () { return nbrDestroyed >= 25; },
 			hint : "The comets break in one shot: more Cannons and more critical shots destroy more of everything in the same time.",

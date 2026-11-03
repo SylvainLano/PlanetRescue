@@ -45,6 +45,7 @@
 		SaOW			: { delay : 25, power : 1, speed : 3, smart : 0, cannons : 0 },
 		magneticW		: { delay : 50, power : 3, speed : 1, smart : 0, cannons : 0 },	// (its shots go to the asteroids near them : slower)
 		HaBW			: { delay : 50, power : 1, speed : 1, smart : 0, cannons : 0 },
+		harvestW		: { delay : 25, power : 1, speed : 0, smart : 0, cannons : 0, yield : 2 },	// the Harvester : its rays' power, and the debris torn off by point of damage
 		missileW		: { delay : 100, power : 3, speed : 1.5, smart : 0, cannons : 0, blast : 25 },	// a secondary weapon, given by its research
 		nitroW			: { delay : 200, power : 12, speed : 1.5, smart : 0, cannons : 0, blast : 40 },	// another one, its delay counted once its bomb is gone
 		laserW			: { delay : 350, power : 6, speed : 0, smart : 0, cannons : 0, duration : 50 },	// the laser : its power per second, its beam's duration and its cooldown in turns
@@ -158,10 +159,13 @@
 	
 	// player's weapons parameters
 	var shotList		= new Array();
+	var rayList			= new Array();		// the Harvester's rays, shown a few turns (raySpan) once fired
+	var raySpan			= 6;
 	var weaponList		= new Array();
 	var weaponCost		= new Array();	// costs of each weapon
 	weaponCost["basicW"]= 50;
 	weaponCost["SaOW"]	= 150;
+	weaponCost["harvestW"]	= 250;
 	weaponCost["magneticW"]	= 400;
 	weaponCost["HaBW"]	= 450;
 	var mainCanMovSpeed	= startValues.mainCanMovSpeed;
@@ -296,14 +300,18 @@ function initDefault(context,level) {
 	// player's weapons parameters
 	// Weapon ( context, type, color, angle, delay, power, speed, smart, cNbr )
 	shotList		= [];
+	rayList			= [];
 	weaponList		= [];
 	maxWAtATime		= gameValues.maxWAtATime;
 	mainCannon		= newWeapon(context,"basicW","#FFFFFF");
 	spiralCannon	= newWeapon(context,"SaOW","#00FFFF");
+	harvester		= newWeapon(context,"harvestW","#FFC83D");
+	harvester.yield	= gameValues.harvestW.yield;
 	magneticCannon	= newWeapon(context,"magneticW","#964514");
 	hammerCannon	= newWeapon(context,"HaBW","#0099CC");
 	weaponList.push(mainCannon);
 	weaponList.push(spiralCannon);
+	weaponList.push(harvester);
 	weaponList.push(magneticCannon);
 	weaponList.push(hammerCannon);
 	activate("basicW");
