@@ -105,7 +105,7 @@ function engine() {
 
 	} else if(state == "upgrades") {
 
-		// Displaying the bonuses bought with the Adventure's stars, from its map (starshop.js)
+		// Displaying the tree of the Adventure's stars, from its map (starshop.js)
 		startMenu.style.display = "block";
 		mainMenu.style.display = "none";
 		infoText.style.display = "none";

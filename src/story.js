@@ -83,8 +83,7 @@ function tellStories ( list ) {
 // function to know the stories the map's Story link tells : the first world's, and its end once the Colossus is destroyed
 function storyList () {
 	var list = [ "intro" ];
-	var last = adventureLevels.length - 1;
-	if ( levelStars[last] && levelStars[last][0] ) {
+	if ( levelWon ( mainLevels - 1 ) ) {
 		list.push ( "world1End" );
 	}
 	return list;

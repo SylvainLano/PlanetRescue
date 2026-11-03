@@ -72,10 +72,11 @@ function drawCriticals ( ctx ) {
 	ctx.restore();
 }
 
-// function to choose the metal of a new asteroid, or none : the Prospector draws more of them
+// function to choose the metal of a new asteroid, or none : the Prospector draws more of them, and so does a level of the Adventure
+// rich in metals (adventure.js)
 function asteroidMetal () {
 	var roll = Math.random();
-	var more = 1 + prospectorBonus * MyGravitron.prospector;
+	var more = ( 1 + prospectorBonus * MyGravitron.prospector ) * ( inAdventure() ? adventureLevels[adventure.level].metals || 1 : 1 );
 	for ( var metal in metals ) {
 		roll -= metals[metal].chance * more;
 		if ( roll < 0 ) {

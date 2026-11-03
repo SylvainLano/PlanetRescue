@@ -33,6 +33,16 @@ function announce ( title, text, seconds, gift, coming ) {
 	return news;
 }
 
+// function to know if a threat announced has not come yet (a wave of the Adventure waits for it before it is over : adventure.js)
+function threatComing () {
+	for ( var a in announces ) {
+		if ( !announces[a].done && announces[a].coming ) {
+			return true;
+		}
+	}
+	return false;
+}
+
 // function to make the announces' countdowns go on, at each turn of the game (not during the pause) :
 // what they announce comes when theirs ends
 function advanceAnnounces ( ctx ) {
@@ -357,7 +367,8 @@ var swarmAt			= 0;		// the turn the next swarm comes in the Arcade (0 : not plan
 function announceSwarm ( seconds ) {
 	var side = Math.random() * 2 * Math.PI;
 	var news = announce ( "Swarm from the " + compassSide ( side ), "An asteroid swarm is coming from the " + compassSide ( side )
-		+ "! A cloud of small rocks: shorten your cooldown, turn your shield to them, or use your Spiral.", seconds, swarmGift,
+		+ "! A cloud of small rocks: shorten your cooldown" + ( adventureAllows ( "SaOW" ) ? ", turn your shield to them, or use your Spiral." : " or turn your shield to them." ),
+		seconds, swarmGift,
 		function ( ctx ) { launchSwarm ( ctx, side ); } );
 	news.side = side;
 }
@@ -416,7 +427,8 @@ function armorDamage ( asteroid, power, x, y ) {
 function announceArmored ( seconds ) {
 	var side = Math.random() * 2 * Math.PI;
 	var news = announce ( "Armored from the " + compassSide ( side ), "Armored asteroids are coming from the " + compassSide ( side )
-		+ "! Their steel plates stop the shots under " + armorMin + " of power: raise your fire power; critical shots and the laser get through.",
+		+ "! Their steel plates stop the shots under " + armorMin + " of power: raise your fire power; critical shots"
+		+ ( adventureAllows ( "lasers" ) ? " and the laser get through." : " get through." ),
 		seconds, armorGift, function ( ctx ) { launchArmored ( ctx, side ); } );
 	news.side = side;
 }

@@ -33,8 +33,8 @@ var tipReach	= 3;		// and the asteroids coming too fast for the cannon's shots t
 // achievements.js), and its text, or false when it doesn't fit the game
 var lossTips = [
 	{ id : "shop", tiles : [ "Upgrades" ], picture : "pause", text : function () {
-		if ( nbrUpgrades > 0 || nbrCost > 0 ) {
-			return false;
+		if ( nbrUpgrades > 0 || nbrCost > 0 || ( inAdventure() && adventureLevels[adventure.level].bonus ) ) {
+			return false;		// (a bonus level's mat is kept for its weapon : adventure.js)
 		}
 		return "You spent no mat in this game. Press Space: the pause menu sells upgrades for your cannon, your Gravitron and your planet."; } },
 	{ id : "autoHeal", tiles : [ "Hits taken", "Inhabitants" ], picture : "autoHeal", text : function () {
@@ -56,7 +56,8 @@ var lossTips = [
 		if ( nbrBounces < tipBounces || mainCannon.power >= armorMin || !tipCan ( "mainPow" ) ) {
 			return false;
 		}
-		return nbrBounces + " of your shots bounced off armored asteroids. Under " + armorMin + " of Fire Power, their plates stop them: raise it, or count on critical shots and the laser."; } },
+		return nbrBounces + " of your shots bounced off armored asteroids. Under " + armorMin + " of Fire Power, their plates stop them: raise it, or count on critical shots"
+			+ ( adventureAllows ( "lasers" ) ? " and the laser." : "." ); } },
 	{ id : "smart", tiles : [ "Accuracy" ], picture : "chip", text : function () {
 		if ( gameAccuracy() >= tipAccuracy || mainCannon.smart >= 2 || !tipCan ( "SMART" ) ) {
 			return false;

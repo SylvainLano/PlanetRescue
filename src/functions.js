@@ -716,6 +716,35 @@ function distanceToPlanet(x,y) {
 	return Math.sqrt( Math.pow((x - MyPlanet.x),2) + Math.pow((y - MyPlanet.y),2) );
 }
 
+// the shots of the main cannon with an even number of cannons : the middle two side by side, parallel to the aim, this far on each
+// side of it (in game units : both on a swarm's pebble, of radius 3.5 ; spread as the others, a far small target fitted between them)
+var pairGap = 2.5;
+
+// function to mark the shots of a volley that will meet the main cannon's target, the ones the SMART AI counts on to destroy it
+// (smartTarget) : the ones whose way passes close enough to the point where they will meet it (meetingPoint) ; not the side shots
+// spreading away from a far target, nor any while the cannon turns toward it
+function targetShots ( weapon, from ) {
+	var target = weapon.target;
+	if ( !target ) {
+		return;
+	}
+	var r0 = MyPlanet.radius + 5 + weapon.speed;
+	var meeting = meetingPoint ( target, weapon.speed, r0 );
+	if ( meeting == false ) {
+		return;
+	}
+	// where they meet, then how far each shot's way passes from it
+	var reach = r0 + meeting.turns * weapon.speed;
+	var mx = MyPlanet.x + reach * Math.cos ( meeting.angle ), my = MyPlanet.y + reach * Math.sin ( meeting.angle );
+	for ( var s = from; s < shotList.length; s++ ) {
+		var shot = shotList[s];
+		var miss = Math.abs ( ( mx - shot.x ) * shot.vy - ( my - shot.y ) * shot.vx ) / Math.sqrt ( shot.vx * shot.vx + shot.vy * shot.vy );
+		if ( miss < target.radius ) {
+			shot.target = target;
+		}
+	}
+}
+
 // function to create shoots depending on the weapon type and number of cannons
 function shoot(ctx,weapon){
 	// counting the shots really fired, for the accuracy statistic
@@ -733,25 +762,16 @@ function shoot(ctx,weapon){
 				item = new Shot1(ctx,weapon.power,weapon.color,x,y,vx,vy);
 				shotList.push(item);
 			} else {
-				var x = MyPlanet.x + (MyPlanet.radius+5) * Math.cos(weapon.angle - 0.04);
-				var y = MyPlanet.y + (MyPlanet.radius+5) * Math.sin(weapon.angle - 0.04);
-				var vx = weapon.speed * Math.cos(weapon.angle - 0.04);
-				var vy = weapon.speed * Math.sin(weapon.angle - 0.04);
-				
-				item = new Shot1(ctx,weapon.power,weapon.color,x,y,vx,vy);
-				shotList.push(item);
-				
-				var x = MyPlanet.x + (MyPlanet.radius+5) * Math.cos(weapon.angle + 0.04);
-				var y = MyPlanet.y + (MyPlanet.radius+5) * Math.sin(weapon.angle + 0.04);
-				var vx = weapon.speed * Math.cos(weapon.angle + 0.04);
-				var vy = weapon.speed * Math.sin(weapon.angle + 0.04);
-				
-				item = new Shot1(ctx,weapon.power,weapon.color,x,y,vx,vy);
-				shotList.push(item);
-			}
-			// the shots fired right toward the target are the ones the SMART AI counts on to destroy it
-			for ( var s = shotsBefore; s < shotList.length; s++ ) {
-				shotList[s].target = weapon.target;
+				// the middle two side by side, parallel to the aim (pairGap)
+				for ( var side = -1; side <= 1; side += 2 ) {
+					var x = MyPlanet.x + (MyPlanet.radius+5) * Math.cos(weapon.angle) - side * pairGap * Math.sin(weapon.angle);
+					var y = MyPlanet.y + (MyPlanet.radius+5) * Math.sin(weapon.angle) + side * pairGap * Math.cos(weapon.angle);
+					var vx = weapon.speed * Math.cos(weapon.angle);
+					var vy = weapon.speed * Math.sin(weapon.angle);
+
+					item = new Shot1(ctx,weapon.power,weapon.color,x,y,vx,vy);
+					shotList.push(item);
+				}
 			}
 			if ( weapon.cannonNbr >= 3 ) {
 				var x = MyPlanet.x + (MyPlanet.radius+5) * Math.cos(weapon.angle - 0.08);
@@ -785,8 +805,9 @@ function shoot(ctx,weapon){
 				var vy = weapon.speed * Math.sin(weapon.angle + 0.16);
 				
 				item = new Shot1(ctx,weapon.power,weapon.color,x,y,vx,vy);
-				shotList.push(item);	
+				shotList.push(item);
 			}
+			targetShots ( weapon, shotsBefore );
 			break;
 		case "SaOW" :
 			if ( weapon.smart == 0 ) {
@@ -883,20 +904,18 @@ function displayWeapon(ctx,weapon) {
 				ctx.closePath();
 				ctx.stroke();
 			} else {
-				var sx1 = MyPlanet.x + MyPlanet.radius * Math.cos(weapon.angle-0.04);
-				var sy1 = MyPlanet.y + MyPlanet.radius * Math.sin(weapon.angle-0.04);
-				var ex1 = MyPlanet.x + (MyPlanet.radius+4) * Math.cos(weapon.angle-0.04);
-				var ey1 = MyPlanet.y + (MyPlanet.radius+4) * Math.sin(weapon.angle-0.04);
-				var sx2 = MyPlanet.x + MyPlanet.radius * Math.cos(weapon.angle+0.04);
-				var sy2 = MyPlanet.y + MyPlanet.radius * Math.sin(weapon.angle+0.04);
-				var ex2 = MyPlanet.x + (MyPlanet.radius+4) * Math.cos(weapon.angle+0.04);
-				var ey2 = MyPlanet.y + (MyPlanet.radius+4) * Math.sin(weapon.angle+0.04);
+				// (the middle two side by side, parallel to the aim, as their shots : pairGap)
+				var px = - pairGap * Math.sin(weapon.angle), py = pairGap * Math.cos(weapon.angle);
+				var sx = MyPlanet.x + MyPlanet.radius * Math.cos(weapon.angle);
+				var sy = MyPlanet.y + MyPlanet.radius * Math.sin(weapon.angle);
+				var ex = MyPlanet.x + (MyPlanet.radius+4) * Math.cos(weapon.angle);
+				var ey = MyPlanet.y + (MyPlanet.radius+4) * Math.sin(weapon.angle);
 				ctx.strokeStyle = weapon.color;
 				ctx.beginPath();
-				ctx.moveTo(sx1,sy1);
-				ctx.lineTo(ex1,ey1);
-				ctx.moveTo(sx2,sy2);
-				ctx.lineTo(ex2,ey2);
+				ctx.moveTo(sx-px,sy-py);
+				ctx.lineTo(ex-px,ey-py);
+				ctx.moveTo(sx+px,sy+py);
+				ctx.lineTo(ex+px,ey+py);
 				ctx.closePath();
 				ctx.stroke();
 			}

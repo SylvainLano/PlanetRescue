@@ -151,14 +151,22 @@ function sectionAppears ( section ) {
 }
 
 // function to show the weapon tabs and upgrade tiles once they are worth buying, at each refresh()
-// (they are hidden again at a new game : back to the first tab if the one shown goes)
+// (they are hidden again at a new game : back to the first tab still shown if the one shown goes, once they are all known)
 function refreshAppearing () {
 	for ( var n in menuAppearing ) {
 		var item = menuAppearing[n];
-		var shown = item.appears();
-		item.element.style.display = shown ? "" : "none";
-		if ( !shown && item.element.classList.contains ( "current" ) ) {
-			item.element.parentNode.firstChild.click();
+		item.element.style.display = item.appears() ? "" : "none";
+	}
+	for ( var n in menuAppearing ) {
+		var element = menuAppearing[n].element;
+		if ( element.style.display == "none" && element.classList.contains ( "current" ) ) {
+			var tabs = element.parentNode.children;
+			for ( var t = 0; t < tabs.length; t++ ) {
+				if ( tabs[t].style.display != "none" ) {
+					tabs[t].click();
+					break;
+				}
+			}
 		}
 	}
 }

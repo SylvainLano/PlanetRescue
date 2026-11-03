@@ -354,22 +354,22 @@ var shopLayout = [
 			statusTip : "One weapon can be active next to your basic cannon, two with the Multiple weapon : making this one active may disactivate another one.",
 			upgrades : ["SaOCNumber","SaOCFireRate","SaOPow","SaOSpeed"] },
 		{ tab : "Harvest", title : "Harvester", weapon : "harvestW",
-			appears : function () { return spiralCannon.cannonNbr > 0; },
+			appears : function () { return chainOpen ( spiralCannon ); },
 			about : "Its golden rays strike the asteroids in front of your Gravitron's opening, the nearest first: little damage, but twice the debris, falling right into the opening. Turn the opening toward the asteroids to mine them... it pulls them in too, unless your Sorting is high.",
 			statusTip : "One weapon can be active next to your basic cannon, two with the Multiple weapon : making this one active may disactivate another one.",
 			upgrades : ["harvestRays","harvestCooldown","harvestYield"] },
 		{ tab : "Cryo", title : "Cryo Cannon", weapon : "cryoW",
-			appears : function () { return harvester.cannonNbr > 0; },
+			appears : function () { return chainOpen ( harvester ); },
 			about : "Its ice shards fly to the asteroid nearest to your planet and freeze it: stopped at once, your Gravitron no longer pulls it, a shock only makes it slide a little, and it stops the asteroids hitting it. Once thawed, it stays where it is, without any speed... nor brakes: a shock sends it flying again.",
 			statusTip : "One weapon can be active next to your basic cannon, two with the Multiple weapon : making this one active may disactivate another one.",
 			upgrades : ["cryoShards","cryoCooldown","cryoFreeze"] },
 		{ tab : "Hammer", title : "Hammer and Broom Weapon", weapon : "HaBW", modes : true,
-			appears : function () { return cryo.cannonNbr > 0; },
+			appears : function () { return chainOpen ( cryo ); },
 			about : "Its waves damage a little each asteroid they cross, and slow down the ones coming closer to your planet, before they fade; the debris go through them. At first they leave through your Gravitron's opening, to slow down the asteroids it pulls in while the debris come: its other modes follow the main cannon, or turn.",
 			statusTip : "One weapon can be active next to your basic cannon, two with the Multiple weapon : making this one active may disactivate another one.",
 			upgrades : ["HaBCNumber","HaBCFireRate","HaBReach","HaBSpeed"] },
 		{ tab : "Magnet", title : "Magnetic Weapon", weapon : "magneticW", modes : true,
-			appears : function () { return hammerCannon.cannonNbr > 0; },
+			appears : function () { return chainOpen ( hammerCannon ); },
 			statusTip : "One weapon can be active next to your basic cannon, two with the Multiple weapon : making this one active may disactivate another one.",
 			upgrades : ["magneticCNumber","magneticCFireRate","magneticPow","magneticSpeed"] },
 		// a secondary weapon : its tab is shown once its research is validated
@@ -410,6 +410,12 @@ var labNextLevel = [
 	"Research Lab - Its next level, the Automation, validates each research once complete, and starts the next one by itself : the one to be done the soonest. You can still stop it, and choose another one.",
 	"Research Lab - Your lab does the researches by itself : no more level available."
 ];
+
+// function to know if a weapon of the chain comes in the menu : once the one before it is bought, or at once in the Adventure,
+// where a level's shop offers it alone (adventure.js)
+function chainOpen ( before ) {
+	return inAdventure() || before.cannonNbr > 0;
+}
 
 // the cooldown of a cannon or of the missiles, a fifth shorter at each level of its upgrade : 1 second, then 0.8, 0.64…
 var cooldownStep = 0.8;

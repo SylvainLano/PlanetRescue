@@ -45,6 +45,7 @@ var tilePictures = {
 	beam		: '<circle cx="15" cy="45" r="5"/><path d="M19 42l32-22" stroke-width="5"/>',
 	cold		: '<path d="M32 12v40M14.7 22l34.6 20M14.7 42l34.6-20"/><path d="M26 16l6 5 6-5M26 48l6-5 6 5" stroke-width="2"/>',
 	pinball		: medalPictures.pinball,
+	spiral		: '<path d="M29 32a3 3 0 0 1 6 0a6 6 0 0 1-12 0a9 9 0 0 1 18 0a12 12 0 0 1-24 0a15 15 0 0 1 30 0"/>',		// (the Spiral's bonus level too : adventure.js)
 	// the planet
 	heal		: '<rect x="15" y="21" width="34" height="26" rx="4"/><path d="M26 21v-5h12v5"/><path d="M32 28v12M26 34h12" stroke-width="4"/>',
 	healFactor	: '<path d="M32 48C19 39 14 33 14 26a9 9 0 0 1 18-4 9 9 0 0 1 18 4c0 7-5 13-18 22z"/><path d="M32 28v10M27 33h10" stroke-width="2.5"/>',
