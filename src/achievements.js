@@ -10,12 +10,13 @@
 */
 
 
-// The achievements, saved by the browser for good, whatever the difficulty level (planned in 2010, to unlock the research tree later)
+// The achievements, saved by the browser for good, whatever the difficulty level (planned in 2010 ; they opened the research tree's
+// branches until 0.53.0)
 // each one : its name, what it asks, its medal (its picture, and its metal for how hard it is), and its test,
 // read at each turn of the engine until it is achieved ; they are shown in this order, six by row (the Adventure's ones, marked,
 // only once it is ready : adventure.js)
 var achievements = {
-	// the four ones of 2010, and the tutorial
+	// the four ones of 2010, and the Arcade's hints (once the tutorial's : hints.js)
 	firstContact	: { name : "First Contact", text : "Play your first game.", picture : "planet", metal : "bronze",
 						test : function () { return state == "playing"; } },
 	timeOut			: { name : "Time Out", text : "Open the pause menu.", picture : "pause", metal : "bronze",
@@ -24,8 +25,8 @@ var achievements = {
 						test : function () { return state == "playing" && nbrDestroyed >= 1; } },
 	upgraded		: { name : "Upgraded", text : "Buy your first upgrade.", picture : "arrow", metal : "bronze",
 						test : function () { return state == "playing" && nbrUpgrades >= 1; } },
-	graduate		: { name : "Graduate", text : "Finish the tutorial.", picture : "cap", metal : "bronze",
-						test : function () { return state == "tutorialSteps" && countdownValue >= 345; } },
+	graduate		: { name : "Graduate", text : "See every hint of the Arcade.", picture : "cap", metal : "bronze",
+						test : function () { return allHintsSeen(); } },
 	// surviving
 	survivor		: { name : "Survivor", text : "Survive 2 minutes.", picture : "hourglass", metal : "bronze",
 						test : function () { return survived ( 120 ); } },

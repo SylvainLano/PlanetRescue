@@ -421,7 +421,3 @@ function levelValues(level) {
 	}
 	return values;
 }
-
-function initTutorial(context) {
-	countdownValue = 0;
-}

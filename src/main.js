@@ -71,5 +71,6 @@ window.addEventListener('load', function () {
 	document.onkeydown=function(e){changeKey(e||window.event, 1);}
 	document.onkeyup=function(e){changeKey(e||window.event, 0);}
 	showKeyLabels();	// the letters of the Infos page, as the player's keyboard has them
+	document.getElementById("hintsBox").checked = hintsOn;	// (the Arcade's hints : hints.js)
 
 }, false);

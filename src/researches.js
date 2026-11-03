@@ -10,20 +10,20 @@
 */
 
 
-// The research tree, planned in 2010 for the pause menu : its branches open for good with an achievement,
-// and in a game, each research takes time, one at a time, before it is validated in the pause menu to bring its bonus
-// each branch : its name, and the achievement opening it
+// The research tree, planned in 2010 for the pause menu : the Arcade's, all its branches open from the first game (until 0.53.0, an
+// achievement opened each one) ; in a game, each research takes time, one at a time, before it is validated in the pause menu to
+// bring its bonus (the Adventure has none : its stars' tree keeps what is won from a level to the next, starshop.js)
+// each branch : its name
 var researchBranches = {
-	missiles	: { name : "Missiles", opener : "survivor" },
-	explosives	: { name : "Explosives", opener : "demolisher" },
-	lasers		: { name : "Lasers", opener : "sharpshooter" },
-	ricochets	: { name : "Ricochets", opener : "bankShot" },
-	gravitron	: { name : "Gravitron", opener : "collector" },
-	planet		: { name : "Planet", opener : "untouchable" }
+	missiles	: { name : "Missiles" },
+	explosives	: { name : "Explosives" },
+	lasers		: { name : "Lasers" },
+	ricochets	: { name : "Ricochets" },
+	gravitron	: { name : "Gravitron" },
+	planet		: { name : "Planet" }
 };
 
 // each research : its name, its tooltip, its branch, its time (in seconds of play), the researches it needs first, and what it brings
-// (a research with an opener also waits for that achievement, once its branch is open)
 var researches = {
 	missiles	: { name : "Missile Launcher", branch : "missiles", time : 60, needs : [],
 					tip : "Missile Launcher - A secondary weapon, which takes no place among your active weapons. Its missiles fly to your main cannon's target, and explode on the first asteroid they touch, damaging every asteroid around.",
@@ -49,25 +49,25 @@ var researches = {
 	trick		: { name : "Trick Shot", branch : "ricochets", time : 90, needs : ["rebound"],
 					tip : "Trick Shot - Your rebound cannon reckons its ricochets before it fires : among many angles, it takes the one whose way hits the most asteroids, rebounds included, and its shots no longer go astray on the rock.",
 					apply : function () { reboundCannon.smart = 1; } },
-	wideNet		: { name : "Wide Net", branch : "gravitron", time : 45, needs : [], opener : "collector",
+	wideNet		: { name : "Wide Net", branch : "gravitron", time : 45, needs : [],
 					tip : "Wide Net - Out of its opening, your Gravitron pulls the debris too, more weakly, but never the asteroids.",
 					apply : function () { MyGravitron.wideNet = 1; } },
-	compactor	: { name : "Compactor", branch : "gravitron", time : 45, needs : [], opener : "hoarder",
+	compactor	: { name : "Compactor", branch : "gravitron", time : 45, needs : [],
 					tip : "Compactor - Brings the Compactor upgrade of your Gravitron : each of its levels makes more mat from the debris gathered.",
 					apply : function () {} },
-	gravityBrake: { name : "Gravity Brake", branch : "gravitron", time : 60, needs : [], opener : "exterminator",
+	gravityBrake: { name : "Gravity Brake", branch : "gravitron", time : 60, needs : [],
 					tip : "Gravity Brake - The asteroids in your Gravitron's opening slow down, the heavy ones less : your cannons have more time to destroy them.",
 					apply : function () { MyGravitron.brake = 1; } },
-	slingshot	: { name : "Slingshot", branch : "gravitron", time : 60, needs : [], opener : "bankShot",
+	slingshot	: { name : "Slingshot", branch : "gravitron", time : 60, needs : [],
 					tip : "Slingshot - An asteroid your Gravitron has turned from its way hits twice as hard the asteroids it runs into.",
 					apply : function () { MyGravitron.slingshot = 1; } },
-	atmosphere	: { name : "Thick Atmosphere", branch : "planet", time : 60, needs : [], opener : "untouchable",
+	atmosphere	: { name : "Thick Atmosphere", branch : "planet", time : 60, needs : [],
 					tip : "Thick Atmosphere - Your planet's atmosphere thickens : every asteroid coming into it burns, losing 2 points of life, and the weakest ones burn up before they crash.",
 					apply : function () { MyPlanet.atmosphere = 1; } },
-	earlyWarning: { name : "Early Warning", branch : "planet", time : 45, needs : [], opener : "veteran",
+	earlyWarning: { name : "Early Warning", branch : "planet", time : 45, needs : [],
 					tip : "Early Warning - Brings the Early Warning upgrade of your planet : each of its levels evacuates more inhabitants before the asteroids crash.",
 					apply : function () {} },
-	shelters	: { name : "Shelters", branch : "planet", time : 60, needs : [], opener : "legend",
+	shelters	: { name : "Shelters", branch : "planet", time : 60, needs : [],
 					tip : "Shelters - Once in a game, when an asteroid's crash should end it, the shelters save 10% of your planet's inhabitants.",
 					apply : function () { MyPlanet.shelters = 1; } }
 };
@@ -81,13 +81,9 @@ function newResearches () {
 	research = { lab : 0, current : false, complete : false, spent : {}, done : {}, validated : false };
 }
 
-// function to know if a branch is open, by its achievement
-// (in the Adventure, by the level being played : adventure.js)
+// function to know if a branch is open : all of them in the Arcade, none in the Adventure
 function branchOpen ( branch ) {
-	if ( inAdventure() ) {
-		return adventureAllows ( branch );
-	}
-	return achieved[researchBranches[branch].opener] ? true : false;
+	return !inAdventure();
 }
 
 // function to know if a branch at least is open, for the lab to be worth building
@@ -100,11 +96,9 @@ function anyBranchOpen () {
 	return false;
 }
 
-// function to know if a research is opened : its branch, and its own achievement if it has one
-// (in the Adventure, its branch is enough)
+// function to know if a research is opened : its branch
 function researchOpened ( id ) {
-	var opener = researches[id].opener;
-	return branchOpen ( researches[id].branch ) && ( inAdventure() || !opener || achieved[opener] ? true : false );
+	return branchOpen ( researches[id].branch );
 }
 
 // function to know if a research can be done : the lab built, opened, not done yet, and the researches it needs done
@@ -204,8 +198,8 @@ function researchAction ( id ) {
 	refresh();
 }
 
-// function to fill the Researches section of the pause menu, at each refresh() : the lab to build first, the open branches
-// with their researches, and the closed ones, whose achievement stays secret
+// function to fill the Researches section of the pause menu, at each refresh() : the lab to build first, then the branches
+// with their researches
 function refreshResearches () {
 	var holder = document.getElementById ( "researchList" );
 	holder.innerHTML = "";
@@ -216,8 +210,6 @@ function refreshResearches () {
 	}
 	for ( var branch in researchBranches ) {
 		if ( !branchOpen ( branch ) ) {
-			var closed = addLine ( holder, "???", "", "Closed branch - An achievement will open this branch of the research tree, for good.", function () {} );
-			closed.querySelector ( "a" ).innerHTML = "<span class='upred'>opened by an achievement</span>";
 			continue;
 		}
 		newElement ( "h2", "", holder ).textContent = researchBranches[branch].name;
@@ -241,9 +233,6 @@ function addResearchLine ( holder, id ) {
 	} else if ( research.current == id ) {
 		var done = Math.floor ( 100 * research.spent[id] / ( item.time * framesPerSecond ) );
 		link.innerHTML = "<span><span class='blue'>" + done + "% done, " + researchLeft ( id ) + " s left</span> <span class='upred'>STOP</span></span>";
-	} else if ( !researchOpened ( id ) ) {
-		// its achievement stays secret, as a closed branch's
-		link.innerHTML = "<span class='upred'>opened by an achievement</span>";
 	} else if ( !researchOpen ( id ) ) {
 		var needs = research.lab ? [] : [ upgrades.lab.name ];
 		for ( var n in item.needs ) {

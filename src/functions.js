@@ -374,7 +374,7 @@ function rememberPlaces() {
 		for ( var i in moving[m].objects ) {
 			var object = moving[m].objects[i];
 			if ( typeof object != "object" ) {
-				continue;	// the tutorial empties the places of its asteroid and its shot
+				continue;	// (an empty place)
 			}
 			object.before = object.before || {};
 			for ( var p in moving[m].parts ) {
@@ -455,14 +455,14 @@ function changeKey(e, to){
 	}
 }
 
-// function to write on the Infos page the letters as the player's keyboard has them (Z Q S D on an AZERTY one),
-// when the browser can tell them : a note tells it otherwise
-function showKeyLabels() {
+// function to write on the Infos page (or in a hint : hints.js) the letters as the player's keyboard has them (Z Q S D on an
+// AZERTY one), when the browser can tell them : a note tells it otherwise
+function showKeyLabels(holder) {
 	if ( !navigator.keyboard || !navigator.keyboard.getLayoutMap ) {
 		return;
 	}
 	navigator.keyboard.getLayoutMap().then( function ( layout ) {
-		var keys = document.querySelectorAll("#infoText kbd[data-code]");
+		var keys = ( holder || document.getElementById("infoText") ).querySelectorAll("kbd[data-code]");
 		for ( var k = 0; k < keys.length; k++ ) {
 			var letter = layout.get(keys[k].getAttribute("data-code"));
 			if ( letter ) {

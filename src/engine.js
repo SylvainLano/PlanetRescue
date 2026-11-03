@@ -25,7 +25,6 @@ function engine() {
 	var gameOver = document.getElementById("gameOver");
 	var loader = document.getElementById("loader");
 	var pauseScreen = document.getElementById("pause");
-	var countdown = document.getElementById("countdown");
 
 	// the laser hums while it fires, and only then (sound.js)
 	laserHum ( state == "playing" && pause == 0 && laserCannon && laserCannon.firing > 0 );
@@ -43,8 +42,6 @@ function engine() {
 		pauseScreen.style.display = "none";
 		status.style.display = "none";
 		loader.style.display = "none";
-		instructions.style.display = "none";
-		countdown.style.display = "none";
 		showAchievementCount();
 		showMenuPages();		// the Adventure's page, with its levels, and the Arcade's (adventure.js)
 
@@ -62,8 +59,6 @@ function engine() {
 		pauseScreen.style.display = "none";
 		status.style.display = "none";
 		loader.style.display = "none";
-		instructions.style.display = "none";
-		countdown.style.display = "none";
 
 	} else if(state == "achievements") {
 
@@ -119,227 +114,6 @@ function engine() {
 		showStarShop(starShop);
 		state = "stand";
 
-	} else if (state == "tutorial"){
-	
-		startMenu.style.display = "none";
-		gameOver.style.display = "none";
-		pauseScreen.style.display = "none";
-		countdown.style.display = "block";
-		instructions.style.display = "block";
-		status.style.display = "block";
-		countdown.style.background = 'rgba(60,60,60,0)';
-		status.style.background = 'rgba(60,60,60,0)';
-		instructions.style.background = 'rgba(60,60,60,0)';
-		countdown.style.top = '35px';
-		instructions.style.top = '155px';
-		initDefault(ctx,"normal");
-		initTutorial(ctx);
-		state = "tutorialSteps";
-		
-	} else if (state == "tutorialSteps"){
-
-		// (what the tutorial shows is drawn by drawTutorial)
-		if ( countdownValue > 10 ) {
-			MyPlanet.Turn();
-		}
-		if ( countdownValue > 214 ) {
-			debrisList = resolveDebris(debrisList,ctx,MyPlanet,pause,gravSuction,MyGravitron.power,MyGravitron.sort,debrisColor);
-		}
-		if ( countdownValue > 234 ) {
-		var keys = [0,0,0,0,0,0];
-			if ( countdownValue > 262 ) {
-				keys=key;
-			}
-			resolveGravitron (ctx,pause,MyGravitron,gravFriction,keys,gravMinSize,gravMaxSize,gravColor,gravWidth,MyPlanet,gravRadius);
-		}
-
-		var step = countdownValue;
-		if ( countdownValue < 10 ) {
-			countdown.innerHTML = "Tutorial";
-			countdown.style.background = 'rgba(60,60,60,'+(countdownValue/20)+')';
-			status.style.background = 'rgba(60,60,60,'+(countdownValue/20)+')';
-			instructions.style.background = 'rgba(60,60,60,'+(countdownValue/20)+')';
-			countdown.style.color = 'rgba(255,0,0,'+(countdownValue/10)+')';
-			instructions.style.color = 'rgba(BB,BB,BB,'+(countdownValue/10)+')';
-			countdownValue++;
-		} else if ( countdownValue == 10 ) {
-			instructions.innerHTML = 'Press "Space" to start the tutorial';
-		} else if ( countdownValue < 22 ) {
-			var string = "Your planet";
-			countdown.innerHTML = string.substr(0,(countdownValue-10));
-			countdownValue++;
-			instructions.innerHTML = '';
-		} else if ( countdownValue == 22 ) {
-			instructions.innerHTML = 'Press "Space"';
-		} else if ( countdownValue < 36 ) {
-			var string = "Don't lose it";
-			countdown.innerHTML = string.substr(0,(countdownValue-22));
-			countdownValue++;
-			instructions.innerHTML = '';
-		} else if ( countdownValue == 36 ) {
-			instructions.innerHTML = 'Keep pressing "Space"';
-		} else if ( countdownValue < 57 ) {
-			var string = "Its life is up there";
-			countdown.innerHTML = string.substr(0,(countdownValue-36));
-			countdownValue++;
-			status.innerHTML = 'Life : 20';
-			instructions.innerHTML = '';
-		} else if ( countdownValue == 57 ) {
-			instructions.innerHTML = '"Space", "Space", "SPACE"';
-			var radius = gameSize / 2;
-			var angle = Math.PI / 4;
-			var AsterX = MyPlanet.x + (radius * Math.cos(angle));
-			var AsterY = MyPlanet.y + (radius * Math.sin(angle));
-			if ( asteroidList.length == 0 ) {
-				item = new Asteroid(ctx,10,asteroidBR,asteroidBM,AsterX,AsterY,-0.25,-0.25);
-				asteroidList.push(item);
-			}
-		} else if ( countdownValue < 77 ) {
-			var string = "Look, an asteroid !";
-			countdown.innerHTML = string.substr(0,(countdownValue-57));
-			countdownValue++;
-			instructions.innerHTML = '';
-			asteroidList[0].x += asteroidList[0].vx;
-			asteroidList[0].y += asteroidList[0].vy;
-		} else if ( countdownValue < 120 ) {
-			instructions.innerHTML = 'Wait . . .';
-			asteroidList[0].x += asteroidList[0].vx;
-			asteroidList[0].y += asteroidList[0].vy;
-			countdownValue++;
-		} else if ( countdownValue < 136 ) {
-			var string = "This is harmful";
-			countdown.innerHTML = string.substr(0,(countdownValue-120));
-			countdownValue++;
-			instructions.innerHTML = '';
-		} else if ( countdownValue == 136 )  {
-			instructions.innerHTML = 'Lost in space? Press "Space"!';
-		} else if ( countdownValue < 157 ) {
-			var string = "We should destroy it";
-			countdown.innerHTML = string.substr(0,(countdownValue-136));
-			countdownValue++;
-			instructions.innerHTML = '';
-		} else if ( countdownValue == 157 )  {
-			instructions.innerHTML = 'Give it a try with "Space"';
-			mainCannon.angle = Math.PI / 4;
-		} else if ( countdownValue < 174 ) {
-			var string = "We have a cannon";
-			countdown.innerHTML = string.substr(0,(countdownValue-157));
-			countdownValue++;
-			instructions.innerHTML = '';
-		} else if ( countdownValue == 174 )  {
-			instructions.innerHTML = "it's much more like a missile launcher, but anyway, press what you know";
-		} else if ( countdownValue < 193 )  {
-			var string = "It moves by itself";
-			countdown.innerHTML = string.substr(0,(countdownValue-174));
-			countdownValue++;
-			instructions.innerHTML = '';
-		} else if ( countdownValue == 193 )  {
-			instructions.innerHTML = "you can't control it, so keep pressing";
-			var x = MyPlanet.x + (MyPlanet.radius+5) * Math.cos(mainCannon.angle);
-			var y = MyPlanet.y + (MyPlanet.radius+5) * Math.sin(mainCannon.angle);
-			var vx = mainCannon.speed * Math.cos(mainCannon.angle);
-			var vy = mainCannon.speed * Math.sin(mainCannon.angle);
-			if ( shotList.length == 0 ) {
-				item = new Shot1(ctx,mainCannon.power,mainCannon.color,x,y,vx,vy);
-				shotList.push(item);
-			}
-		} else if ( countdownValue < 213 )  {
-			var string = "It shoots by itself";
-			countdown.innerHTML = string.substr(0,(countdownValue-193));
-			countdownValue++;
-			instructions.innerHTML = '';
-			asteroidList[0].x += asteroidList[0].vx;
-			asteroidList[0].y += asteroidList[0].vy;
-			shotList[0].x += shotList[0].vx;
-			shotList[0].y += shotList[0].vy;
-		} else if ( countdownValue == 213 )  {
-			instructions.innerHTML = 'how can that be a game when you have nothing to do? Find out by waiting . . .';
-			asteroidList[0].x += asteroidList[0].vx;
-			asteroidList[0].y += asteroidList[0].vy;
-			shotList[0].x += shotList[0].vx;
-			shotList[0].y += shotList[0].vy;
-			if ( ( asteroidList[0].x - shotList[0].x ) < asteroidList[0].radius ) {
-				countdownValue++;
-			}
-		} else if ( countdownValue == 214 )  {
-			addDebris(ctx,100,asteroidList[0].x,asteroidList[0].y,asteroidList[0].vx,asteroidList[0].vy,debrisList,asteroidList[0].metal);
-			shotList[0] = '';
-			asteroidList[0] = '';
-			countdownValue++;
-		} else if ( countdownValue < 234 ) {
-			var string = "Asteroid is no more";
-			countdown.innerHTML = string.substr(0,(countdownValue-214));
-			countdownValue++;
-			instructions.innerHTML = '';
-		} else if ( countdownValue == 234 )  {
-			instructions.innerHTML = "a great thing done, but here's where the game starts";
-		} else if ( countdownValue < 255 ) {
-			var string = "The GRAVITRON";
-			countdown.innerHTML = string.substr(0,(countdownValue-234));
-			countdownValue++;
-			instructions.innerHTML = '';
-		} else if ( countdownValue == 255 )  {
-			instructions.innerHTML = "it should have something to do with gravity, right?";
-		} else if ( countdownValue < 261 ) {
-			var string = "Right";
-			countdown.innerHTML = string.substr(0,(countdownValue-255));
-			countdownValue++;
-			instructions.innerHTML = '';
-		} else if ( countdownValue == 261 )  {
-		} else if ( countdownValue == 262 )  {
-			instructions.innerHTML = "well ok, what's next";
-		} else if ( countdownValue < 277 ) {
-			var string = "Use arrow keys";
-			countdown.innerHTML = string.substr(0,(countdownValue-262));
-			countdownValue++;
-			instructions.innerHTML = '';
-		} else if ( countdownValue == 277 )  {
-			instructions.innerHTML = 'especially the Down one';
-		} else if ( countdownValue < 296 ) {
-			var string = "Collect the debris";
-			countdown.innerHTML = string.substr(0,(countdownValue-277));
-			countdownValue++;
-			instructions.innerHTML = '';
-		} else if ( countdownValue == 296 )  {
-			instructions.innerHTML = 'debris are the crumbles of the former asteroid';
-		} else if ( countdownValue < 317 ) {
-			var string = "Get Mat from them";
-			countdown.innerHTML = string.substr(0,(countdownValue-296));
-			countdownValue++;
-			instructions.innerHTML = '';
-			status.innerHTML = 'Life : 20 - Mat : 20';
-		} else if ( countdownValue == 317 )  {
-			instructions.innerHTML = 'it means "material", and you want MOAR of it';
-		} else if ( countdownValue < 337 ) {
-			var string = "Upgrade costs Mat";
-			countdown.innerHTML = string.substr(0,(countdownValue-317));
-			countdownValue++;
-			instructions.innerHTML = '';
-		} else if ( countdownValue == 337 )  {
-			instructions.innerHTML = 'In game, you will press... yes, "Space", to open upgrade menu';
-		} else if ( countdownValue < 345 ) {
-			var string = "The end";
-			countdown.innerHTML = string.substr(0,(countdownValue-337));
-			countdownValue++;
-			instructions.innerHTML = '';
-		} else if ( countdownValue == 345 )  {
-			instructions.innerHTML = 'Tutorial is over. Applause. Thanks. Press "Space" to get back to menu.';
-		} else if ( countdownValue > 345 )  {
-			state="menu";
-		}
-
-		// "Space" only moves on from a step waiting for it, once that step has been played
-		// (until 2026, a press at the very frame a step began could skip what it creates and crash the tutorial)
-		if ( key[4] == 1 ) {
-			pauseStep++;
-			if(pauseStep==1 && countdownValue == step){
-				countdownValue++;
-			}
-		}
-		if ( key[4] == 0 ) {
-			pauseStep=0;
-		}
-
 	} else if (state == "init"){
 	
 		startMenu.style.display = "none";
@@ -352,8 +126,6 @@ function engine() {
 			startLevel();			// then what the level gives at its start (adventure.js)
 		}
 		// the countdown's banner is drawn on the game, at the top, and hidden until the countdown begins
-		// (the "countdown" element of the page only writes the tutorial's texts)
-		countdown.style.display = "none";
 		banner.y = 0;
 		banner.alpha = 0;
 		banner.background = 0;
@@ -379,7 +151,6 @@ function engine() {
 		MyPlanet.Turn();
 		if ( countdownValue <= 0 ){
 			status.style.display = "block";
-			status.style.background = "";		// as css/main.css draws it, whatever the tutorial left
 			state = "playing";
 			countdownValue=10;
 		} else {
@@ -1177,8 +948,9 @@ function engine() {
 
 	}	// Bracket for the state == "playing"
 
-	// Checking the achievements not obtained yet (achievements.js)
+	// Checking the achievements not obtained yet (achievements.js), and showing the Arcade's hints (hints.js)
 	checkAchievements();
+	advanceHints();
 }
 
 
@@ -1203,9 +975,7 @@ function drawGame ( blend ) {
 
 	blendPlaces ( blend );
 	try {
-		if ( state == "tutorialSteps" ) {
-			drawTutorial ( ctx );
-		} else if ( state == "countdown" ) {
+		if ( state == "countdown" ) {
 			if ( simulating() ) {
 				drawHologramPlanet ( ctx );		// (a simulation of the Adventure : adventure.js)
 				drawSimulationOverlay ( ctx );
@@ -1373,68 +1143,6 @@ function drawPlaying ( ctx ) {
 	if ( pause == 0 ) {
 		drawPulses(ctx);
 		drawGravitron(ctx,2);
-	}
-}
-
-// Function to draw the tutorial, step by step
-function drawTutorial ( ctx ) {
-	if ( countdownValue > 10 ) {
-		MyPlanet.Draw();
-	}
-	if ( countdownValue > 57 && countdownValue < 214 ) {
-		asteroidList[0].Draw();
-		if ( countdownValue <= 157 ) {
-			ctx.strokeStyle = 'rgba(255,0,0,1)';
-			ctx.lineWidth = 1;
-			ctx.beginPath();
-			ctx.arc(asteroidList[0].x,asteroidList[0].y,15,0,(Math.PI*2),false);
-			ctx.arc(asteroidList[0].x,asteroidList[0].y,15,(Math.PI*2),0,true);
-			ctx.closePath();
-			ctx.stroke();
-		}
-	}
-	if ( countdownValue > 157) {
-		var sx = MyPlanet.x + MyPlanet.radius * Math.cos(mainCannon.angle);
-		var sy = MyPlanet.y + MyPlanet.radius * Math.sin(mainCannon.angle);
-		var ex = MyPlanet.x + (MyPlanet.radius+4) * Math.cos(mainCannon.angle);
-		var ey = MyPlanet.y + (MyPlanet.radius+4) * Math.sin(mainCannon.angle);
-		ctx.strokeStyle = mainCannon.color;
-		ctx.beginPath();
-		ctx.moveTo(sx,sy);
-		ctx.lineTo(ex,ey);
-		ctx.closePath();
-		ctx.stroke();
-		if ( countdownValue <= 213 ) {
-			ctx.strokeStyle = 'rgba(255,0,0,1)';
-			ctx.lineWidth = 1;
-			ctx.beginPath();
-			ctx.arc(ex,ey,10,0,(Math.PI*2),false);
-			ctx.arc(ex,ey,10,(Math.PI*2),0,true);
-			ctx.closePath();
-			ctx.stroke();
-		}
-	}
-	if ( countdownValue > 193 && countdownValue < 214 ) {
-		ctx.fillStyle = shotList[0].color;
-		ctx.beginPath();
-		ctx.arc(shotList[0].x,shotList[0].y,1,0,2*Math.PI,true);
-		ctx.closePath();
-		ctx.fill();
-	}
-	if ( countdownValue > 214 ) {
-		drawDebris(ctx);
-	}
-	if ( countdownValue > 234 ) {
-		drawGravitron(ctx,1);	// thinner than in the game, as the tutorial has always shown it
-	}
-	// the mat, underlined in the status bar
-	if ( countdownValue > 296 && countdownValue <= 317 ) {
-		ctx.strokeStyle = 'rgba(255,0,0,1)';
-		ctx.beginPath();
-		ctx.moveTo(50,20);
-		ctx.lineTo(100,20);
-		ctx.closePath();
-		ctx.stroke();
 	}
 }
 

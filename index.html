@@ -12,7 +12,7 @@
 <html>
 <head>
 	<meta charset="utf-8">
-	<title>Planet Rescue v0.52.0</title>
+	<title>Planet Rescue v0.53.0</title>
 
 	<link rel="stylesheet" type="text/css" href="css/main.css">
 
@@ -24,6 +24,7 @@
 	<script type="text/javascript" src="src/shop.js"></script>
 	<script type="text/javascript" src="src/menu.js"></script>
 	<script type="text/javascript" src="src/achievements.js"></script>
+	<script type="text/javascript" src="src/hints.js"></script>
 <script type="text/javascript" src="src/tiles.js"></script>
 	<script type="text/javascript" src="src/researches.js"></script>
 	<script type="text/javascript" src="src/adventure.js"></script>
@@ -46,10 +47,9 @@
 <body>
 <div id="gameArea">
 	<div id="status" class="ui" onClick="displayStatus();"></div>
-	<div id="instructions" class="ui"></div>
+	<div id="hint"></div><!-- the Arcade's hints, written by src/hints.js -->
 	<div id="gameOver" class="ui"></div>
 	<div id="story" class="ui"></div><!-- the Adventure's story, built by src/story.js -->
-	<div id="countdown" class="ui"></div>
 	<div id="loader" class="ui">
 		<div id="loadingDisplay">
 			Loading game, please wait<br />
@@ -68,7 +68,7 @@
 	</div>
 	<div id="startMenu" class="ui">
 		<div class="title">
-			Planet Rescue <span class="version">v0.52.0</span>
+			Planet Rescue <span class="version">v0.53.0</span>
 		</div>
 		<div id="mainMenu">
 			<!-- the two pages of the start menu, sliding one after the other : the Adventure's, then the Arcade's (src/adventure.js) -->
@@ -94,6 +94,7 @@
 							<a href="#" id="level_hard" class="level" onClick='chooseLevel("hard");'>Hard</a>
 						</div>
 						<div id="levelText"></div><!-- what the chosen level changes, written by showLevel() -->
+						<label id="hintsToggle"><input type="checkbox" id="hintsBox" onChange='toggleHints(this.checked);'> Hints for a new player</label><!-- src/hints.js -->
 					</div>
 				</div>
 			</div>
@@ -101,7 +102,6 @@
 			<a href="#" id="toArcade" class="sideArrow" onClick='turnMenuPage("arcade");'><svg viewBox="0 0 40 90"><path d="M8 6l24 39-24 39"/></svg><span>Arcade</span></a>
 			<a href="#" id="toAdventure" class="sideArrow" onClick='turnMenuPage("adventure");'><svg viewBox="0 0 40 90"><path d="M32 6L8 45l24 39"/></svg><span>Adventure</span></a>
 			<div id="moreLinks">
-				<a href="#" class="button" onClick='state="tutorial";'>Tutorial</a>
 				<a href="#" class="button" onClick='state="infos";'>Infos</a>
 				<a href="#" class="button" onClick='state="achievements";'>Achievements <span id="achievementCount"></span></a>
 				<a href="#" class="button" onClick='state="hiscores";'>Hi-Scores</a>
@@ -131,7 +131,7 @@
 						<li>The open part of the Gravitron pulls the debris in&hellip; and the asteroids too.</li>
 						<li>An asteroid crashing on the Earth takes away as many million inhabitants as it has life left.</li>
 						<li>A new threat every two minutes, announced by the NAZA: comets, splitting rocks, giants after six minutes (destroy them first), swarms, armored rocks.</li>
-						<li>Your achievements open the branches of the research tree: build a Research Lab, then start a research from the pause menu.</li>
+						<li>The research tree is open: build a Research Lab with your planet's upgrades, then start a research from the pause menu. It takes time, not mat.</li>
 					</ul>
 				</div>
 				<div>

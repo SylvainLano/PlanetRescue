@@ -105,15 +105,54 @@ body {
 	position: absolute;
 }
 
-#countdown {
-	text-align: center;
-	z-index: 11;
-	vertical-align: bottom;
-	font-family: 'MirageRegular';
-	font-size: 85px;
-	color : rgb(255, 71, 71);
-	display: none;
-	height: 100px;
+/* THE ARCADE'S HINTS (src/hints.js) : a frame at the bottom left of the game area, over the kamikazes' gauge (kamikaze.js), fading
+   in and out, the research corner keeping the right ; its label in green, as the achievements' banner */
+#hint {
+	position: absolute;
+	left: 8px;
+	bottom: 36px;
+	width: 352px;
+	padding: 8px 12px;
+	z-index: 2;
+	font-family: Arial, Helvetica, sans-serif;
+	font-size: 13px;
+	line-height: 1.5;
+	color: #eee;
+	background: rgba(20,24,32,0.88);
+	border: 1px solid rgba(93,244,93,0.55);
+	border-radius: 6px;
+	opacity: 0;
+	visibility: hidden;
+	transition: opacity 0.4s, visibility 0.4s;
+	pointer-events: none;
+}
+
+#hint.shown {
+	opacity: 1;
+	visibility: visible;
+}
+
+#hint .label {
+	display: block;
+	font-size: 10px;
+	font-weight: bold;
+	letter-spacing: 1px;
+	text-transform: uppercase;
+	color: #5df45d;
+}
+
+/* (and the box turning them on or off, on the Arcade's page of the start menu) */
+#hintsToggle {
+	display: inline-block;
+	margin-top: 10px;
+	font-size: 12px;
+	color: #aaa;
+	cursor: pointer;
+}
+
+#hintsToggle input {
+	vertical-align: middle;
+	accent-color: #5df45d;
 }
 
 #loader {
@@ -204,12 +243,6 @@ body {
 	font-size: 13px;
 }
 
-#instructions {
-	height: 15px;
-	z-index: 6;
-	text-align : center;
-	text-decoration : blink;
-}
 
 #startMenu {
 	height: 584px;
@@ -1356,7 +1389,7 @@ a.level.current {
 }
 
 #adventureMap .spotInfo .text {
-	width: auto;		/* (not the tutorial's .text : it ran under the Play button) */
+	width: auto;		/* (not the 2010 .text's width : it ran under the Play button) */
 	margin: 4px 0 0;
 	font-size: 13px;
 	color: #bbb;
