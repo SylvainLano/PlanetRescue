@@ -76,7 +76,18 @@ var tileInk = "#9fb3cf";	// their color, darkened by the tile (css/main.css)
 var tileFont = { family : "Impact, Haettenschweiler, 'Arial Narrow Bold', sans-serif", size : 34, room : 64 };
 var tileMeasure = document.createElement ( "canvas" ).getContext ( "2d" );
 
-// function to draw a tile's picture, darkened behind its value (the Adventure's bonuses use it too : starshop.js)
+// the pictures that have an icon (img/icons, neon holograms), by the name of its file : the tiles of the pause menu show it instead
+// of their drawing (tilePicture), the other ones keep their drawing until their icon comes
+var tileIcons = { sort : "sort", pull : "pull", opening : "opening", push : "push", shield : "shield", pulse : "pulse", eye : "eye",
+	crystal : "crystal", press : "compactor", kamikaze : "kamikaze", warning : "earlyWarning", beam : "laser", slow : "gravityBrake",
+	pinball : "trick" };
+
+// function to draw a tile's picture, dim behind its value : its icon, or else its drawing
+function tilePicture ( picture ) {
+	return tileIcons[picture] ? "<img class='icon' src='img/icons/" + tileIcons[picture] + ".webp' alt=''>" : tileSVG ( picture );
+}
+
+// function to draw a picture with lines, darkened behind a tile's value (the Adventure's bonuses use it too : starshop.js)
 function tileSVG ( picture ) {
 	return '<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 64 64">'
 		+ '<g fill="none" stroke="' + tileInk + '" stroke-width="3" stroke-linecap="round" stroke-linejoin="round">'
@@ -96,7 +107,7 @@ function addTile ( grid, thing ) {
 	var tile = newElement ( "div", "tile", grid );
 	tile.setAttribute ( "data-upgrade", thing );
 	var square = newElement ( "div", "square", tile );
-	square.innerHTML = tileSVG ( upgrades[thing].picture );
+	square.innerHTML = tilePicture ( upgrades[thing].picture );
 	shopTiles.push ( { element : tile, thing : thing, value : newElement ( "div", "value", square ), unit : newElement ( "div", "unit", square ),
 		price : newElement ( "div", "price mat", tile ) } );
 	newElement ( "div", "name", tile ).textContent = upgrades[thing].name;

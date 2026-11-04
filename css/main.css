@@ -1115,11 +1115,11 @@ a.level.current {
 	color: #8fc4ff;
 }
 
-/* (the price of what a click buys, in a light pill over its corner) */
+/* (the price of what a click buys, in a light pill over its bottom right corner) */
 .tree .cell .price {
 	position: absolute;
-	top: -8px;
-	right: -9px;
+	bottom: -11px;
+	right: -11px;
 	padding: 0 4px;
 	font-family: Arial, Helvetica, sans-serif;
 	font-size: 10px;
@@ -1172,11 +1172,27 @@ a.level.current {
 .tree.research {
 	width: 268px;
 	height: 268px;
-	margin: 6px auto 4px;
+	margin: 6px auto 14px;		/* (room for the pills of the bottom row) */
 }
 
 .tree.research .cell:not(.lab) svg {
 	top: 7px;
+}
+
+/* (a research's icon, the lab's too, a neon hologram glowing on the dark cell, in its middle, under the corner of its pill : a little
+   dim until it is done or going on) */
+.tree .cell img {
+	position: absolute;
+	left: 50%;
+	top: 50%;
+	width: 32px;
+	height: 32px;
+	margin: -16px 0 0 -16px;
+	opacity: 0.85;
+}
+
+.tree .cell.bought img, .tree .cell.running img, .tree .cell.complete img {
+	opacity: 1;
 }
 
 /* (the research going on : framed in gold, its time filling it as a clock, from noon ; complete, all gold, its pill too) */
@@ -1951,6 +1967,17 @@ a.sideArrow:hover {
 	opacity: 0.3;
 }
 
+/* (or its icon, a neon hologram, dim behind its value : tiles.js) */
+.tileGrid .tile img.icon {
+	position: absolute;
+	left: 50%;
+	top: 50%;
+	width: 62px;
+	height: 62px;
+	margin: -31px 0 0 -31px;
+	opacity: 0.45;
+}
+
 /* (a value too wide for the square is written smaller by src/tiles.js, centered all the same) */
 .tileGrid .tile .value {
 	position: absolute;
@@ -1995,10 +2022,11 @@ a.sideArrow:hover {
 	border-color: rgb(242,201,76);
 }
 
-/* the price of one more, in a pill over the tile's corner : gold for stars (starshop.js), green for mat (tiles.js) */
+/* the price of one more, in a pill over the bottom right corner of the tile's square (76 pixels), above its name : gold for stars
+   (starshop.js), green for mat (tiles.js) */
 .tileGrid .tile .price {
 	position: absolute;
-	top: -7px;
+	top: 66px;
 	right: -7px;
 	padding: 0 5px;
 	font-family: Arial, Helvetica, sans-serif;

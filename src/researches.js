@@ -24,53 +24,54 @@ var researchBranches = {
 };
 
 // each research : its name, its tooltip, its branch, its time (in seconds of play), the researches it needs first, its place in the
-// tree (in columns and rows from the lab, the north up : refreshResearches), its picture (tilePictures, tiles.js), and what it brings
+// tree (in columns and rows from the lab, the north up : refreshResearches), its picture (tilePictures, tiles.js ; or its icon, img/icons,
+// once it has one), and what it brings
 // (since 0.54.0, the Compactor waits for the Wide Net, the Slingshot for the Gravity Brake, and the Shelters for the Thick Atmosphere :
 // every research of the tree opens from the lab or from the one before it)
 var researches = {
-	missiles	: { name : "Missile Launcher", branch : "missiles", time : 60, needs : [], at : [0, -1], picture : "missile",
+	missiles	: { name : "Missile Launcher", branch : "missiles", time : 60, needs : [], at : [0, -1], picture : "missile", icon : true,
 					tip : "Missile Launcher - A secondary weapon, which takes no place among your active weapons. Its missiles fly to your main cannon's target, and explode on the first asteroid they touch, damaging every asteroid around.",
 					apply : function () { missileLauncher.cannonNbr = 1; } },
-	homing		: { name : "Homing Missiles", branch : "missiles", time : 90, needs : ["missiles"], at : [0, -2], picture : "homing",
+	homing		: { name : "Homing Missiles", branch : "missiles", time : 90, needs : ["missiles"], at : [0, -2], picture : "homing", icon : true,
 					tip : "Homing Missiles - Your missiles steer toward their target, even when it changes its way, and look for another one if it is destroyed before they reach it.",
 					apply : function () { missileLauncher.smart = 1; } },
-	nitro		: { name : "Nitroglycerine", branch : "explosives", time : 75, needs : [], at : [-1, -1], picture : "bomb",
+	nitro		: { name : "Nitroglycerine", branch : "explosives", time : 75, needs : [], at : [-1, -1], picture : "bomb", icon : true,
 					tip : "Nitroglycerine - A secondary weapon, whose slow capsules turn an asteroid far from your planet into a bomb, damaging every asteroid around when it explodes : when it touches another asteroid, when it is destroyed, or as soon as your planet comes into its blast, which spares your planet. Steer it into the others with your Gravitron.",
 					apply : function () { nitroLauncher.cannonNbr = 1; } },
-	chain		: { name : "Chain Reaction", branch : "explosives", time : 90, needs : ["nitro"], at : [-2, -2], picture : "fireworks",
+	chain		: { name : "Chain Reaction", branch : "explosives", time : 90, needs : ["nitro"], at : [-2, -2], picture : "fireworks", icon : true,
 					tip : "Chain Reaction - The asteroids a bomb's blast doesn't destroy become bombs too, with half its power : their blasts do the same, until the reaction fades out.",
 					apply : function () { nitroLauncher.smart = 1; } },
-	laser		: { name : "Laser", branch : "lasers", time : 90, needs : [], at : [1, -1], picture : "beam",
+	laser		: { name : "Laser", branch : "lasers", time : 90, needs : [], at : [1, -1], picture : "beam", icon : true,
 					tip : "Laser - A secondary weapon, whose beam burns an asteroid for a while, then cools down. It aims first at the giants, then at the asteroids going to crash on your planet, the soonest first.",
 					apply : function () { laserCannon.cannonNbr = 1; } },
-	piercing	: { name : "Piercing Beam", branch : "lasers", time : 90, needs : ["laser"], at : [2, -2], picture : "pierce",
+	piercing	: { name : "Piercing Beam", branch : "lasers", time : 90, needs : ["laser"], at : [2, -2], picture : "pierce", icon : true,
 					tip : "Piercing Beam - Your laser's beam goes through its target, and spreads behind it in a cone of light to the edge of space : every other asteroid it reaches, on its way or in the cone, burns at half power.",
 					apply : function () { laserCannon.smart = 1; } },
-	rebound		: { name : "Rebound Shot", branch : "ricochets", time : 90, needs : [], at : [-1, 0], picture : "boomerang",
+	rebound		: { name : "Rebound Shot", branch : "ricochets", time : 90, needs : [], at : [-1, 0], picture : "boomerang", icon : true,
 					tip : "Rebound Shot - A secondary weapon, whose fast shots fly to your main cannon's target, then ricochet on the asteroids they hit, on the edges of space and on your planet's atmosphere, which they don't harm, until they have made all their rebounds.",
 					apply : function () { reboundCannon.cannonNbr = 1; } },
-	trick		: { name : "Trick Shot", branch : "ricochets", time : 90, needs : ["rebound"], at : [-2, 0], picture : "pinball",
+	trick		: { name : "Trick Shot", branch : "ricochets", time : 90, needs : ["rebound"], at : [-2, 0], picture : "pinball", icon : true,
 					tip : "Trick Shot - Your rebound cannon reckons its ricochets before it fires : among many angles, it takes the one whose way hits the most asteroids, rebounds included, and its shots no longer go astray on the rock.",
 					apply : function () { reboundCannon.smart = 1; } },
-	wideNet		: { name : "Wide Net", branch : "gravitron", time : 45, needs : [], at : [1, 0], picture : "net",
+	wideNet		: { name : "Wide Net", branch : "gravitron", time : 45, needs : [], at : [1, 0], picture : "net", icon : true,
 					tip : "Wide Net - Out of its opening, your Gravitron pulls the debris too, more weakly, but never the asteroids.",
 					apply : function () { MyGravitron.wideNet = 1; } },
-	compactor	: { name : "Compactor", branch : "gravitron", time : 45, needs : ["wideNet"], at : [2, 0], picture : "press",
+	compactor	: { name : "Compactor", branch : "gravitron", time : 45, needs : ["wideNet"], at : [2, 0], picture : "press", icon : true,
 					tip : "Compactor - Brings the Compactor upgrade of your Gravitron : each of its levels makes more mat from the debris gathered.",
 					apply : function () {} },
-	gravityBrake: { name : "Gravity Brake", branch : "gravitron", time : 60, needs : [], at : [1, 1], picture : "slow",
+	gravityBrake: { name : "Gravity Brake", branch : "gravitron", time : 60, needs : [], at : [1, 1], picture : "slow", icon : true,
 					tip : "Gravity Brake - The asteroids in your Gravitron's opening slow down, the heavy ones less : your cannons have more time to destroy them.",
 					apply : function () { MyGravitron.brake = 1; } },
-	slingshot	: { name : "Slingshot", branch : "gravitron", time : 60, needs : ["gravityBrake"], at : [2, 2], picture : "sling",
+	slingshot	: { name : "Slingshot", branch : "gravitron", time : 60, needs : ["gravityBrake"], at : [2, 2], picture : "sling", icon : true,
 					tip : "Slingshot - An asteroid your Gravitron has turned from its way hits twice as hard the asteroids it runs into.",
 					apply : function () { MyGravitron.slingshot = 1; } },
-	atmosphere	: { name : "Thick Atmosphere", branch : "planet", time : 60, needs : [], at : [0, 1], picture : "atmosphere",
+	atmosphere	: { name : "Thick Atmosphere", branch : "planet", time : 60, needs : [], at : [0, 1], picture : "atmosphere", icon : true,
 					tip : "Thick Atmosphere - Your planet's atmosphere thickens : every asteroid coming into it burns, losing 2 points of life, and the weakest ones burn up before they crash.",
 					apply : function () { MyPlanet.atmosphere = 1; } },
-	earlyWarning: { name : "Early Warning", branch : "planet", time : 45, needs : [], at : [-1, 1], picture : "warning",
+	earlyWarning: { name : "Early Warning", branch : "planet", time : 45, needs : [], at : [-1, 1], picture : "warning", icon : true,
 					tip : "Early Warning - Brings the Early Warning upgrade of your planet : each of its levels evacuates more inhabitants before the asteroids crash.",
 					apply : function () {} },
-	shelters	: { name : "Shelters", branch : "planet", time : 60, needs : ["atmosphere"], at : [0, 2], picture : "bunker",
+	shelters	: { name : "Shelters", branch : "planet", time : 60, needs : ["atmosphere"], at : [0, 2], picture : "bunker", icon : true,
 					tip : "Shelters - Once in a game, when an asteroid's crash should end it, the shelters save 10% of your planet's inhabitants.",
 					apply : function () { MyPlanet.shelters = 1; } }
 };
@@ -241,7 +242,7 @@ function refreshResearches () {
 	var labCost = maxReached ( "lab" ) ? false : priceToPay ( "lab" );
 	html += "<div class='cell lab" + ( research.lab ? " bought" : "" ) + ( labCost === false ? " max" : "" ) + "' style='left:" + lab.left + "px;top:" + lab.top + "px'"
 		+ " onmouseenter='labTip(event);' onmousemove='placeTooltip(event);' onmouseleave='hideTooltip();' onClick='buyLab();'>"
-		+ tileSVG ( "lab" ) + "<div class='value'>" + [ "to build", "lab", "auto" ][research.lab] + "</div>"
+		+ "<img src='img/icons/lab.webp' alt=''>"
 		+ ( labCost === false ? "" : "<div class='price" + ( MyPlanet.mat >= labCost ? "" : " short" ) + "'>" + labCost + " mat</div>" ) + "</div>";
 	// the researches shown
 	for ( var s in shown ) {
@@ -252,10 +253,15 @@ function refreshResearches () {
 		var clock = ( state == " running" ) ? ";--done:" + researchShare ( id ) + "%" : "";
 		html += "<div class='cell" + state + "' style='left:" + place.left + "px;top:" + place.top + "px" + clock + "'"
 			+ " onmouseenter='researchTip(event,\"" + id + "\");' onmousemove='placeTooltip(event);' onmouseleave='hideTooltip();' onClick='researchAction(\"" + id + "\");'>"
-			+ tileSVG ( researches[id].picture ) + ( pill ? "<div class='price" + ( state == " complete" ? " gold" : "" ) + "'>" + pill + "</div>" : "" ) + "</div>";
+			+ researchPicture ( id ) + ( pill ? "<div class='price" + ( state == " complete" ? " gold" : "" ) + "'>" + pill + "</div>" : "" ) + "</div>";
 	}
 	html += "</div><div class='foot'>" + researchFoot() + "</div>";
 	holder.innerHTML = html;
+}
+
+// function to draw a research on its cell : its icon (img/icons, a rendered object), or else its picture, drawn with lines
+function researchPicture ( id ) {
+	return researches[id].icon ? "<img src='img/icons/" + id + ".webp' alt=''>" : tileSVG ( researches[id].picture );
 }
 
 // function to know how much of a research is done, in percents

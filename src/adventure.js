@@ -60,7 +60,7 @@ var adventureLevels = [
 		type : "hunt", time : 150, goal : 15, values : { planetMat : 100 },
 		shop : [ "mainPow", "mCNumber", "SMART", "critChance" ],
 		flow : { every : [7, 4], comets : 10 },
-		challenge : { text : "Destroy 25 asteroids", test : function () { return nbrDestroyed >= 25; },
+		challenge : { text : "Destroy 32 asteroids", test : function () { return nbrDestroyed >= 32; },
 			hint : "The comets are fast, but break in one shot: SMART AI 2 aims ahead of them, and more Cannons destroy more of everything in the same time.",
 			picture : "cannons", tiles : [ "Hunt" ] } },
 	{ name : "Shatterpoint", log : "Rain 45. Cracked rocks, glowing red. They burst when they break: keep them far.",
@@ -94,9 +94,9 @@ var adventureLevels = [
 		waves : [ { count : 9, gap : 1.9, speed : 1.1 }, { count : 5, armored : true, gap : 1.9, speed : 1.1 },
 			{ count : 10, splitters : 3, gap : 1.7, speed : 1.2 }, { count : 7, comets : 3, armored : true, gap : 1.7, speed : 1.1 },
 			{ count : 10, giants : 1, armored : true, gap : 1.5, speed : 1.2 } ],
-		challenge : { text : "Destroy every armored asteroid before it gets halfway to your planet",
-			test : function () { return armorClosest > ( gameSize / 2 + MyPlanet.radius ) / 2; },
-			hint : "Their plates absorb 3 of each shot's power: raise your Fire Power early, and the critical shots go through whole.",
+		challenge : { text : "Destroy every armored asteroid before it travels three quarters of the way to your planet",
+			test : function () { return armorClosest > gameSize / 2 - ( gameSize / 2 - MyPlanet.radius ) * 3 / 4; },
+			hint : "Aim at each armored asteroid with T as soon as it comes: their plates absorb 3 of each shot's power, so raise your Fire Power early; the critical shots go through whole.",
 			picture : "flame", tiles : [ "Destroyed" ] } },
 	{ name : "The Gauntlet", log : "Rain 49. Everything at once. The NAZA has never seen a rain like this one.",
 		type : "survival", time : 240, values : { planetMat : 100 },
@@ -152,7 +152,7 @@ function adventureKey ( name ) {
 // what the difficulty level changes, the same in every level : its density, the asteroids of the waves and of the flows that many
 // times as many (closer, a bit faster), the Colossus's throws, charge and debris as much (boss.js) ; a hunt's asteroids only go
 // faster or slower, as many coming, for its goal to stay the same
-var adventureDensity = { easy : 0.6, normal : 1, hard : 1.3 };
+var adventureDensity = { easy : 0.7, normal : 1, hard : 1.3 };
 
 // function to get the density of the level being played, at the Adventure's difficulty level (1 in the Arcade)
 function levelDensity () {
