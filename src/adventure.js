@@ -124,8 +124,8 @@ var adventureLevels = [
 			hint : "The Spiral's shots turn around your planet: with three Cannons, its Orbital mode makes a wall that the pebbles can't cross.",
 			picture : "spread", tiles : [ "Inhabitants" ] } }
 ];
-// the Adventure is shown on the start menu once it is ready ; until then, opening the game as index.html?adventure shows it, to test it
-var adventureReady	= /adventure/.test ( location.search );
+// the Adventure is shown on the start menu since 1.0.0 (until then, only to the game opened as index.html?adventure, to test it)
+var adventureReady	= true;
 var sideSpread	= 25;		// how far from its side an asteroid of a wave may come, in degrees on each side
 var waveBreak	= 2;		// seconds between a wave destroyed (or going away) and the next one,
 var waveWait	= 20;		// and at most since its last asteroid came, when some of them are still there
@@ -904,7 +904,16 @@ function showMenuPages () {
 	menu.classList.toggle ( "adventure", adventureReady );
 	var pages = menuPages();
 	var at = Math.max ( 0, pages.indexOf ( menuPage ) );
-	document.getElementById("menuTrack").style.transform = "translateX(" + ( - at * 100 ) + "%)";
+	var track = document.getElementById("menuTrack"), shift = "translateX(" + ( - at * 100 ) + "%)";
+	if ( !track.style.transform ) {
+		// (the first time, the menu opens on its page, without sliding to it)
+		track.style.transition = "none";
+		track.style.transform = shift;
+		track.offsetWidth;
+		track.style.transition = "";
+	} else if ( track.style.transform != shift ) {
+		track.style.transform = shift;
+	}
 	showPageArrow ( document.getElementById("turnLeft"), pages[at - 1] );
 	showPageArrow ( document.getElementById("turnRight"), pages[at + 1] );
 	writeOnce ( document.getElementById("tutorialStart"), tutorialDone ? "Play again" : "Start" );
