@@ -284,6 +284,7 @@ function playLevel ( number ) {
 		return;
 	}
 	adventure.level = number;
+	tutorial.on = false;		// (tutorial.js)
 	menuPage = "adventure";		// (the start menu comes back to its page after the game,
 	mapChoice = false;			// and the map to the next level to play)
 	state = "init";
@@ -292,6 +293,7 @@ function playLevel ( number ) {
 // function to play the Arcade, at the difficulty level chosen
 function playArcade () {
 	adventure.level = null;
+	tutorial.on = false;
 	menuPage = "arcade";
 	state = "init";
 }
@@ -879,17 +881,35 @@ function starsText ( stars ) {
 	return text;
 }
 
-// the start menu's page shown : the Adventure's first, then the one of the mode last played ; the Arcade's alone until the Adventure is ready
-var menuPage = adventureReady ? "adventure" : "arcade";
+// the start menu's pages, from left to right : the Tutorial's (tutorial.js), the Adventure's (once it is ready) and the Arcade's,
+// with their names on the big arrows turning to them
+var menuPageNames = { tutorial : "Tutorial", adventure : "Adventure", arcade : "Arcade" };
 
-// function to show the start menu's pages, at each turn of the menu (engine.js) : the Adventure's and the Arcade's side by side,
-// sliding to the one shown (css/main.css), with a big arrow on the side turning to the other one ;
+// function to list the start menu's pages
+function menuPages () {
+	return adventureReady ? [ "tutorial", "adventure", "arcade" ] : [ "tutorial", "arcade" ];
+}
+
+// the start menu's page shown : the Tutorial's until it is finished, then the Adventure's (the Arcade's until the Adventure is
+// ready), then the one of the mode last played
+var menuPage = !tutorialDone ? "tutorial" : adventureReady ? "adventure" : "arcade";
+
+// function to show the start menu's pages, at each turn of the menu (engine.js) : side by side, sliding to the one shown
+// (css/main.css), with a big arrow on each side turning to the next one, named ;
+// the Tutorial's button plays it again once it is finished ;
 // the Adventure's button starts it, or continues it once a level is won (in green), on the map, and tells the next level and the stars won,
 // at the difficulty level chosen under it (chooseAdventureLevel)
 function showMenuPages () {
 	var menu = document.getElementById("mainMenu");
 	menu.classList.toggle ( "adventure", adventureReady );
-	menu.classList.toggle ( "arcade", menuPage == "arcade" );
+	var pages = menuPages();
+	var at = Math.max ( 0, pages.indexOf ( menuPage ) );
+	document.getElementById("menuTrack").style.transform = "translateX(" + ( - at * 100 ) + "%)";
+	showPageArrow ( document.getElementById("turnLeft"), pages[at - 1] );
+	showPageArrow ( document.getElementById("turnRight"), pages[at + 1] );
+	writeOnce ( document.getElementById("tutorialStart"), tutorialDone ? "Play again" : "Start" );
+	writeOnce ( document.getElementById("tutorialText"), tutorialDone ? "Finished: play it again whenever you like."
+		: "Learn to defend the Earth, in a few minutes." );
 	for ( var level in difficultyLevels ) {
 		document.getElementById("adventure_" + level).classList.toggle ( "current", level == adventureDifficulty );
 	}
@@ -952,19 +972,29 @@ function starsCount () {
 	return count;
 }
 
-// function to turn the start menu to a page, or else to the other one
-function turnMenuPage ( page ) {
-	if ( adventureReady ) {
-		menuPage = page || ( ( menuPage == "arcade" ) ? "adventure" : "arcade" );
+// function to show a big arrow of the start menu, named after the page it turns to (hidden without one)
+function showPageArrow ( arrow, page ) {
+	arrow.classList.toggle ( "shown", page !== undefined );
+	if ( page !== undefined ) {
+		writeOnce ( arrow.querySelector ( "span" ), menuPageNames[page] );
+	}
+}
+
+// function to turn the start menu to the next page on a side (1 : the right one, -1 : the left one), if there is one
+function turnMenuPage ( side ) {
+	var pages = menuPages();
+	var page = pages[Math.max ( 0, pages.indexOf ( menuPage ) ) + side];
+	if ( page ) {
+		menuPage = page;
 	}
 }
 
 // the keyboard's arrows turn the start menu's pages too
 document.addEventListener ( "keydown", function ( e ) {
 	if ( state == "menu" && e.key == "ArrowRight" ) {
-		turnMenuPage ( "arcade" );
+		turnMenuPage ( 1 );
 	} else if ( state == "menu" && e.key == "ArrowLeft" ) {
-		turnMenuPage ( "adventure" );
+		turnMenuPage ( -1 );
 	}
 } );
 

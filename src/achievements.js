@@ -16,7 +16,7 @@
 // read at each turn of the engine until it is achieved ; they are shown in this order, six by row (the Adventure's ones, marked,
 // only once it is ready : adventure.js)
 var achievements = {
-	// the four ones of 2010, and the Arcade's hints (once the tutorial's : hints.js)
+	// the four ones of 2010, and the tutorial's (tutorial.js), won with its last lesson
 	firstContact	: { name : "First Contact", text : "Play your first game.", picture : "planet", metal : "bronze",
 						test : function () { return state == "playing"; } },
 	timeOut			: { name : "Time Out", text : "Open the pause menu.", picture : "pause", metal : "bronze",
@@ -25,8 +25,8 @@ var achievements = {
 						test : function () { return state == "playing" && nbrDestroyed >= 1; } },
 	upgraded		: { name : "Upgraded", text : "Buy your first upgrade.", picture : "arrow", metal : "bronze",
 						test : function () { return state == "playing" && nbrUpgrades >= 1; } },
-	graduate		: { name : "Graduate", text : "See every hint of the Arcade.", picture : "cap", metal : "bronze",
-						test : function () { return allHintsSeen(); } },
+	graduate		: { name : "Graduate", text : "Finish the tutorial.", picture : "cap", metal : "bronze",
+						test : function () { return state == "playing" && inTutorial() && tutorial.lesson == lessons.length - 1 && tutorial.told; } },
 	// surviving
 	survivor		: { name : "Survivor", text : "Survive 2 minutes.", picture : "hourglass", metal : "bronze",
 						test : function () { return survived ( 120 ); } },

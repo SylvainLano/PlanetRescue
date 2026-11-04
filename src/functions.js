@@ -455,7 +455,7 @@ function changeKey(e, to){
 	}
 }
 
-// function to write on the Infos page (or in a hint : hints.js) the letters as the player's keyboard has them (Z Q S D on an
+// function to write on the Infos page (or in a lesson of the tutorial : tutorial.js) the letters as the player's keyboard has them (Z Q S D on an
 // AZERTY one), when the browser can tell them : a note tells it otherwise
 function showKeyLabels(holder) {
 	if ( !navigator.keyboard || !navigator.keyboard.getLayoutMap ) {

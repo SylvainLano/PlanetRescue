@@ -33,10 +33,11 @@ function newKamikazes () {
 	kamikazeList = [];
 }
 
-// a click (or a touch) on the game sends a kamikaze to the asteroid under it, while playing, if one is ready
+// a click (or a touch) on the game sends a kamikaze to the asteroid under it, while playing, if one is ready (and while the lesson
+// of the tutorial asking for it stops the game : tutorial.js)
 // (the page reads it, the game's canvas not being there yet when this file is read)
 document.addEventListener ( "pointerdown", function ( e ) {
-	if ( e.target.id != "mainArea" || state != "playing" || pause != 0 || kamikazes.ready <= 0 ) {
+	if ( e.target.id != "mainArea" || state != "playing" || ( pause != 0 && !lessonAsks ( "kamikaze" ) ) || kamikazes.ready <= 0 ) {
 		return;
 	}
 	var place = spacePlace ( e.clientX, e.clientY );
@@ -49,7 +50,7 @@ document.addEventListener ( "pointerdown", function ( e ) {
 
 // function to send a kamikaze to the asteroid the main cannon aims at, circled on screen, with the F key (changeKey in functions.js)
 function aimedKamikaze () {
-	if ( state == "playing" && pause == 0 && kamikazes.ready > 0 && aimedA && aimedA.life > 0 ) {
+	if ( state == "playing" && ( pause == 0 || lessonAsks ( "kamikaze" ) ) && kamikazes.ready > 0 && aimedA && aimedA.life > 0 ) {
 		launchKamikaze ( aimedA );
 	}
 }
@@ -86,9 +87,6 @@ function launchKamikaze ( target ) {
 		kamikazes.timer = kamikazes.building * framesPerSecond;
 	}
 	kamikazes.ready--;
-	try {
-		localStorage["kamikazeSent"] = "yes";		// (the hint to click an asteroid has done its job : drawKamikazeGauge)
-	} catch ( e ) {}
 	playSound ( "kamikaze" );
 }
 
@@ -228,7 +226,7 @@ function drawShip ( ctx ) {
 }
 
 // function to draw the kamikazes in the bottom left corner of the game, the ships heading up : the ready ones bright,
-// the one being built dim with its progress around it ; and until a first one is sent, the hint to click an asteroid
+// the one being built dim with its progress around it (the tutorial tells how to send them : tutorial.js)
 function drawKamikazeGauge ( ctx ) {
 	ctx.save();
 	for ( var n = 0; n < kamikazes.most; n++ ) {
@@ -249,17 +247,6 @@ function drawKamikazeGauge ( ctx ) {
 			ctx.arc ( x, y, 10, - Math.PI / 2, - Math.PI / 2 + 2 * Math.PI * Math.max ( 0, done ) );
 			ctx.stroke();
 		}
-	}
-	var sent = false;
-	try {
-		sent = localStorage["kamikazeSent"] == "yes";
-	} catch ( e ) {}
-	if ( !sent ) {
-		ctx.fillStyle = "rgba(220,230,240,0.7)";
-		ctx.font = "10px Arial";
-		ctx.textAlign = "left";
-		ctx.textBaseline = "middle";
-		ctx.fillText ( "click an asteroid, or press F for the circled one, to send a kamikaze", 18 + kamikazes.most * 22, gameSize - 18 );
 	}
 	ctx.restore();
 }

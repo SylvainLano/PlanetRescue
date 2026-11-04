@@ -12,7 +12,7 @@
 <html>
 <head>
 	<meta charset="utf-8">
-	<title>Planet Rescue v0.57.0</title>
+	<title>Planet Rescue v0.58.0</title>
 
 	<link rel="stylesheet" type="text/css" href="css/main.css">
 
@@ -24,7 +24,7 @@
 	<script type="text/javascript" src="src/shop.js"></script>
 	<script type="text/javascript" src="src/menu.js"></script>
 	<script type="text/javascript" src="src/achievements.js"></script>
-	<script type="text/javascript" src="src/hints.js"></script>
+	<script type="text/javascript" src="src/tutorial.js"></script>
 <script type="text/javascript" src="src/tiles.js"></script>
 	<script type="text/javascript" src="src/researches.js"></script>
 	<script type="text/javascript" src="src/adventure.js"></script>
@@ -47,7 +47,7 @@
 <body>
 <div id="gameArea">
 	<div id="status" class="ui" onClick="displayStatus();"></div>
-	<div id="hint"></div><!-- the Arcade's hints, written by src/hints.js -->
+	<div id="lesson"></div><!-- the bubble of a lesson of the tutorial, written by src/tutorial.js -->
 	<div id="gameOver" class="ui"></div>
 	<div id="story" class="ui"></div><!-- the Adventure's story, built by src/story.js -->
 	<div id="loader" class="ui">
@@ -68,12 +68,16 @@
 	</div>
 	<div id="startMenu" class="ui">
 		<div class="title">
-			Planet Rescue <span class="version">v0.57.0</span>
+			Planet Rescue <span class="version">v0.58.0</span>
 		</div>
 		<div id="mainMenu">
-			<!-- the two pages of the start menu, sliding one after the other : the Adventure's, then the Arcade's (src/adventure.js) -->
+			<!-- the pages of the start menu, sliding one after the other : the Tutorial's, the Adventure's, then the Arcade's (src/adventure.js) -->
 			<div id="menuPages">
 				<div id="menuTrack">
+					<div id="tutorialPage" class="page">
+						<a href="#" id="tutorialStart" class="button primary" onClick='playTutorial();'>Start</a>
+						<div id="tutorialText"></div><!-- written by showMenuPages(), as the button, once the tutorial is finished (src/tutorial.js) -->
+					</div>
 					<div id="adventurePage" class="page">
 						<a href="#" id="adventureStart" class="button primary" onClick='openAdventure();'>Start</a>
 						<div id="adventureLevels"><!-- each difficulty level an adventure of its own (src/adventure.js) -->
@@ -94,13 +98,12 @@
 							<a href="#" id="level_hard" class="level" onClick='chooseLevel("hard");'>Hard</a>
 						</div>
 						<div id="levelText"></div><!-- what the chosen level changes, written by showLevel() -->
-						<label id="hintsToggle"><input type="checkbox" id="hintsBox" onChange='toggleHints(this.checked);'> Hints for a new player</label><!-- src/hints.js -->
 					</div>
 				</div>
 			</div>
-			<!-- the big arrows on the sides, turning to the other page -->
-			<a href="#" id="toArcade" class="sideArrow" onClick='turnMenuPage("arcade");'><svg viewBox="0 0 40 90"><path d="M8 6l24 39-24 39"/></svg><span>Arcade</span></a>
-			<a href="#" id="toAdventure" class="sideArrow" onClick='turnMenuPage("adventure");'><svg viewBox="0 0 40 90"><path d="M32 6L8 45l24 39"/></svg><span>Adventure</span></a>
+			<!-- the big arrows on the sides, turning to the next page, named by showMenuPages() -->
+			<a href="#" id="turnRight" class="sideArrow" onClick='turnMenuPage(1);'><svg viewBox="0 0 40 90"><path d="M8 6l24 39-24 39"/></svg><span></span></a>
+			<a href="#" id="turnLeft" class="sideArrow" onClick='turnMenuPage(-1);'><svg viewBox="0 0 40 90"><path d="M32 6L8 45l24 39"/></svg><span></span></a>
 			<div id="moreLinks">
 				<a href="#" class="button" onClick='state="infos";'>Infos</a>
 				<a href="#" class="button" onClick='state="achievements";'>Achievements <span id="achievementCount"></span></a>

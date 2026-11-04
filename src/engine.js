@@ -119,8 +119,8 @@ function engine() {
 		startMenu.style.display = "none";
 		gameOver.style.display = "none";
 		pauseScreen.style.display = "none";
-		// a level of the Adventure starts with its own values, the Arcade with the difficulty level's (adventure.js)
-		initDefault(ctx,inAdventure() ? adventureLevels[adventure.level].values : difficulty);
+		// a level of the Adventure starts with its own values, the Arcade with the difficulty level's (adventure.js), the tutorial with the Normal one's
+		initDefault(ctx,inAdventure() ? adventureLevels[adventure.level].values : inTutorial() ? "normal" : difficulty);
 		if ( inAdventure() ) {
 			applyStarBonuses();		// and the bonuses bought with its stars (starshop.js),
 			startLevel();			// then what the level gives at its start (adventure.js)
@@ -137,7 +137,7 @@ function engine() {
 		}
 
 		// (the hi-scores are the Arcade's)
-		if ( !inAdventure() ) {
+		if ( !inAdventure() && !inTutorial() ) {
 			var playedGames = localStorage[scoreKey('playedGames')];
 			if( playedGames === null || playedGames === undefined ){
 				localStorage[scoreKey('playedGames')] = 1;
@@ -205,6 +205,10 @@ function engine() {
 		planetHealTimer = 0;
 		MyPlanet.life += healed;
 	}
+	// the planet can't fall in the tutorial (tutorial.js)
+	if ( inTutorial() && MyPlanet.life < 1 ) {
+		MyPlanet.life = 1;
+	}
 	// the Shelters save the planet, once in a game (researches.js)
 	if ( MyPlanet.life <= 0 && MyPlanet.shelters == 1 ) {
 		openShelters();
@@ -253,7 +257,10 @@ function engine() {
 		if ( MyPlanet.mat >= MyPlanet.maxMat ) {
 			fullTurns++;
 		}
-		if ( inAdventure() ) {
+		if ( inTutorial() ) {
+			// the tutorial's lessons send their own asteroids (tutorial.js)
+			advanceTutorial(ctx);
+		} else if ( inAdventure() ) {
 			// the level of the Adventure sends its waves (adventure.js)
 			advanceWaves(ctx);
 		} else {
@@ -948,9 +955,10 @@ function engine() {
 
 	}	// Bracket for the state == "playing"
 
-	// Checking the achievements not obtained yet (achievements.js), and showing the Arcade's hints (hints.js)
+	// Checking the achievements not obtained yet (achievements.js), and reading what the player does while a lesson of the tutorial
+	// stops the game (tutorial.js)
 	checkAchievements();
-	advanceHints();
+	tutorialTurn();
 }
 
 
@@ -1001,6 +1009,7 @@ function drawGame ( blend ) {
 			drawSimulationOverlay ( ctx );	// the simulator's screen over a simulation of the Adventure (adventure.js),
 			drawWaveBanner ( ctx );		// and its waves
 			drawAnnounce ( ctx );		// and the NAZA's announces of the threats coming (threats.js)
+			drawLesson ( ctx );			// and a lesson of the tutorial, the game darkened around what it tells about (tutorial.js)
 			// what the player should know about the researches, while playing (researches.js)
 			if ( pause == 0 ) {
 				drawResearchCorner ( ctx );
@@ -1140,7 +1149,8 @@ function drawPlaying ( ctx ) {
 		ctx.closePath();
 		ctx.stroke();
 	}
-	if ( pause == 0 ) {
+	// (and while a lesson of the tutorial stops the game : tutorial.js)
+	if ( pause == 0 || pause == lessonPause ) {
 		drawPulses(ctx);
 		drawGravitron(ctx,2);
 	}

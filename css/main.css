@@ -105,54 +105,57 @@ body {
 	position: absolute;
 }
 
-/* THE ARCADE'S HINTS (src/hints.js) : a frame at the bottom left of the game area, over the kamikazes' gauge (kamikaze.js), fading
-   in and out, the research corner keeping the right ; its label in green, as the achievements' banner */
-#hint {
+/* THE BUBBLE OF A LESSON OF THE TUTORIAL (src/tutorial.js) : beside what it tells about, placed by showLesson(), in the NAZA's blue
+   as its tips (src/gameover.js), with its OK in the bottom right corner */
+#lesson {
+	display: none;
 	position: absolute;
-	left: 8px;
-	bottom: 36px;
-	width: 352px;
-	padding: 8px 12px;
-	z-index: 2;
+	width: 260px;
+	padding: 10px 12px;
+	z-index: 6;		/* (over the pause menu too, for its lesson) */
 	font-family: Arial, Helvetica, sans-serif;
 	font-size: 13px;
 	line-height: 1.5;
-	color: #eee;
-	background: rgba(20,24,32,0.88);
-	border: 1px solid rgba(93,244,93,0.55);
+	color: #e6edf5;
+	background: rgba(15,32,56,0.95);
+	border: 1px solid rgba(120,180,255,0.9);
+	border-radius: 8px;
+	box-shadow: 0 0 18px rgba(80,150,255,0.35);
+}
+
+#lesson.shown {
+	display: block;
+}
+
+/* what a lesson tells about outside the game area, lit in the NAZA's blue : the mat's gauge, the tile to buy */
+#status.lessonMat .stat:nth-child(2), #shop .tile .square.lessonTile {
 	border-radius: 6px;
-	opacity: 0;
-	visibility: hidden;
-	transition: opacity 0.4s, visibility 0.4s;
-	pointer-events: none;
+	box-shadow: 0 0 0 2px #8fc4ff, 0 0 16px rgba(80,150,255,0.8);
 }
 
-#hint.shown {
-	opacity: 1;
-	visibility: visible;
-}
-
-#hint .label {
+#lesson .label {
 	display: block;
 	font-size: 10px;
 	font-weight: bold;
-	letter-spacing: 1px;
-	text-transform: uppercase;
-	color: #5df45d;
+	letter-spacing: 2px;
+	color: #8fc4ff;
 }
 
-/* (and the box turning them on or off, on the Arcade's page of the start menu) */
-#hintsToggle {
-	display: inline-block;
-	margin-top: 10px;
+#lesson a.ok, #lesson a.ok:link, #lesson a.ok:visited {
+	display: block;
+	width: fit-content;
+	margin: 8px 0 0 auto;
+	padding: 2px 16px;
 	font-size: 12px;
-	color: #aaa;
-	cursor: pointer;
+	font-weight: bold;
+	text-decoration: none;
+	color: #0d1a2c;
+	background: #8fc4ff;
+	border-radius: 10px;
 }
 
-#hintsToggle input {
-	vertical-align: middle;
-	accent-color: #5df45d;
+#lesson a.ok:hover {
+	background: #fff;
 }
 
 #loader {
@@ -742,8 +745,11 @@ a.level.current {
 	display: block;
 }
 
-#mainMenu.adventure.arcade #menuTrack {
-	transform: translateX(-100%);
+/* (the Tutorial's page : its text under its button, as the Adventure's) */
+#tutorialText {
+	margin-top: 22px;
+	font-size: 13px;
+	color: #ddd;
 }
 
 /* (the difficulty levels of the Arcade, and the Adventure's, each one an adventure of its own) */
@@ -1485,7 +1491,7 @@ a.level.current {
 	margin: 0;
 }
 
-/* the big arrows on the sides of the start menu, turning to the other page once the Adventure is shown (src/adventure.js) */
+/* the big arrows on the sides of the start menu, turning to the next page, shown when there is one (src/adventure.js) */
 .sideArrow {
 	display: none;
 	position: absolute;
@@ -1522,15 +1528,15 @@ a.sideArrow:hover {
 	letter-spacing: 1px;
 }
 
-#toArcade {
+#turnRight {
 	right: 8px;
 }
 
-#toAdventure {
+#turnLeft {
 	left: 8px;
 }
 
-#mainMenu.adventure:not(.arcade) #toArcade, #mainMenu.adventure.arcade #toAdventure {
+.sideArrow.shown {
 	display: block;
 }
 
