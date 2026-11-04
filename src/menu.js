@@ -50,8 +50,8 @@ function addSection ( shop, section ) {
 	} else if ( section.panels ) {
 		addPanels ( content, section.panels );
 	} else if ( section.researches ) {
-		// filled at each refresh (researches.js)
-		newElement ( "div", "lines", content ).id = "researchList";
+		// the research tree, drawn again at each refresh (researches.js)
+		newElement ( "div", "researchTree", content ).id = "researchList";
 		researchSection = block;
 	} else {
 		content.textContent = section.text;
@@ -204,14 +204,17 @@ function panelThings ( panel ) {
 }
 
 // function to show on each title and weapon tab how many things can be bought there with the mat in store, in green,
-// or else the price of the cheapest one ; the Researches section tells in gold when a research waits for the player
+// or else the price of the cheapest one ; the Researches section tells the lab's price until it is built, as an upgrade's,
+// then in gold when a research waits for the player
 function refreshBadges () {
 	for ( var b in menuBadges ) {
 		var item = menuBadges[b];
 		if ( item.things == "research" ) {
 			var waiting = ( researchNews() == "available" || researchNews() == "complete" );
-			item.badge.textContent = waiting ? " (1)" : "";
+			var lab = ( !research.lab && anyBranchOpen() ) ? priceToPay ( "lab" ) : false;
+			item.badge.textContent = waiting ? " (1)" : ( lab === false ) ? "" : ( lab <= MyPlanet.mat ) ? " (1)" : " · " + lab + " mat";
 			item.element.classList.toggle ( "waiting", waiting );
+			item.element.classList.toggle ( "buyable", lab !== false && lab <= MyPlanet.mat );
 			continue;
 		}
 		var count = 0, cheapest = false, maxed = false;

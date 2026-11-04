@@ -1019,34 +1019,39 @@ a.level.current {
 	display: none;
 }
 
-#starShop .tree {
+/* (its cells and links shared with the Arcade's research tree, in the pause menu : researches.js) */
+.tree {
 	position: relative;
+}
+
+#starShop .tree {
+	width: 566px;
 	height: 392px;
 	margin: 6px 0 4px;
 }
 
-#starShop .tree .links {
+.tree .links {
 	position: absolute;
 	left: 0;
 	top: 0;
-	width: 566px;
-	height: 392px;
+	width: 100%;
+	height: 100%;
 	stroke-linecap: round;
 }
 
-#starShop .tree .links line {
+.tree .links line {
 	stroke: rgba(95,160,230,0.8);
 	stroke-width: 4;
 }
 
-#starShop .tree .links line.open {
+.tree .links line.open {
 	stroke: rgba(255,255,255,0.25);
 	stroke-width: 2;
 	stroke-dasharray: 3 5;
 }
 
 /* (44 pixels with its frame : treeCell, src/starshop.js) */
-#starShop .cell {
+.tree .cell {
 	position: absolute;
 	width: 40px;
 	height: 40px;
@@ -1059,16 +1064,16 @@ a.level.current {
 	transition: transform 0.08s;
 }
 
-#starShop .cell:hover {
+.tree .cell:hover {
 	background: rgba(36,42,54,0.95);
 }
 
-#starShop .cell:active {
+.tree .cell:active {
 	transform: scale(0.95);
 }
 
 /* (its picture over its value, dim until it is bought) */
-#starShop .cell svg {
+.tree .cell svg {
 	position: absolute;
 	left: 50%;
 	top: 4px;
@@ -1078,7 +1083,7 @@ a.level.current {
 	opacity: 0.4;
 }
 
-#starShop .cell .value {
+.tree .cell .value {
 	position: absolute;
 	left: 0;
 	right: 0;
@@ -1089,29 +1094,29 @@ a.level.current {
 }
 
 /* (a cell bought : framed in blue, its picture and its value bright) */
-#starShop .cell.bought {
+.tree .cell.bought {
 	border-color: rgb(95,160,230);
 }
 
-#starShop .cell.bought svg {
+.tree .cell.bought svg {
 	opacity: 0.9;
 }
 
-#starShop .cell.bought .value {
+.tree .cell.bought .value {
 	color: #e6eefa;
 }
 
 /* (and all of it bought : tinted blue inside) */
-#starShop .cell.max {
+.tree .cell.max {
 	background: rgba(20,38,63,0.95);
 }
 
-#starShop .cell.max .value {
+.tree .cell.max .value {
 	color: #8fc4ff;
 }
 
 /* (the price of what a click buys, in a light pill over its corner) */
-#starShop .cell .price {
+.tree .cell .price {
 	position: absolute;
 	top: -8px;
 	right: -9px;
@@ -1128,13 +1133,13 @@ a.level.current {
 }
 
 /* (in red when the stars left don't pay for it) */
-#starShop .cell .price.short {
+.tree .cell .price.short {
 	color: #f4b4b4;
 	background: #5c2626;
 }
 
 /* a cell's levels, as pips one on top of the other along its left side, as a gauge : the ones bought full, from the bottom */
-#starShop .cell .pips {
+.tree .cell .pips {
 	position: absolute;
 	left: 2px;
 	top: 4px;
@@ -1145,21 +1150,58 @@ a.level.current {
 	color: #5a6070;
 }
 
-#starShop .cell.bought .pips {
+.tree .cell.bought .pips {
 	color: #8fc4ff;
 }
 
 /* the Earth in the middle : its globe, in a blue frame */
-#starShop .cell.earth {
+.tree .cell.earth {
 	border-color: rgb(95,160,230);
 	background: rgba(10,20,40,0.95);
 	cursor: default;
 }
 
-#starShop .cell.earth canvas {
+.tree .cell.earth canvas {
 	width: 36px;
 	height: 36px;
 	margin-top: 2px;
+}
+
+/* THE ARCADE'S RESEARCH TREE (researches.js), in the Researches section of the pause menu : five cells wide and high, the lab in the
+   middle ; a research's picture in the middle of its cell (no value under it), its time in the pill */
+.tree.research {
+	width: 268px;
+	height: 268px;
+	margin: 6px auto 4px;
+}
+
+.tree.research .cell:not(.lab) svg {
+	top: 7px;
+}
+
+/* (the research going on : framed in gold, its time filling it as a clock, from noon ; complete, all gold, its pill too) */
+.tree .cell.running {
+	border-color: rgb(242,201,76);
+	background: conic-gradient(rgba(242,201,76,0.38) 0 var(--done), rgba(22,26,34,0.95) var(--done) 100%);
+}
+
+.tree .cell.complete {
+	border-color: rgb(242,201,76);
+	background: rgba(242,201,76,0.38);
+}
+
+.tree .cell.running svg, .tree .cell.complete svg {
+	opacity: 0.9;
+}
+
+.tree .cell .price.gold {
+	background: rgb(242,201,76);
+}
+
+#researchList .foot {
+	font-size: 12px;
+	text-align: center;
+	color: #999;
 }
 
 /* under the tree, what the cells do, and the button taking the stars back */
@@ -1731,7 +1773,7 @@ a.sideArrow:hover {
 	align-content: start;
 }
 
-#shop .open .content.lines, #shop .panel.lines, #researchList {
+#shop .open .content.lines, #shop .panel.lines {
 	display: grid;
 }
 

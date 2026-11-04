@@ -23,51 +23,54 @@ var researchBranches = {
 	planet		: { name : "Planet" }
 };
 
-// each research : its name, its tooltip, its branch, its time (in seconds of play), the researches it needs first, and what it brings
+// each research : its name, its tooltip, its branch, its time (in seconds of play), the researches it needs first, its place in the
+// tree (in columns and rows from the lab, the north up : refreshResearches), its picture (tilePictures, tiles.js), and what it brings
+// (since 0.54.0, the Compactor waits for the Wide Net, the Slingshot for the Gravity Brake, and the Shelters for the Thick Atmosphere :
+// every research of the tree opens from the lab or from the one before it)
 var researches = {
-	missiles	: { name : "Missile Launcher", branch : "missiles", time : 60, needs : [],
+	missiles	: { name : "Missile Launcher", branch : "missiles", time : 60, needs : [], at : [0, -1], picture : "missile",
 					tip : "Missile Launcher - A secondary weapon, which takes no place among your active weapons. Its missiles fly to your main cannon's target, and explode on the first asteroid they touch, damaging every asteroid around.",
 					apply : function () { missileLauncher.cannonNbr = 1; } },
-	homing		: { name : "Homing Missiles", branch : "missiles", time : 90, needs : ["missiles"],
+	homing		: { name : "Homing Missiles", branch : "missiles", time : 90, needs : ["missiles"], at : [0, -2], picture : "homing",
 					tip : "Homing Missiles - Your missiles steer toward their target, even when it changes its way, and look for another one if it is destroyed before they reach it.",
 					apply : function () { missileLauncher.smart = 1; } },
-	nitro		: { name : "Nitroglycerine", branch : "explosives", time : 75, needs : [],
+	nitro		: { name : "Nitroglycerine", branch : "explosives", time : 75, needs : [], at : [-1, -1], picture : "bomb",
 					tip : "Nitroglycerine - A secondary weapon, whose slow capsules turn an asteroid far from your planet into a bomb, damaging every asteroid around when it explodes : when it touches another asteroid, when it is destroyed, or as soon as your planet comes into its blast, which spares your planet. Steer it into the others with your Gravitron.",
 					apply : function () { nitroLauncher.cannonNbr = 1; } },
-	chain		: { name : "Chain Reaction", branch : "explosives", time : 90, needs : ["nitro"],
+	chain		: { name : "Chain Reaction", branch : "explosives", time : 90, needs : ["nitro"], at : [-2, -2], picture : "fireworks",
 					tip : "Chain Reaction - The asteroids a bomb's blast doesn't destroy become bombs too, with half its power : their blasts do the same, until the reaction fades out.",
 					apply : function () { nitroLauncher.smart = 1; } },
-	laser		: { name : "Laser", branch : "lasers", time : 90, needs : [],
+	laser		: { name : "Laser", branch : "lasers", time : 90, needs : [], at : [1, -1], picture : "beam",
 					tip : "Laser - A secondary weapon, whose beam burns an asteroid for a while, then cools down. It aims first at the giants, then at the asteroids going to crash on your planet, the soonest first.",
 					apply : function () { laserCannon.cannonNbr = 1; } },
-	piercing	: { name : "Piercing Beam", branch : "lasers", time : 90, needs : ["laser"],
+	piercing	: { name : "Piercing Beam", branch : "lasers", time : 90, needs : ["laser"], at : [2, -2], picture : "pierce",
 					tip : "Piercing Beam - Your laser's beam goes through its target, and spreads behind it in a cone of light to the edge of space : every other asteroid it reaches, on its way or in the cone, burns at half power.",
 					apply : function () { laserCannon.smart = 1; } },
-	rebound		: { name : "Rebound Shot", branch : "ricochets", time : 90, needs : [],
+	rebound		: { name : "Rebound Shot", branch : "ricochets", time : 90, needs : [], at : [-1, 0], picture : "boomerang",
 					tip : "Rebound Shot - A secondary weapon, whose fast shots fly to your main cannon's target, then ricochet on the asteroids they hit, on the edges of space and on your planet's atmosphere, which they don't harm, until they have made all their rebounds.",
 					apply : function () { reboundCannon.cannonNbr = 1; } },
-	trick		: { name : "Trick Shot", branch : "ricochets", time : 90, needs : ["rebound"],
+	trick		: { name : "Trick Shot", branch : "ricochets", time : 90, needs : ["rebound"], at : [-2, 0], picture : "pinball",
 					tip : "Trick Shot - Your rebound cannon reckons its ricochets before it fires : among many angles, it takes the one whose way hits the most asteroids, rebounds included, and its shots no longer go astray on the rock.",
 					apply : function () { reboundCannon.smart = 1; } },
-	wideNet		: { name : "Wide Net", branch : "gravitron", time : 45, needs : [],
+	wideNet		: { name : "Wide Net", branch : "gravitron", time : 45, needs : [], at : [1, 0], picture : "net",
 					tip : "Wide Net - Out of its opening, your Gravitron pulls the debris too, more weakly, but never the asteroids.",
 					apply : function () { MyGravitron.wideNet = 1; } },
-	compactor	: { name : "Compactor", branch : "gravitron", time : 45, needs : [],
+	compactor	: { name : "Compactor", branch : "gravitron", time : 45, needs : ["wideNet"], at : [2, 0], picture : "press",
 					tip : "Compactor - Brings the Compactor upgrade of your Gravitron : each of its levels makes more mat from the debris gathered.",
 					apply : function () {} },
-	gravityBrake: { name : "Gravity Brake", branch : "gravitron", time : 60, needs : [],
+	gravityBrake: { name : "Gravity Brake", branch : "gravitron", time : 60, needs : [], at : [1, 1], picture : "slow",
 					tip : "Gravity Brake - The asteroids in your Gravitron's opening slow down, the heavy ones less : your cannons have more time to destroy them.",
 					apply : function () { MyGravitron.brake = 1; } },
-	slingshot	: { name : "Slingshot", branch : "gravitron", time : 60, needs : [],
+	slingshot	: { name : "Slingshot", branch : "gravitron", time : 60, needs : ["gravityBrake"], at : [2, 2], picture : "sling",
 					tip : "Slingshot - An asteroid your Gravitron has turned from its way hits twice as hard the asteroids it runs into.",
 					apply : function () { MyGravitron.slingshot = 1; } },
-	atmosphere	: { name : "Thick Atmosphere", branch : "planet", time : 60, needs : [],
+	atmosphere	: { name : "Thick Atmosphere", branch : "planet", time : 60, needs : [], at : [0, 1], picture : "atmosphere",
 					tip : "Thick Atmosphere - Your planet's atmosphere thickens : every asteroid coming into it burns, losing 2 points of life, and the weakest ones burn up before they crash.",
 					apply : function () { MyPlanet.atmosphere = 1; } },
-	earlyWarning: { name : "Early Warning", branch : "planet", time : 45, needs : [],
+	earlyWarning: { name : "Early Warning", branch : "planet", time : 45, needs : [], at : [-1, 1], picture : "warning",
 					tip : "Early Warning - Brings the Early Warning upgrade of your planet : each of its levels evacuates more inhabitants before the asteroids crash.",
 					apply : function () {} },
-	shelters	: { name : "Shelters", branch : "planet", time : 60, needs : [],
+	shelters	: { name : "Shelters", branch : "planet", time : 60, needs : ["atmosphere"], at : [0, 2], picture : "bunker",
 					tip : "Shelters - Once in a game, when an asteroid's crash should end it, the shelters save 10% of your planet's inhabitants.",
 					apply : function () { MyPlanet.shelters = 1; } }
 };
@@ -185,65 +188,144 @@ function validateResearch () {
 	playSound ( "research" );
 }
 
-// function to start a research, or to stop it (its time spent is kept), or to validate it once complete, from the pause menu
+// function to act on a research, from its cell of the tree : to validate it once complete, to stop it (its time spent is kept),
+// or to start it, the one going on stopping (validated first, if complete)
 function researchAction ( id ) {
+	if ( research.done[id] ) {
+		return;
+	}
 	if ( research.current == id ) {
 		if ( research.complete ) {
 			validateResearch();
 		}
 		research.current = false;
-	} else if ( !research.current && researchOpen ( id ) ) {
+	} else if ( researchOpen ( id ) ) {
+		if ( research.complete ) {
+			validateResearch();
+		}
 		startResearch ( id );
 	}
 	refresh();
+	researchTip ( false, id );
 }
 
-// function to fill the Researches section of the pause menu, at each refresh() : the lab to build first, then the branches
-// with their researches
+// THE RESEARCH TREE, in the Researches section of the pause menu, drawn as the Adventure's tree of the stars (starshop.js) : the lab
+// in the middle, bought there with mat, and the researches around it, each one in its branch's direction (the weapons to the north
+// and the west, the Gravitron to the east, the planet to the south), linked to the lab or to the one before it ; only the lab
+// until it is built, then the researches done, in the Earth's blue, the one going on, gold, its time filling it as a clock from
+// noon, and the ones that can be started, their time in their pill ; the others stay hidden
+var researchArea	= 268;		// the tree's width and height, for five cells (as the stars' tree's : treePitch, treeCell)
+
+// function to fill the Researches section of the pause menu with the tree, at each refresh()
 function refreshResearches () {
 	var holder = document.getElementById ( "researchList" );
-	holder.innerHTML = "";
-	if ( !research.lab && anyBranchOpen() ) {
-		// a click opens the planet's upgrades, where the lab is bought
-		var lab = addLine ( holder, upgrades.lab.name, "", upgrades.lab.tip, function () { openSection ( document.querySelector ( "[data-upgrade='lab']" ).closest ( ".section" ) ); } );
-		lab.querySelector ( "a" ).innerHTML = "<span class='upred'>build it first, with your planet's upgrades</span>";
+	var area = { width : researchArea, height : researchArea };
+	var shown = [];
+	for ( var id in researches ) {
+		if ( research.lab && ( research.done[id] || research.current == id || researchOpen ( id ) ) ) {
+			shown.push ( id );
+		}
 	}
-	for ( var branch in researchBranches ) {
-		if ( !branchOpen ( branch ) ) {
-			continue;
-		}
-		newElement ( "h2", "", holder ).textContent = researchBranches[branch].name;
-		for ( var id in researches ) {
-			if ( researches[id].branch == branch ) {
-				addResearchLine ( holder, id );
-			}
-		}
+	var html = "<div class='tree research'><svg class='links' viewBox='0 0 " + area.width + " " + area.height + "'>";
+	// the links, from the lab or the research before, to the researches shown (under the cells)
+	for ( var s in shown ) {
+		var item = researches[shown[s]];
+		var from = cellPlace ( item.needs.length ? researches[item.needs[0]].at : [0, 0], area );
+		var to = cellPlace ( item.at, area );
+		html += "<line class='" + ( research.done[shown[s]] ? "bought" : "open" ) + "' x1='" + ( from.left + treeCell / 2 ) + "' y1='" + ( from.top + treeCell / 2 )
+			+ "' x2='" + ( to.left + treeCell / 2 ) + "' y2='" + ( to.top + treeCell / 2 ) + "'/>";
+	}
+	html += "</svg>";
+	// the lab, and what its next level costs
+	var lab = cellPlace ( [0, 0], area );
+	var labCost = maxReached ( "lab" ) ? false : priceToPay ( "lab" );
+	html += "<div class='cell lab" + ( research.lab ? " bought" : "" ) + ( labCost === false ? " max" : "" ) + "' style='left:" + lab.left + "px;top:" + lab.top + "px'"
+		+ " onmouseenter='labTip(event);' onmousemove='placeTooltip(event);' onmouseleave='hideTooltip();' onClick='buyLab();'>"
+		+ tileSVG ( "lab" ) + "<div class='value'>" + [ "to build", "lab", "auto" ][research.lab] + "</div>"
+		+ ( labCost === false ? "" : "<div class='price" + ( MyPlanet.mat >= labCost ? "" : " short" ) + "'>" + labCost + " mat</div>" ) + "</div>";
+	// the researches shown
+	for ( var s in shown ) {
+		var id = shown[s];
+		var place = cellPlace ( researches[id].at, area );
+		var state = research.done[id] ? " bought max" : ( research.current == id ) ? ( research.complete ? " complete" : " running" ) : "";
+		var pill = research.done[id] ? "" : ( research.current == id && research.complete ) ? "validate" : researchLeft ( id ) + " s";
+		var clock = ( state == " running" ) ? ";--done:" + researchShare ( id ) + "%" : "";
+		html += "<div class='cell" + state + "' style='left:" + place.left + "px;top:" + place.top + "px" + clock + "'"
+			+ " onmouseenter='researchTip(event,\"" + id + "\");' onmousemove='placeTooltip(event);' onmouseleave='hideTooltip();' onClick='researchAction(\"" + id + "\");'>"
+			+ tileSVG ( researches[id].picture ) + ( pill ? "<div class='price" + ( state == " complete" ? " gold" : "" ) + "'>" + pill + "</div>" : "" ) + "</div>";
+	}
+	html += "</div><div class='foot'>" + researchFoot() + "</div>";
+	holder.innerHTML = html;
+}
+
+// function to know how much of a research is done, in percents
+function researchShare ( id ) {
+	return Math.min ( 100, Math.floor ( 100 * ( research.spent[id] || 0 ) / ( researches[id].time * framesPerSecond ) ) );
+}
+
+// function to write under the tree what goes on, and what a click does
+function researchFoot () {
+	if ( !research.lab ) {
+		return "Build the lab, in the middle, to research: each research then takes time, not mat.";
+	}
+	if ( research.current ) {
+		var name = researches[research.current].name;
+		return research.complete ? name + " is complete: click it to validate it."
+			: "Researching " + name + ": " + researchShare ( research.current ) + "% done, " + researchLeft ( research.current ) + " s left. Click it to stop it.";
+	}
+	return ( researchNews() == "available" ) ? "Click a research to start it: one at a time, it goes on while you play." : "Every research is done.";
+}
+
+// function to fill the tooltip with a research of the tree : its name, what it brings, and what a click on it does
+// (placed under the mouse when it comes on the cell, left where it is after a click)
+function researchTip ( e, id ) {
+	var item = researches[id];
+	var cut = item.tip.indexOf ( " - " );
+	shopTooltip.innerHTML = "";
+	newElement ( "h3", "", shopTooltip ).textContent = item.name;
+	newElement ( "div", "", shopTooltip ).textContent = ( cut >= 0 ) ? item.tip.substring ( cut + 3 ) : item.tip;
+	var does = newElement ( "div", "buys", shopTooltip );
+	if ( research.done[id] ) {
+		does.innerHTML = "<span class='gold'>Researched: yours for this game.</span>";
+	} else if ( research.current == id && research.complete ) {
+		does.innerHTML = "<span class='green'>Complete: a click validates it.</span>";
+	} else if ( research.current == id ) {
+		does.innerHTML = "<span class='gold'>" + researchShare ( id ) + "% done, " + researchLeft ( id ) + " s left</span><br>A click stops it, its time kept.";
+	} else if ( research.current ) {
+		does.innerHTML = "<span class='green'>" + researchLeft ( id ) + " s of play</span><br>A click starts it, " + researches[research.current].name + " stopping, its time kept.";
+	} else {
+		does.innerHTML = "<span class='green'>" + researchLeft ( id ) + " s of play: a click starts it.</span>";
+	}
+	shopTooltip.style.display = "block";
+	if ( e ) {
+		placeTooltip ( e );
 	}
 }
 
-// function to add the line of a research, telling what a click on it does
-function addResearchLine ( holder, id ) {
-	var item = researches[id];
-	var line = addLine ( holder, item.name, "research_" + id, item.tip, function () { researchAction ( id ); } );
-	var link = line.querySelector ( "a" );
-	if ( research.done[id] ) {
-		link.innerHTML = "<span class='green'>researched</span>";
-	} else if ( research.current == id && research.complete ) {
-		link.innerHTML = "<span class='upgreen'>COMPLETE : VALIDATE</span>";
-	} else if ( research.current == id ) {
-		var done = Math.floor ( 100 * research.spent[id] / ( item.time * framesPerSecond ) );
-		link.innerHTML = "<span><span class='blue'>" + done + "% done, " + researchLeft ( id ) + " s left</span> <span class='upred'>STOP</span></span>";
-	} else if ( !researchOpen ( id ) ) {
-		var needs = research.lab ? [] : [ upgrades.lab.name ];
-		for ( var n in item.needs ) {
-			needs.push ( researches[item.needs[n]].name );
-		}
-		link.innerHTML = "<span class='upred'>needs " + needs.join ( ", " ) + "</span>";
-	} else if ( research.current ) {
-		link.innerHTML = "<span class='upred'>" + researchLeft ( id ) + " s, once the current research is over</span>";
+// function to fill the tooltip with the lab, in the middle of the tree : what its next level brings, and its price
+function labTip ( e ) {
+	var cost = maxReached ( "lab" ) ? false : priceToPay ( "lab" );
+	var cut = upgrades.lab.tip.indexOf ( " - " );
+	shopTooltip.innerHTML = "";
+	newElement ( "h3", "", shopTooltip ).textContent = research.lab >= 2 ? "Research Lab: the Automation" : upgrades.lab.name;
+	newElement ( "div", "", shopTooltip ).textContent = upgrades.lab.tip.substring ( cut + 3 );
+	var buys = newElement ( "div", "buys", shopTooltip );
+	if ( cost === false ) {
+		buys.innerHTML = "<span class='gold'>Maximum reached.</span>";
 	} else {
-		link.innerHTML = "<span class='upgreen'>START : " + researchLeft ( id ) + " s</span>";
+		buys.innerHTML = "<span class='" + ( MyPlanet.mat >= cost ? "green" : "red" ) + "'>" + cost + " mat" + ( research.lab ? " for the Automation" : " to build it" ) + "</span>"
+			+ ( MyPlanet.mat >= cost ? "" : "<br>You have " + MyPlanet.mat + " mat." );
 	}
+	shopTooltip.style.display = "block";
+	if ( e ) {
+		placeTooltip ( e );
+	}
+}
+
+// function to buy the lab, or its Automation, from the middle of the tree, when the mat pays for it (upgrade, shop.js)
+function buyLab () {
+	upgrade ( "lab" );
+	labTip ( false );
 }
 
 // function to tell the player about the researches, at the bottom right of the game area (above an achievement's banner) :

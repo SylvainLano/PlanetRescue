@@ -34,7 +34,7 @@ var hints = [
 		test : function () { return nbrDamage > 0; } },
 	{ id : "target", text : "A giant! <kbd data-code='KeyT'>T</kbd> makes your cannon aim at it, <kbd data-code='KeyR'>R</kbd> lets it choose again.",
 		test : function () { return asteroidList.some ( function ( a ) { return a.giant && a.life > 0; } ); } },
-	{ id : "lab", text : "A Research Lab, in your planet's upgrades, opens the research tree: a research costs time, not mat.",
+	{ id : "lab", text : "Build a Research Lab, in the Researches of the pause menu: it opens the research tree, where a research costs time, not mat.",
 		test : function () { return !research.lab && anyBranchOpen() && MyPlanet.mat >= priceToPay ( "lab" ); } }
 ];
 

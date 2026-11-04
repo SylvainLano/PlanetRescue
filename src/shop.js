@@ -332,7 +332,7 @@ var upgrades = {
 							picture : "warning", unit : "evacuated", value : function () { return Math.round ( MyPlanet.warning * warningShare * 100 ) + "%"; },
 							change : function () { return Math.round ( MyPlanet.warning * warningShare * 100 ) + "% → " + Math.round ( ( MyPlanet.warning + 1 ) * warningShare * 100 )
 								+ "% of the inhabitants a crash would take, evacuated"; } },
-	// the planet's lab, needed for any research (researches.js) : in the Arcade only, where the research tree is open,
+	// the planet's lab, needed for any research, bought in the middle of the research tree (researches.js) : in the Arcade only,
 	// and its level 2, the Automation, does the researches one after the other by itself
 	lab					: { name : "Research Lab", tip : "",
 							max : 2, price : "times200plus100", appears : function () { return anyBranchOpen(); },
@@ -392,8 +392,8 @@ var shopLayout = [
 			statusTip : "A secondary weapon, always active : it takes no place among your active weapons.",
 			upgrades : ["reboundReload","reboundPow","reboundBounces"] }
 	] },
-	{ title : "Heal or upgrade your Planet", upgrades : ["healing","healFact","crews","maxHealth","maxMat","autoHeal","recovery","earlyWarning","kamikazeNbr","kamikazeBuilding","lab"] },
-	{ title : "Researches", researches : true }		// filled by refreshResearches() (researches.js)
+	{ title : "Heal or upgrade your Planet", upgrades : ["healing","healFact","crews","maxHealth","maxMat","autoHeal","recovery","earlyWarning","kamikazeNbr","kamikazeBuilding"] },
+	{ title : "Researches", researches : true }		// the research tree, its lab in the middle (refreshResearches, researches.js)
 ];
 
 // what the next level of SMART AI brings, for the upgrade menu
@@ -408,7 +408,7 @@ var smartNextLevel = [
 
 // what the next level of the Research Lab brings, for the upgrade menu
 var labNextLevel = [
-	"Research Lab - Your planet needs it to do any research. Then the researches can be started from the Researches section : each one takes time, not mat.",
+	"Research Lab - Your planet needs it to do any research. Then a click on a research of the tree starts it : each one takes time, not mat.",
 	"Research Lab - Its next level, the Automation, validates each research once complete, and starts the next one by itself : the one to be done the soonest. You can still stop it, and choose another one.",
 	"Research Lab - Your lab does the researches by itself : no more level available."
 ];

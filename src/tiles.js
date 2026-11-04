@@ -56,7 +56,18 @@ var tilePictures = {
 	recovery	: '<path d="M14 21l4-6.5 6.5-1 5 4.5-.5 7-5 4.5-7-.5-3-4.5z"/><path d="M39 35.5h9l4 5-8.5 10-8.5-10z"/><path d="M31 23q11 0 12 8" stroke-dasharray="3 3" stroke-width="2"/><path d="M39.5 28.5l3.5 4 3-4.5" stroke-width="2"/>',
 	warning		: '<path d="M32 14L52 48H12z"/><path d="M32 26v10" stroke-width="4"/><circle fill="INK" stroke="none" cx="32" cy="42" r="2.5"/>',
 	kamikaze	: '<path d="M32 9l9 26-9-5-9 5z"/><path d="M27 41l5 13 5-13" stroke-width="2"/><circle cx="48" cy="17" r="5" stroke-width="2"/>',
-	lab			: medalPictures.flask
+	lab			: medalPictures.flask,
+	// the researches, as cells of their tree (researches.js)
+	missile		: '<path d="M42 14l8 8-20 20-8-8z"/><path d="M22 34l-8 2 6 6M30 42l-2 8-6-6" stroke-width="2.5"/><circle fill="INK" stroke="none" cx="40" cy="24" r="2.5"/>',
+	homing		: '<path d="M46 12l6 6-15 15-6-6z"/><path d="M31 27l-5 1 5 5" stroke-width="2"/><path d="M28 36q-6 12-16 14" stroke-dasharray="3 4" stroke-width="2"/><circle cx="12" cy="50" r="3"/>',
+	bomb		: '<circle cx="28" cy="38" r="14"/><path d="M37 27l6-6" stroke-width="4"/><path d="M46 18q4-6 8-4" stroke-width="2"/><path d="M50 8l2 4M56 12l-4 1" stroke-width="2"/>',
+	fireworks	: medalPictures.fireworks,
+	pierce		: '<circle cx="12" cy="46" r="4"/><path d="M15 44l17-11" stroke-width="4"/><circle cx="36" cy="30" r="6"/><path d="M41 27l14-9M41 27l15-1M41 27l6-13" stroke-width="2" stroke-dasharray="3 3"/>',
+	boomerang	: medalPictures.boomerang,
+	net			: '<path d="M44 21A16 16 0 1 0 44 43" stroke-width="3"/><path d="M50 13A26 26 0 0 1 50 51" stroke-width="2" stroke-dasharray="3 4"/><g fill="INK" stroke="none"><circle cx="40" cy="30" r="2"/><circle cx="45" cy="36" r="2"/><circle cx="38" cy="38" r="2"/></g>',
+	sling		: medalPictures.sling,
+	atmosphere	: '<circle cx="32" cy="32" r="11"/><circle cx="32" cy="32" r="19" stroke-width="2" stroke-dasharray="4 4"/><path d="M49 13l-5 7M55 21l-7 3" stroke-width="2"/>',
+	bunker		: '<path d="M13 44a19 19 0 0 1 38 0z"/><path d="M27 44v-8h10v8" stroke-width="2"/><path d="M8 48h48" stroke-width="2"/>'
 };
 var tileInk = "#9fb3cf";	// their color, darkened by the tile (css/main.css)
 
