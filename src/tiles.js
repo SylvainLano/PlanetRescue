@@ -77,10 +77,13 @@ var tileFont = { family : "Impact, Haettenschweiler, 'Arial Narrow Bold', sans-s
 var tileMeasure = document.createElement ( "canvas" ).getContext ( "2d" );
 
 // the pictures that have an icon (img/icons, neon holograms), by the name of its file : the tiles of the pause menu show it instead
-// of their drawing (tilePicture), the other ones keep their drawing until their icon comes
+// of their drawing (tilePicture) ; the tree of the stars, the bonuses and the Game Over's tips keep the drawings for now
 var tileIcons = { sort : "sort", pull : "pull", opening : "opening", push : "push", shield : "shield", pulse : "pulse", eye : "eye",
-	crystal : "crystal", press : "compactor", kamikaze : "kamikaze", warning : "earlyWarning", beam : "laser", slow : "gravityBrake",
-	pinball : "trick" };
+	crystal : "crystal", press : "compactor", turn : "turn", chip : "chip", weapons : "weapons", dice : "dice", burst : "burst",
+	cannons : "cannons", bolt : "bolt", flame : "flame", speed : "speed", slow : "gravityBrake", beam : "laser", cold : "cold",
+	hourglass : "hourglass", spread : "spread", blast : "blast", pinball : "trick", spiral : "spiral", heal : "heal",
+	healFactor : "healFactor", crews : "crews", people : "people", crate : "crate", autoHeal : "autoHeal", recovery : "recovery",
+	kamikaze : "kamikaze", warning : "earlyWarning", lab : "lab" };
 
 // function to draw a tile's picture, dim behind its value : its icon, or else its drawing
 function tilePicture ( picture ) {

@@ -109,7 +109,8 @@ function achievementShown ( id ) {
 	return !achievements[id].adventure || adventureReady;
 }
 
-// The pictures of the medals, drawn in a 64 x 64 square around its center (32, 32), with lines of the color "INK"
+// The pictures of the medals, drawn in a 64 x 64 square around its center (32, 32), with lines of the color "INK" : the medals
+// show their icon of the same name now (medalIcon), these drawings stay for the tiles' and the Game Over's tips (tiles.js, gameover.js)
 var medalPictures = {
 	planet		: '<circle cx="32" cy="32" r="9"/><ellipse cx="32" cy="32" rx="18" ry="6" transform="rotate(-20 32 32)"/>',
 	pause		: '<path d="M26 21v22M38 21v22" stroke-width="6"/>',
@@ -142,36 +143,67 @@ var medalPictures = {
 	sling		: '<g transform="translate(12 -2) scale(0.8)"><path d="M18 31l7-12 12-2 9 8-1 13-9 8-12-1-6-8z"/><path d="M34 18l-3 10 6 5-5 8" stroke-width="2"/></g><path d="M15 20v26" stroke-width="2.5"/><path d="M27 49L16 38L26 31" stroke-dasharray="3 4" stroke-width="2"/><circle fill="INK" stroke="none" cx="27" cy="49" r="3.5"/>'
 };
 
-// the colors of the medals : their metal's rim, their disk and their picture ; the ones not obtained yet are dark silhouettes
+// the colors of the medals' metal rings, from their light side to their dark one ; the ones not obtained yet are grey
 var medalColors = {
-	bronze	: { rim : "#cd7f32", light : "#323c4c", dark : "#121821", ink : "#eef3fa" },
-	silver	: { rim : "#c9d1d9", light : "#323c4c", dark : "#121821", ink : "#eef3fa" },
-	gold	: { rim : "#f2c94c", light : "#323c4c", dark : "#121821", ink : "#eef3fa" },
-	locked	: { rim : "#33383f", light : "#191c22", dark : "#0b0d10", ink : "#2f343c" }
+	bronze	: { light : "#eba57a", rim : "#b8662c", dark : "#55280c" },
+	silver	: { light : "#ffffff", rim : "#c9d1d9", dark : "#69717b" },
+	gold	: { light : "#fff7c9", rim : "#f7d24a", dark : "#a57d0e" },
+	locked	: { light : "#5a6069", rim : "#33383f", dark : "#1a1d22" }
 };
 
-// function to get the medal of an achievement, as an SVG picture
-function medalSVG ( id ) {
-	var achievement = achievements[id];
-	var colors = medalColors[achieved[id] ? achievement.metal : "locked"];
-	var gradient = "medal" + ( achieved[id] ? achievement.metal : "Locked" );
+// the icons of the medals' pictures (img/icons, neon holograms), when their file has another name : a research's or a tile's
+var medalIcons = { lightning : "bolt", flask : "lab", pinball : "trick", sling : "slingshot" };
+
+// function to get the file of an achievement's icon
+function medalIcon ( id ) {
+	var picture = achievements[id].picture;
+	return "img/icons/" + ( medalIcons[picture] || picture ) + ".webp";
+}
+
+// function to get the medal of an achievement, as an SVG picture : a ring of its metal around a dark disk, where its icon
+// shines ; the ones not obtained yet have a grey ring and their icon unlit, grey and faint
+// ("bare" : without its icon, for the canvas, medalImage)
+function medalSVG ( id, bare ) {
+	var metal = achieved[id] ? achievements[id].metal : "locked";
+	var colors = medalColors[metal];
 	return '<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 64 64" width="64" height="64">'
-		+ '<defs><radialGradient id="' + gradient + '" cx="40%" cy="35%" r="70%"><stop offset="0" stop-color="' + colors.light + '"/><stop offset="1" stop-color="' + colors.dark + '"/></radialGradient></defs>'
-		+ '<circle cx="32" cy="32" r="29" fill="url(#' + gradient + ')" stroke="' + colors.rim + '" stroke-width="4"/>'
-		+ '<circle cx="32" cy="32" r="24.5" fill="none" stroke="' + colors.rim + '" stroke-opacity="0.35"/>'
-		+ '<g fill="none" stroke="' + colors.ink + '" stroke-width="3" stroke-linecap="round" stroke-linejoin="round">'
-		+ medalPictures[achievement.picture].replace ( /INK/g, colors.ink ) + '</g></svg>';
+		+ '<defs><linearGradient id="ring' + metal + '" x1="0" y1="0" x2="1" y2="1"><stop offset="0" stop-color="' + colors.light + '"/>'
+		+ '<stop offset="0.45" stop-color="' + colors.rim + '"/><stop offset="1" stop-color="' + colors.dark + '"/></linearGradient>'
+		+ '<radialGradient id="medalDisk" cx="40%" cy="35%" r="70%"><stop offset="0" stop-color="#1e2836"/><stop offset="1" stop-color="#07090d"/></radialGradient>'
+		+ '<filter id="medalUnlit"><feColorMatrix type="saturate" values="0"/></filter></defs>'
+		+ '<circle cx="32" cy="32" r="28" fill="url(#medalDisk)" stroke="url(#ring' + metal + ')" stroke-width="6"/>'
+		+ '<circle cx="32" cy="32" r="31" fill="none" stroke="' + colors.dark + '"/>'
+		+ '<circle cx="32" cy="32" r="25" fill="none" stroke="' + colors.dark + '"/>'
+		+ ( bare ? '' : '<image href="' + medalIcon ( id ) + '" x="11" y="11" width="42" height="42"'
+			+ ( achieved[id] ? '' : ' filter="url(#medalUnlit)" opacity="0.3"' ) + '/>' )
+		+ '</svg>';
 }
 
 // the medals as images, for the canvas to draw them, as they are now : obtained or not
 var medalImages = {};
 
-// function to get the image of an achievement's medal
+// function to get the image of an achievement's medal : an SVG drawn as an image can't load its icon's file, so a canvas gets
+// the medal without it, then the icon over it, and is "ready" once both are loaded
+// (the canvas only shows the medals just obtained : the faint icon of the others stays in its colors there)
 function medalImage ( id ) {
 	var key = id + ( achieved[id] ? "" : "Locked" );
 	if ( !medalImages[key] ) {
-		medalImages[key] = new Image();
-		medalImages[key].src = "data:image/svg+xml;charset=utf-8," + encodeURIComponent ( medalSVG ( id ) );
+		var medal = document.createElement ( "canvas" );
+		medal.width = medal.height = 128;
+		var ring = new Image(), icon = new Image(), loaded = 0, lit = achieved[id];
+		ring.onload = icon.onload = function () {
+			if ( ++loaded < 2 ) {
+				return;
+			}
+			var ctx = medal.getContext ( "2d" );
+			ctx.drawImage ( ring, 0, 0, 128, 128 );
+			ctx.globalAlpha = lit ? 1 : 0.3;
+			ctx.drawImage ( icon, 22, 22, 84, 84 );
+			medal.ready = true;
+		};
+		ring.src = "data:image/svg+xml;charset=utf-8," + encodeURIComponent ( medalSVG ( id, true ) );
+		icon.src = medalIcon ( id );
+		medalImages[key] = medal;
 	}
 	return medalImages[key];
 }
@@ -281,7 +313,7 @@ function drawAchievement ( ctx ) {
 	ctx.fillRect ( 0, gameSize - 76, gameSize, 76 );
 	// its medal on the left
 	var medal = medalImage ( achievementQueue[0] );
-	if ( medal.complete && medal.naturalWidth > 0 ) {
+	if ( medal.ready ) {
 		ctx.drawImage ( medal, 16, gameSize - 68, 60, 60 );
 	}
 	ctx.textAlign = 'center';
