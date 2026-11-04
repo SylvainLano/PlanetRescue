@@ -18,7 +18,6 @@
 // a level won without all its stars, how to win the first one missed : adventure.js) ; a tip shows in a card under the numbers,
 // with the picture of what it advises, and the number behind it lights up
 var hotTile		= false;	// the labels of the numbers that the tip shown lights up (gameOverTile)
-var tipInk		= "#8fc4ff";	// the blue of the NAZA's announces (threats.js)
 var tipMat		= 60;		// the mat left in store at the end that a tip finds too much,
 var tipAccuracy	= 70;		// the accuracy under which the SMART AI is advised (over 3 minutes, SMART 1 : 55 to 70 %, SMART 2 : 80 to 87 %),
 var tipTurning	= 35;		// the part of the time turning over which the Move Speed is (37 to 47 % at first, 28 to 39 % with one more level),
@@ -248,12 +247,12 @@ function chooseTip ( found ) {
 	return tip;
 }
 
-// function to write the card of a tip, in the NAZA's blue : the picture of what it advises, and its text (nothing without a tip)
+// function to write the card of a tip, in the NAZA's blue : the icon of what it advises, and its text (nothing without a tip)
+// (a tile's icon, tiles.js, or else a medal's of the same name, as the pause button or the asteroid : achievements.js)
 function tipCard ( tip ) {
 	if ( !tip ) {
 		return "";
 	}
-	var picture = ( tilePictures[tip.picture] || medalPictures[tip.picture] ).replace ( /INK/g, tipInk );
-	return "<div class='tip'><svg viewBox='0 0 64 64'><g fill='none' stroke='" + tipInk + "' stroke-width='3' stroke-linecap='round' stroke-linejoin='round'>"
-		+ picture + "</g></svg><div class='advice'><span class='label'>NAZA tip</span>" + tip.text + "</div></div>";
+	return "<div class='tip'><img src='img/icons/" + ( tileIcons[tip.picture] || tip.picture ) + ".webp' alt=''>"
+		+ "<div class='advice'><span class='label'>NAZA tip</span>" + tip.text + "</div></div>";
 }

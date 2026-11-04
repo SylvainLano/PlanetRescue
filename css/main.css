@@ -484,10 +484,10 @@ kbd {
 	border-radius: 8px;
 }
 
-#gameOver .over .tip svg {
+#gameOver .over .tip img {
 	flex: none;
-	width: 36px;
-	height: 36px;
+	width: 44px;
+	height: 44px;
 }
 
 #gameOver .over .tip .advice {
@@ -1102,6 +1102,19 @@ a.level.current {
 	opacity: 0.9;
 }
 
+/* (its icon, as the tiles' : src/tiles.js) */
+.tree .cell img.icon {
+	top: 3px;
+	width: 28px;
+	height: 28px;
+	margin: 0 0 0 -14px;
+	opacity: 0.45;
+}
+
+.tree .cell.bought img.icon {
+	opacity: 1;
+}
+
 .tree .cell.bought .value {
 	color: #e6eefa;
 }
@@ -1250,7 +1263,8 @@ a.level.current {
 	background: rgba(22,26,34,0.9);
 }
 
-#adventureBonuses .bonusIcon svg {
+#adventureBonuses .bonusIcon svg, #adventureBonuses .bonusIcon img {
+	display: block;
 	width: 20px;
 	height: 20px;
 	margin: 2px;
@@ -1307,18 +1321,27 @@ a.level.current {
 	color: #fff;
 }
 
+/* (its icon filling it, its number in a light pill over its bottom right corner, as the prices of the trees) */
 #adventureMap .spot .type {
 	display: block;
-	width: 24px;
-	height: 24px;
+	width: 38px;
+	height: 38px;
 	margin: 6px auto 0;
 }
 
 #adventureMap .spot .number {
-	display: block;
-	line-height: 14px;
-	font-family: 'MirageRegular';
-	font-size: 14px;
+	position: absolute;
+	right: -12px;
+	bottom: 2px;
+	padding: 0 5px;
+	font-family: Arial, Helvetica, sans-serif;
+	font-size: 11px;
+	font-weight: bold;
+	line-height: 15px;
+	color: #1d1d1b;
+	background: #eceae4;
+	border-radius: 8px;
+	box-shadow: 0 1px 3px rgba(0,0,0,0.7);
 }
 
 #adventureMap .spot .stars {
@@ -1366,14 +1389,16 @@ a.level.current {
 }
 
 #adventureMap .spot.boss .type {
-	width: 34px;
-	height: 34px;
+	width: 54px;
+	height: 54px;
 	margin-top: 9px;
 }
 
 #adventureMap .spot.boss .number {
-	line-height: 20px;
-	font-size: 18px;
+	right: -10px;
+	bottom: 4px;
+	font-size: 13px;
+	line-height: 17px;
 }
 
 #adventureMap .spot.boss .stars {
@@ -1393,16 +1418,16 @@ a.level.current {
 }
 
 #adventureMap .spot.bonus .type {
-	width: 20px;
-	height: 20px;
-	margin-top: 4px;
+	width: 28px;
+	height: 28px;
+	margin-top: 6px;
 }
 
-/* ("bonus" in a plain font : the menus' one draws a B as an 8) */
 #adventureMap .spot.bonus .number {
-	font-family: Arial, Helvetica, sans-serif;
+	right: -18px;
+	bottom: -2px;
 	font-size: 9px;
-	line-height: 12px;
+	line-height: 13px;
 	letter-spacing: 0.5px;
 }
 

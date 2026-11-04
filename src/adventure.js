@@ -974,16 +974,15 @@ document.addEventListener ( "keydown", function ( e ) {
 var mapSpots = [ [70, 270], [180, 290], [290, 262], [400, 282], [500, 222], [420, 150], [300, 166], [185, 142], [95, 84], [290, 50] ];
 var mapChoice = false;		// the level chosen on the map, told under it (false : the next one to play)
 
-// the pictures of the levels' types on their spots, drawn like the medals' (achievements.js) : in a 64 x 64 square, with lines
-// of the color "INK" ; the waves (a level without a type) are a falling asteroid, a hunt a crosshair, a survival an hourglass
-var levelPictures = {
-	waves		: '<circle cx="39" cy="39" r="9"/><path d="M32.6 32.6L16 16M39 30L27 18M30 39L18 27" stroke-width="2.5"/>',
-	hunt		: '<circle cx="32" cy="32" r="14"/><path d="M32 10v12M32 42v12M10 32h12M42 32h12"/><circle fill="INK" stroke="none" cx="32" cy="32" r="2.5"/>',
-	survival	: medalPictures.hourglass,
-	boss		: '<path d="M23 48v-7c-5-3-8-8-8-14 0-10 8-16 17-16s17 6 17 16c0 6-3 11-8 14v7z"/><circle fill="INK" stroke="none" cx="25.5" cy="28" r="4.5"/>'
-		+ '<circle fill="INK" stroke="none" cx="38.5" cy="28" r="4.5"/><path fill="INK" stroke="none" d="M32 34l-3 5h6z"/><path d="M29 48v-4M35 48v-4" stroke-width="2"/>',
-	// (the bonus levels' own pictures : the weapon they bring, as its tile in the tree of the stars : tiles.js)
-	spiral		: tilePictures.spiral
+// the icons of the levels' types on their spots (img/icons, neon holograms), by the name of their file : the waves (a level
+// without a type) are falling meteors, a hunt a target, a survival an hourglass, the boss a skull
+var levelIcons = {
+	waves		: "waves",
+	hunt		: "target",
+	survival	: "hourglass",
+	boss		: "boss",
+	// (the bonus levels' own icons : the weapon they bring, as its tile in the tree of the stars : tiles.js)
+	spiral		: "spiral"
 };
 
 // function to show the map : its bar, the stars won out of the ones of the levels open, its road lit through them, a spot for each
@@ -1023,11 +1022,10 @@ function spotLink ( n, place, kind ) {
 		+ "<span class='stars'>" + starsText ( levelStars[n] ) + "</span></a>";
 }
 
-// function to draw the picture of a level's type (or its own one), on its spot, in the spot's color
+// function to show the icon of a level's type (or its own one), on its spot
 function levelPicture ( n ) {
 	var level = adventureLevels[n];
-	return "<svg class='type' viewBox='0 0 64 64'><g fill='none' stroke='currentColor' stroke-width='3' stroke-linecap='round' stroke-linejoin='round'>"
-		+ levelPictures[level.icon || level.type || "waves"].replace ( /INK/g, "currentColor" ) + "</g></svg>";
+	return "<img class='type' src='img/icons/" + levelIcons[level.icon || level.type || "waves"] + ".webp' alt=''>";
 }
 
 // function to choose a level on the map, to read its challenge and play it

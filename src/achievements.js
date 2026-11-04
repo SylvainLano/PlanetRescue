@@ -110,7 +110,7 @@ function achievementShown ( id ) {
 }
 
 // The pictures of the medals, drawn in a 64 x 64 square around its center (32, 32), with lines of the color "INK" : the medals
-// show their icon of the same name now (medalIcon), these drawings stay for the tiles' and the Game Over's tips (tiles.js, gameover.js)
+// show their icon of the same name now (medalIcon), these drawings stay among the tiles' ones, for a picture without an icon (tiles.js)
 var medalPictures = {
 	planet		: '<circle cx="32" cy="32" r="9"/><ellipse cx="32" cy="32" rx="18" ry="6" transform="rotate(-20 32 32)"/>',
 	pause		: '<path d="M26 21v22M38 21v22" stroke-width="6"/>',

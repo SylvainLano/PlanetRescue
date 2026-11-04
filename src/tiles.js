@@ -77,7 +77,8 @@ var tileFont = { family : "Impact, Haettenschweiler, 'Arial Narrow Bold', sans-s
 var tileMeasure = document.createElement ( "canvas" ).getContext ( "2d" );
 
 // the pictures that have an icon (img/icons, neon holograms), by the name of its file : the tiles of the pause menu show it instead
-// of their drawing (tilePicture) ; the tree of the stars, the bonuses and the Game Over's tips keep the drawings for now
+// of their drawing (tilePicture), as the tree of the stars and its cells bought under the Adventure's button (starshop.js),
+// and the tips of the game's end (gameover.js)
 var tileIcons = { sort : "sort", pull : "pull", opening : "opening", push : "push", shield : "shield", pulse : "pulse", eye : "eye",
 	crystal : "crystal", press : "compactor", turn : "turn", chip : "chip", weapons : "weapons", dice : "dice", burst : "burst",
 	cannons : "cannons", bolt : "bolt", flame : "flame", speed : "speed", slow : "gravityBrake", beam : "laser", cold : "cold",

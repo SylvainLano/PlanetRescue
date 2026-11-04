@@ -253,7 +253,7 @@ function showStarShop ( holder ) {
 		var cost = cellNextCost ( cell );
 		html += "<div class='cell" + ( bought ? " bought" : "" ) + ( cost === false ? " max" : "" ) + "' style='left:" + place.left + "px;top:" + place.top + "px'"
 			+ " onmouseenter='starTip(event,\"" + cell.id + "\");' onmousemove='placeTooltip(event);' onmouseleave='hideTooltip();' onClick='buyStarBonus(\"" + cell.id + "\");'>"
-			+ tileSVG ( cell.picture ) + "<div class='value'>" + cellValue ( cell ) + "</div>"
+			+ tilePicture ( cell.picture ) + "<div class='value'>" + cellValue ( cell ) + "</div>"
 			+ ( cellLevels ( cell ) > 1 ? "<div class='pips'>" + levelPips ( cellLevel ( cell.id ), cellLevels ( cell ) ) + "</div>" : "" )
 			+ ( cost === false ? "" : "<div class='price" + ( left >= cost ? "" : " short" ) + "'>" + cost + " &#9733;</div>" ) + "</div>";
 	}
@@ -315,7 +315,7 @@ function showBonusIcons () {
 	for ( var c in starTree ) {
 		var cell = starTree[c];
 		if ( cellBought ( cell.id ) ) {
-			html += "<span class='bonusIcon' title='" + cell.name + " " + cellValue ( cell ) + "'>" + tileSVG ( cell.picture ) + "</span>";
+			html += "<span class='bonusIcon' title='" + cell.name + " " + cellValue ( cell ) + "'>" + tilePicture ( cell.picture ) + "</span>";
 		}
 	}
 	if ( html != bonusIconsHTML ) {
